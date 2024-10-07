@@ -1,24 +1,29 @@
-import { Route, Routes } from "react-router-dom";
-import RootLayout from "./layouts/RootLayout";
-import AllApps from "./pages/AllApps";
-import Analytics from "./pages/Analytics";
-import Authentication from "./pages/Authentication";
-import Build from "./pages/Build";
-import Settings from "./pages/Settings";
-import Stroage from "./pages/Stroage";
+import React from 'react';
+import { Routes, Route } from 'react-router-dom';
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
+import Historico from './pages/Historico';
+import Projects from './pages/Projects';
+import Stock from './pages/Stock';
+import Me from './pages/Me';
+import Users from './pages/Users';
+import ForgotPass from './pages/ForgotPassword';
+
 
 const App = () => {
   return (
-    <RootLayout>
-      <Routes>
-        <Route path="/" element={<AllApps />} />
-        <Route path="/authentication" element={<Authentication />} />
-        <Route path="/stroage" element={<Stroage />} />
-        <Route path="/settings" element={<Settings />} />
-        <Route path="/build/:bID" element={<Build />} />
-        <Route path="/analytics/:aID" element={<Analytics />} />
-      </Routes>
-    </RootLayout>
+    <Routes>
+      <Route path="/" element={<Login />} />
+      <Route path="/dashboard" element={<Dashboard />}>
+        <Route path="historico" element={<Historico />} />
+        <Route path="me" element={<Me />} />
+        <Route path="projects" element={<Projects />} />
+        <Route path="stock" element={<Stock />} />
+        <Route path="usuarios" element={<Users />} />
+        <Route path="forgotpass" element={<ForgotPass />} />
+      </Route>
+
+    </Routes>
   );
 };
 
