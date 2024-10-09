@@ -2,8 +2,10 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate, Outlet } from "react-router-dom";
 import axios from "axios";
 import Calendar from "react-calendar";
+import { enUS } from "date-fns/locale"; // Importa el idioma inglés
+import { FaBell } from "react-icons/fa"; // Importa el icono de notificaciones
 import "../index.css";
-import { Bar } from 'react-chartjs-2';
+import { Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -12,10 +14,15 @@ import {
   Title,
   Tooltip,
   Legend,
-} from 'chart.js';
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
-
-
+} from "chart.js";
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 const Dashboard = ({ onLogout }) => {
   const apiIpAddress = import.meta.env.VITE_API_IP_ADDRESS;
@@ -94,7 +101,7 @@ const Dashboard = ({ onLogout }) => {
       arrivedResponse.data.forEach((item) => {
         addNotification(
           "success",
-          `¡Nuevo material ha llegado! ID: ${item.id}, Nombre: ${item.name}, Cantidad: ${item.quantity}`,
+          `With ID.${item.id}: ${item.name}, Cantidad: ${item.quantity} (Assembly ID.${item.assembly_id}/Project #${item.project_id}) `,
           { id: item.id }
         );
       });
@@ -102,15 +109,17 @@ const Dashboard = ({ onLogout }) => {
       missingResponse.data.forEach((item) => {
         addNotification(
           "warning",
-          `¡Artículo faltante! ID: ${item.id}, Nombre: ${item.name}`,
-          { id: item.id }
+          `${item.name}, ID.${item.id}(Assembly ID.${item.assembly_id}/Project #${item.project_id})`,
+          {
+            id: item.id,
+          }
         );
       });
 
       assemblyDeliveryResponse.data.forEach((assembly) => {
         addNotification(
           "info",
-          `¡Nuevo ensamblaje entregado! ID: ${assembly.id}, Descripción: ${assembly.description}`,
+          `Assembly ID.${assembly.id}, Proyecto #${assembly.project_id}`,
           { id: assembly.id }
         );
       });
@@ -118,7 +127,7 @@ const Dashboard = ({ onLogout }) => {
       assemblyCompletedResponse.data.forEach((assembly) => {
         addNotification(
           "completed",
-          `¡Ensamblaje completado! ID: ${assembly.id}, Identificación: ${assembly.identification_number}`,
+          `Assembly ID.${assembly.id}, Identificación: ${assembly.identification_number}`,
           { id: assembly.id }
         );
       });
@@ -131,7 +140,7 @@ const Dashboard = ({ onLogout }) => {
     const intervalId = setInterval(fetchNotifications, 10000);
     return () => clearInterval(intervalId);
   }, []);
-   
+
   const handleNotificationClick = (details) => {
     console.log("Detalles de la notificación:", details);
     navigate(`/details/${details.id}`);
@@ -141,77 +150,85 @@ const Dashboard = ({ onLogout }) => {
     setShowChildRoutes(true);
   };
 
+  const CalendarComponent = () => {
+    // Función para abreviar los nombres de los días
+    const formatShortWeekday = (locale, date) => {
+      return date
+        .toLocaleDateString(locale, { weekday: "short" })
+        .charAt(0)
+        .toUpperCase();
+    };
 
-
-  
+    return (
+      <div className="custom-calendar">
+        <Calendar locale="en-US" formatShortWeekday={formatShortWeekday} />{" "}
+        {/* Pasa la función como propiedad */}
+      </div>
+    );
+  };
   return (
-    <div className="flex  bg-gray-900 text-white bg-gray-800">
+    <div className="flex bg-pageBackground text-white">
+      {" "}
+      {/* Fondo de la página */}
       <aside
-        className={`bg-gray-800 w-64 p-4 fixed inset-y-0 left-0 transition-transform transform duration-300 ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={`
+          bg-pageSideMenu 
+          w-60 
+          p-4 
+          fixed 
+          inset-y-0 
+          left-0 
+          transition-transform 
+          transform 
+          duration-300  
+          shadow-2xl 
+          shadow-shadowBlueColor
+          ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
+          `}
       >
-        <h2 className="text-xl font-bold mb-4">Menú</h2>
-        <nav className="flex flex-col h-full justify-between">
+        <div className="flex justify-center items-center pt-10 pb-20">
+          <h2 className="">Logo</h2>
+        </div>
+        <nav className="flex flex-col h-full justify-between ">
           <ul className="flex flex-col space-y-1">
-            <li>
-              <Link
-                to="/dashboard"
-                className="text-sm hover:underline"
-                onClick={() => setShowChildRoutes(false)}
-              >
+            <button className="text-2x1 text-left py-2 px-2 hover:bg-pageSideMenuTextHover hover:rounded transition duration-300 text-lightWhiteLetter font-medium">
+              <Link to="/dashboard" onClick={() => setShowChildRoutes(false)}>
                 Dashboard
               </Link>
-            </li>
-            <li>
-              <Link
-                to="/dashboard/Me"
-                className="text-sm hover:underline"
-                onClick={handleNavigate}
-              >
+            </button>
+            <li className="border-b border-lightBlueLetter"></li>
+            <button className="text-2x1 text-left py-2 px-2 hover:bg-pageSideMenuTextHover hover:rounded transition duration-300 text-lightWhiteLetter font-medium">
+              <Link to="/dashboard/Me" onClick={handleNavigate}>
                 Me
               </Link>
-            </li>
-            <li>
-              <Link
-                to="/dashboard/historico"
-                className="text-sm hover:underline"
-                onClick={handleNavigate}
-              >
+            </button>
+            <li className="border-b border-lightBlueLetter"></li>
+            <button className="text-2x1 text-left py-2 px-2 hover:bg-pageSideMenuTextHover hover:rounded transition duration-300 text-lightWhiteLetter font-medium">
+              <Link to="/dashboard/historico" onClick={handleNavigate}>
                 Histórico
               </Link>
-            </li>
-            <li>
-              <Link
-                to="/dashboard/projects"
-                className="text-sm hover:underline"
-                onClick={handleNavigate}
-              >
+            </button>
+            <li className="border-b border-lightBlueLetter"></li>
+            <button className="text-2x1 text-left py-2 px-2 hover:bg-pageSideMenuTextHover hover:rounded transition duration-300 text-lightWhiteLetter font-medium">
+              <Link to="/dashboard/projects" onClick={handleNavigate}>
                 Proyectos
               </Link>
-            </li>
-            <li>
-              <Link
-                to="/dashboard/usuarios"
-                className="text-sm hover:underline"
-                onClick={handleNavigate}
-              >
-                Usuarios
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/dashboard/stock"
-                className="text-sm hover:underline"
-                onClick={handleNavigate}
-              >
+            </button>
+            <li className="border-b border-lightBlueLetter"></li>
+            <button className="text-2x1 text-left py-2 px-2 hover:bg-pageSideMenuTextHover hover:rounded transition duration-300 text-lightWhiteLetter font-medium">
+              <Link to="/dashboard/stock" onClick={handleNavigate}>
                 Stock
               </Link>
-            </li>
+            </button>
+            <li className="border-b border-lightBlueLetter"></li>
+            <button className="text-2x1 text-left py-2 px-2 hover:bg-pageSideMenuTextHover hover:rounded transition duration-300 text-lightWhiteLetter font-medium">
+              <Link to="/dashboard/usuarios" onClick={handleNavigate}>
+                Usuarios
+              </Link>
+            </button>
           </ul>
         </nav>
       </aside>
-
       <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 mb-4 overflow-auto max-h-[calc(100vh-150px)]">
         {assemblies.map((assembly) => (
           <div
@@ -220,10 +237,7 @@ const Dashboard = ({ onLogout }) => {
             onClick={() => alert(`Detalles del Ensamblaje ID: ${assembly.id}`)}
           >
             <h2 className="font-bold text-lg">ID: {assembly.id}</h2>
-            <p className="text-blue-400">
-              <strong>Número de Identificación:</strong>{" "}
-              {assembly.identification_number}
-            </p>
+            <p className="text-blue-400">#{assembly.identification_number}</p>
             <p className="text-green-400">
               <strong>Fecha de Entrega:</strong>{" "}
               {new Date(assembly.delivery_date).toLocaleDateString()}
@@ -245,159 +259,224 @@ const Dashboard = ({ onLogout }) => {
           </div>
         ))}
       </section>
-
       <main
-        className={`flex-1 p-4 transition-all duration-300 ml-64 ${
+        className={`flex-1 pl-2 pr-2 transition-all duration-300 ml-64 ${
           showChildRoutes ? "mr-" : "mr-64"
         }`}
       >
         {!showChildRoutes ? (
           <>
-          
-             
-          <div className="py-6 flex flex-col justify-leftt sm:py-12 px-4 space-y-3">
-  <h1 className="text-lg font-semibold text-rigth py-3 text-white">Progress Bars</h1>
+            <div className="py-6 flex flex-col justify-leftt sm:py-12 px-4 space-y-1">
+              <div className="bg-contentCards p-5 rounded-lg shadow shadow-shadowBlueColor shadow-xl">
+                <h1 className="text-right pr-10 text-lg font-semibold text-lightBlueLetter">
+                  Project progress
+                </h1>
+                {/* Progress Bars */}
+                <div className="rounded-lg shadow-sm overflow-hidden">
+                  <span className="font-medium text-xs text-lightGrayLetter">
+                    <strong>#1001</strong>
+                  </span>
+                  <div className="relative h-4 flex items-center">
+                    <div className="absolute top-0 bottom-0 left-0 rounded-lg w-full bg-progressBarsBackground"></div>
+                    <div className="absolute top-0 bottom-0 left-0 rounded-lg w-[15%] bg-red-700 flex items-center justify-start pl-1">
+                      <span className="pl-10 font-medium text-xs">15%</span>
+                    </div>
+                  </div>
+                </div>
 
-  {/* Progress Bars */}
-  <div className="bg-gray-700 rounded-lg shadow-sm overflow-hidden p-1">
-    <div className="relative h-4 flex items-center justify-center">
-      <div className="absolute top-0 bottom-0 left-0 rounded-lg w-[15%] bg-red-500"></div>
-      <div className="relative text-red-200 font-medium text-xs">15%</div>
-    </div>
-  </div>
-
-  <div className="bg-gray-700 rounded-lg shadow-sm overflow-hidden p-1">
-    <div className="relative h-4 flex items-center justify-center">
-      <div className="absolute top-0 bottom-0 left-0 rounded-lg w-[36%] bg-orange-500"></div>
-      <div className="relative text-orange-200 font-medium text-xs">36%</div>
-    </div>
-  </div>
-
-  <div className="bg-gray-700 rounded-lg shadow-sm overflow-hidden p-1">
-    <div className="relative h-4 flex items-center justify-center">
-      <div className="absolute top-0 bottom-0 left-0 rounded-lg w-[60%] bg-blue-500"></div>
-      <div className="relative text-blue-200 font-medium text-xs">60%</div>
-    </div>
-  </div>
-
-  <div className="bg-gray-700 rounded-lg shadow-sm overflow-hidden p-1">
-    <div className="relative h-4 flex items-center justify-center">
-      <div className="absolute top-0 bottom-0 left-0 rounded-lg w-[75%] bg-green-500"></div>
-      <div className="relative text-green-200 font-medium text-xs">75%</div>
-    </div>
-  </div>
-
-  <div className="bg-gray-700 rounded-lg shadow-sm overflow-hidden p-1">
-    <div className="relative h-4 flex items-center justify-center">
-      <div className="absolute top-0 bottom-0 left-0 rounded-lg w-[100%] bg-indigo-500"></div>
-      <div className="relative text-indigo-200 font-medium text-xs">100%</div>
-    </div>
-  </div>
-
-  {/* Assemblies Section */}
-  <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 mb-4">
-    {assemblies.map((assembly) => (
-      <div
-        key={assembly.id}
-        className="bg-gray-700 p-1 rounded-lg shadow-md text-xs cursor-pointer hover:bg-gray-600 transition duration-200"
-      >
-        <h2 className="font-bold text-xs">ID: {assembly.id}</h2>
-        <p className="text-blue-400 text-xs">
-          <strong>Número de Identificación:</strong>{" "}
-          {assembly.identification_number}
-        </p>
-        <p className="text-green-400 text-xs">
-          <strong>Fecha de Entrega:</strong>{" "}
-          {new Date(assembly.delivery_date).toLocaleDateString()}
-        </p>
-        <p
-          className={`font-semibold text-xs ${
-            assembly.completed_assembly ? "text-green-500" : "text-red-500"
-          }`}
-        >
-          <strong>Estado:</strong>{" "}
-          {assembly.completed_assembly ? "Completo" : "Incompleto"}
-        </p>
-        <p className="text-yellow-400 text-xs">
-          <strong>Precio:</strong> ${assembly.price}
-        </p>
-        <p className="text-purple-400 text-xs">
-          <strong>Descripción:</strong> {assembly.description}
-        </p>
-      </div>
-    ))}
-  </section>
-
-  {/* Projects Overview Section */}
-  <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 mb-4">
-
-    {projects.map((project) => (
-      <div
-        key={project.id}
-        className="bg-gray-700 p-3 rounded-lg shadow-md text-sm cursor-pointer hover:bg-gray-600 transition duration-200"
-        onClick={() => alert(`Detalles del Proyecto ID: ${project.id}`)}
-      >
-        <h2 className="font-bold text-lg">ID: {project.id}</h2>
-        <p className="text-blue-400">
-          <strong>Número de Identificación:</strong>{" "}
-          {project.identification_number}
-        </p>
-        <p className="text-green-400">
-          <strong>Fecha de Entrega:</strong>{" "}
-          {new Date(project.delivery_date).toLocaleDateString()}
-        </p>
-        <p
-          className={`font-semibold ${
-            project.completed ? "text-green-500" : "text-red-500"
-          }`}
-        >
-          <strong>Estado:</strong>{" "}
-          {project.completed ? "Completo" : "Incompleto"}
-        </p>
-        <p className="text-yellow-400">
-          <strong>Costo de Material:</strong> ${project.cost_material}
-        </p>
-        <p className="text-purple-400">
-          <strong>Descripción:</strong> {project.description}
-        </p>
-      </div>
-    ))}
-  </section>
-</div>
-
+                <div className="rounded-lg shadow-sm overflow-hidden">
+                  <span className="font-medium text-xs text-lightGrayLetter">
+                    <strong>#1002</strong>
+                  </span>
+                  <div className="relative h-4 flex items-center">
+                    <div className="absolute top-0 bottom-0 left-0 rounded-lg w-full bg-progressBarsBackground"></div>
+                    <div className="absolute top-0 bottom-0 left-0 rounded-lg w-[36%] bg-orange-700 flex items-center justify-start pl-1">
+                      <span className="pl-10 font-medium text-xs">36%</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="rounded-lg shadow-sm overflow-hidden">
+                  <span className="font-medium text-xs text-lightGrayLetter">
+                    <strong>#1003</strong>
+                  </span>
+                  <div className="relative h-4 flex items-center">
+                    <div className="absolute top-0 bottom-0 left-0 rounded-lg w-full bg-progressBarsBackground"></div>
+                    <div className="absolute top-0 bottom-0 left-0 rounded-lg w-[60%] bg-blue-700 flex items-center justify-start pl-1">
+                      <span className="pl-10 font-medium text-xs">60%</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="rounded-lg shadow-sm overflow-hidden">
+                  <span className="font-medium text-xs text-lightGrayLetter">
+                    <strong>#1004</strong>
+                  </span>
+                  <div className="relative h-4 flex items-center">
+                    <div className="absolute top-0 bottom-0 left-0 rounded-lg w-full bg-progressBarsBackground"></div>
+                    <div className="absolute top-0 bottom-0 left-0 rounded-lg w-[70%] bg-green-700 flex items-center justify-start pl-1">
+                      <span className="pl-10 font-medium text-xs">70%</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="rounded-lg shadow-sm overflow-hidden">
+                  <span className="font-medium text-xs text-lightGrayLetter">
+                    <strong>#1005</strong>
+                  </span>
+                  <div className="relative h-4 flex items-center">
+                    <div className="absolute top-0 bottom-0 left-0 rounded-lg w-full bg-progressBarsBackground"></div>
+                    <div className="absolute top-0 bottom-0 left-0 rounded-lg w-[95%] bg-pink-700 flex items-center justify-start pl-1">
+                      <span className="pl-10 font-medium text-xs">95%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {/* Assemblies Section */}
+              <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 mb-4">
+                {assemblies.map((assembly) => (
+                  <div
+                    key={assembly.id}
+                    className="bg-gray-700 p-1 rounded-lg shadow-md text-xs cursor-pointer hover:bg-gray-600 transition duration-200"
+                  >
+                    <h2 className="font-bold text-xs">ID: {assembly.id}</h2>
+                    <p className="text-blue-400 text-xs">
+                      <strong>Número de Identificación:</strong>{" "}
+                      {assembly.identification_number}
+                    </p>
+                    <p className="text-green-400 text-xs">
+                      <strong>Fecha de Entrega:</strong>{" "}
+                      {new Date(assembly.delivery_date).toLocaleDateString()}
+                    </p>
+                    <p
+                      className={`font-semibold text-xs ${
+                        assembly.completed_assembly
+                          ? "text-green-500"
+                          : "text-red-500"
+                      }`}
+                    >
+                      <strong>Estado:</strong>{" "}
+                      {assembly.completed_assembly ? "Completo" : "Incompleto"}
+                    </p>
+                    <p className="text-yellow-400 text-xs">
+                      <strong>Precio:</strong> ${assembly.price}
+                    </p>
+                    <p className="text-purple-400 text-xs">
+                      <strong>Descripción:</strong> {assembly.description}
+                    </p>
+                  </div>
+                ))}
+              </section>
+              {/* Projects Overview Section */}
+              <h1 className="text-lg font-semibold text-rigth text-lightWhiteLetter pt-8 pb-5">
+                Project cards under development
+              </h1>
+              <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 mb-4">
+                {projects.map((project) => (
+                  <div
+                    key={project.id}
+                    className="bg-gray-700 p-3 rounded-lg shadow shadow-shadowBlueColor shadow-xl text-sm cursor-pointer hover:bg-gray-600 transition duration-200"
+                    onClick={() =>
+                      alert(`Detalles del Proyecto ID: ${project.id}`)
+                    }
+                  >
+                    {/*<h2 className="font-bold text-lg">ID: {project.id}</h2>*/}
+                    <p className="text-lightBlueLetter">
+                      <strong>#{project.identification_number}</strong>
+                    </p>
+                    <p className="text-lightGrayLetter">
+                      <strong>Project manager:</strong> Nombre del responsable
+                      del proyecto
+                    </p>
+                    <p className="text-lightGrayLetter">
+                      <strong>Delivery date:</strong>{" "}
+                      {new Date(project.delivery_date).toLocaleDateString()}
+                    </p>
+                    {/*<p
+                      className={`font-semibold ${
+                        project.completed ? "text-green-500" : "text-red-500"
+                      }`}
+                    >
+                      <strong>Estado:</strong>{" "}
+                      {project.completed ? "Completo" : "Incompleto"}
+                    </p>*/}
+                    {/*<p className="text-yellow-400">
+                      <strong>Costo de Material:</strong> $
+                      {project.cost_material}
+                    </p>*/}
+                    {/*<p className="text-purple-400">
+                      <strong>Descripción:</strong> {project.description}
+                    </p>*/}
+                  </div>
+                ))}
+              </section>
+            </div>
           </>
         ) : (
           <Outlet /> // Renderiza las rutas hijas
         )}
       </main>
-
       {/* Sidebar Derecho: Solo se muestra cuando no hay rutas hijas */}
       {!showChildRoutes && (
-        <aside className="bg-gray-800 w-64 p-4 fixed inset-y-0 right-0 overflow-y-auto ">
-          <h2 className="text-xl font-bold mb-4">Calendario</h2>
-          <Calendar />
-
-          <h2 className="text-xl font-bold mb-4 mt-6">Notificaciones</h2>
+        <aside className="bg-calendarNotifiBackground w-64 p-4 fixed inset-y-0 right-0 overflow-y-auto ">
+          {/*<h2 className="text-xl font-bold mb-4">Calendario</h2>*/}
+          <CalendarComponent />
+          <div className="flex justify-center items-center text-sm text-lightWhiteLetter font-bold mb-4 mt-6">
+            <FaBell className="mr-2" />
+            <h2>Notifications</h2>
+          </div>
           <ul className="space-y-1">
             {notifications.map((notification, index) => (
               <li
                 key={index}
-                className={`p-2 rounded ${
+                className={`p-2 rounded text-xs text-left notifiGrayLetter ${
                   notification.type === "success"
-                    ? "bg-green-600"
+                    ? "border-l-4 border border-blue-800"
                     : notification.type === "warning"
-                    ? "bg-yellow-600"
+                    ? "border-l-4 border border-yellow-800"
                     : notification.type === "info"
-                    ? "bg-blue-600"
-                    : "bg-red-600"
+                    ? "border-l-4 border border-cyan-800"
+                    : notification.type === "completed"
+                    ? "border-l-4 border border-green-800"
+                    : "border-l-4 border border-red-800"
                 }`}
               >
-                <span className="font-bold">{notification.message}</span>
+                <span className="font-medium">
+                  {notification.type === "success" && (
+                    <span className="text-blue-500 font-bold">
+                      ¡A material has arrived!
+                      <br />
+                    </span>
+                  )}
+                  {notification.type === "warning" && (
+                    <span className="text-yellow-500 font-bold">
+                      ¡There is one missing item!
+                      <br />
+                    </span>
+                  )}
+                  {notification.type === "info" && (
+                    <span className="text-cyan-500 font-bold">
+                      ¡An assembly has been completed!
+                      <br />
+                    </span>
+                  )}
+                  {notification.type === "completed" && (
+                    <span className="text-green-500 font-bold">
+                      ¡Ensamblaje completado!
+                      <br />
+                    </span>
+                  )}
+                  {notification.type === "error" && (
+                    <span className="text-red-500 font-bold">
+                      Error:
+                      <br />
+                    </span>
+                  )}
+                  {notification.message}
+                </span>
+                <br />
                 <button
-                  className="ml-2 text-sm text-gray-300"
+                  className="mt-2 text-xs text-gray-300"
                   onClick={() => handleNotificationClick(notification.details)}
                 >
-                  Detalles
+                  Details
                 </button>
               </li>
             ))}

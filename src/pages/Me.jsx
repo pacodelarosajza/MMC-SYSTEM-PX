@@ -1,32 +1,39 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { FaUser, FaEnvelope, FaCalendarAlt, FaUserShield, FaPowerOff, FaSun, FaMoon, FaKey } from 'react-icons/fa'; // Actualizamos el icono a FaKey
-import axios from 'axios';
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  FaUser,
+  FaEnvelope,
+  FaCalendarAlt,
+  FaUserShield,
+  FaPowerOff,
+  FaSun,
+  FaMoon,
+  FaKey,
+} from "react-icons/fa"; // Actualizamos el icono a FaKey
+import axios from "axios";
 
 const Me = () => {
+  const apiIpAddress = import.meta.env.VITE_API_IP_ADDRESS; // Aquí pones la dirección IP de tu API
 
-    const apiIpAddress = import.meta.env.VITE_API_IP_ADDRESS;// Aquí pones la dirección IP de tu API
-
-  
   const [user, setUser] = useState(null);
   const [darkMode, setDarkMode] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [error, setError] = useState('');
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   // Función para mapear el user_type_id a un tipo de usuario
   const getUserType = (userTypeId) => {
     switch (userTypeId) {
       case 1:
-        return 'Admin';
+        return "Admin";
       case 2:
-        return 'Operacional';
+        return "Operacional";
       case 3:
-        return 'Visualizador';
+        return "Visualizador";
       default:
-        return 'Desconocido';
+        return "Desconocido";
     }
   };
 
@@ -38,30 +45,30 @@ const Me = () => {
   // Obtener saludo personalizado basado en la hora del día
   const getGreeting = () => {
     const hours = new Date().getHours();
-    if (hours < 12) return 'Good morning';
-    if (hours < 18) return 'Good afternoon';
-    return 'Good evening';
+    if (hours < 12) return "Good morning";
+    if (hours < 18) return "Good afternoon";
+    return "Good evening";
   };
 
   useEffect(() => {
-    const loggedInUser = localStorage.getItem('loggedInUser');
-    const lastLogin = localStorage.getItem('lastLogin');
-    
+    const loggedInUser = localStorage.getItem("loggedInUser");
+    const lastLogin = localStorage.getItem("lastLogin");
+
     if (loggedInUser) {
       setUser(JSON.parse(loggedInUser));
       if (!lastLogin) {
-        localStorage.setItem('lastLogin', new Date().toLocaleString());
+        localStorage.setItem("lastLogin", new Date().toLocaleString());
       }
     } else {
       // Si no hay usuario en localStorage, redirige al login
-      navigate('/');
+      navigate("/");
     }
   }, [navigate]);
 
   // Función para cerrar sesión
   const handleLogout = () => {
-    localStorage.removeItem('loggedInUser');
-    navigate('/');
+    localStorage.removeItem("loggedInUser");
+    navigate("/");
   };
 
   // Función para abrir el modal de cambiar contraseña
@@ -72,27 +79,29 @@ const Me = () => {
   // Función para cerrar el modal
   const closeModal = () => {
     setIsModalOpen(false);
-    setNewPassword('');
-    setConfirmPassword('');
-    setError('');
+    setNewPassword("");
+    setConfirmPassword("");
+    setError("");
   };
 
   // Función para cambiar la contraseña
   const handleChangePassword = async () => {
     if (newPassword !== confirmPassword) {
-      setError('Passwords do not match');
+      setError("Passwords do not match");
       return;
     }
 
     const userId = user.id; // ID del usuario del localStorage
 
     try {
-      await axios.patch(`${apiIpAddress}/api/users/${userId}`, { password: newPassword });
-      alert('Password changed successfully');
+      await axios.patch(`${apiIpAddress}/api/users/${userId}`, {
+        password: newPassword,
+      });
+      alert("Password changed successfully");
       closeModal();
     } catch (error) {
-      console.error('Error updating password:', error);
-      setError('Failed to update password');
+      console.error("Error updating password:", error);
+      setError("Failed to update password");
     }
   };
 
@@ -105,10 +114,16 @@ const Me = () => {
   }
 
   return (
-    <div className={`${darkMode ? 'bg-gray-900 text-white' : 'bg-white text-black'} min-h-screen flex flex-col items-center justify-center`}>
+    <div
+      className={`${
+        darkMode ? "bg-gray-900 text-white" : "bg-white text-black"
+      } min-h-screen flex flex-col items-center justify-center`}
+    >
       <div className="bg-gray-800 p-8 rounded-lg shadow-lg w-full max-w-3xl">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-semibold">{getGreeting()}, {user.name}!</h1>
+          <h1 className="text-2xl font-semibold">
+            {getGreeting()}, {user.name}!
+          </h1>
           <button onClick={toggleDarkMode} className="text-xl">
             {darkMode ? <FaSun /> : <FaMoon />}
           </button>
@@ -159,7 +174,7 @@ const Me = () => {
             <FaCalendarAlt className="text-2xl text-blue-400" />
             <div>
               <p className="font-bold">Last Login</p>
-              <p>{localStorage.getItem('lastLogin')}</p>
+              <p>{localStorage.getItem("lastLogin")}</p>
             </div>
           </div>
         </div>
@@ -186,9 +201,16 @@ const Me = () => {
           <div className="fixed z-10 inset-0 flex items-center justify-center bg-black bg-opacity-50">
             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-md">
               <h2 className="text-xl font-semibold mb-4">Change Password</h2>
-              <form onSubmit={(e) => { e.preventDefault(); handleChangePassword(); }}>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleChangePassword();
+                }}
+              >
                 <div className="mb-4">
-                  <label className="block text-sm font-bold mb-2">New Password</label>
+                  <label className="block text-sm font-bold mb-2">
+                    New Password
+                  </label>
                   <input
                     type="password"
                     value={newPassword}
@@ -198,7 +220,9 @@ const Me = () => {
                   />
                 </div>
                 <div className="mb-4">
-                  <label className="block text-sm font-bold mb-2">Confirm Password</label>
+                  <label className="block text-sm font-bold mb-2">
+                    Confirm Password
+                  </label>
                   <input
                     type="password"
                     value={confirmPassword}

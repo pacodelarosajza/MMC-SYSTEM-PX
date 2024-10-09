@@ -1,8 +1,8 @@
 @import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800&family=Play:wght@700&display=swap");
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap');
-@import 'tailwindcss/base'; 
-@import 'tailwindcss/components'; 
-@import 'tailwindcss/utilities'; 
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap");
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -21,77 +21,79 @@
 }
 /* Calendar.css */
 .react-calendar {
-  width: 90%; /* Ajustar el ancho según lo necesites */
-  max-width: 700px; /* Cambia este valor para hacer el calendario más pequeño o más grande */
-  font-family: 'Arial', sans-serif; /* Cambia la fuente si lo deseas */
+  /*width: 90%;  Ajustar el ancho según lo necesites */
+  /* max-width: 700px; Cambia este valor para hacer el calendario más pequeño o más grande */
+  font-family: "Montserrat", sans-serif; /* Fuente del calendario */
   font-size: 0.9em; /* Ajusta el tamaño de la fuente */
-  background-color: #1c1c1c; /* Color de fondo oscuro */
-  border: 1px solid #333; /* Borde más oscuro */
+  background-color: #17202e; /* Color de fondo oscuro */
+  /*border: 1px solid #333;  Borde más oscuro */
   border-radius: 8px; /* Bordes redondeados */
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); /* Sombra más pronunciada */
   overflow: hidden; /* Esconde los desbordamientos */
 }
 
 .react-calendar__month-view__days {
-  display: grid; /* Usa grid para controlar el tamaño de los días */
-  grid-template-columns: repeat(7, 1fr); /* 7 columnas para los días de la semana */
+  display: grid;
+  grid-template-columns: repeat(7, 1fr) !important; /* 7 columnas para los días de la semana */
 }
 
 .react-calendar__tile {
-  padding: 10px; /* Ajusta el espacio alrededor de los días */
-  border-radius: 5px; /* Bordes redondeados */
+  padding-left: 10px;
+  padding-right: 10px;
+  /*border-radius: 5px;  Bordes redondeados */
   margin: 2px; /* Espacio entre los días */
-  background-color: #282828; /* Color de fondo de los días */
+  background-color: #1c2533; /* Color de fondo de los días */
   color: #ffffff; /* Color del texto */
   transition: background-color 0.3s ease, transform 0.2s; /* Transiciones suaves */
   cursor: pointer; /* Cambia el cursor al pasar el ratón */
 }
 
 .react-calendar__tile:hover {
-  background-color: #3a3a3a; /* Color de fondo al pasar el ratón */
+  background-color: #2b394a; /* Color de fondo al pasar el ratón */
   transform: translateY(-3px); /* Efecto de elevación */
 }
 
 .react-calendar__tile--active {
-  background-color: #051280; /* Color de fondo para el día activo */
+  background-color: #a8bdd1; /* Color de fondo para el día activo */
   color: #ffffff; /* Color del texto para el día activo */
-  box-shadow: 0 0 8px rgba(255, 99, 71, 0.5); /* Sombra para el día activo */
+  box-shadow: 0 0 8px rgb(27, 27, 27); /* Sombra para el día activo */
 }
 
 .react-calendar__tile--now {
-  background-color: #ffa500; /* Color de fondo para el día actual */
+  background-color: #fc6c5c; /* Color de fondo para el día actual */
   color: #ffffff; /* Color del texto para el día actual */
-  border: 2px solid #ffffff; /* Borde blanco alrededor del día actual */
+  border: 1px solid #ffffff; /* Borde blanco alrededor del día actual */
 }
 
 .react-calendar__month-view__weekdays {
   display: grid;
-  grid-template-columns: repeat(7, 1fr); /* 7 columnas para los días de la semana */
-  background-color: #333; /* Color de fondo para los días de la semana */
+  grid-template-columns: repeat(7, 1fr) !important;
+  /* background-color: #333;  Color de fondo para los días de la semana */
 }
 
 .react-calendar__month-view__weekdays__weekday {
   font-weight: bold; /* Hacer que los días de la semana sean más prominentes */
-  color: #ffffff; /* Color del texto para los días de la semana */
-  padding: 10px; /* Espaciado */
-  text-align: center; /* Centrar el texto */
-  border-radius: 5px; /* Bordes redondeados */
+  color: #d0dbe7; /* Color del texto para los días de la semana */
+  padding-top: 5px; /* Espaciado */
+
+  /*border-radius: 5px;  Bordes redondeados */
   transition: background-color 0.3s; /* Transición suave para el hover */
 }
 
 .react-calendar__month-view__weekdays__weekday:hover {
-  background-color: #444; /* Color de fondo al pasar el ratón sobre los días de la semana */
+  background-color: #2b394a; /* Color de fondo al pasar el ratón sobre los días de la semana */
 }
 
 /* Estilos para el mes y el año */
 .react-calendar__navigation {
-  background-color: #444; /* Fondo del contenedor de navegación */
+  /*background-color: #444;  Fondo del contenedor de navegación */
   border: none; /* Sin borde */
-  color: #fff; /* Color del texto de navegación */
+  color: #7898b8; /* Color del texto de navegación */
+  text-align: center;
 }
 
 .react-calendar__navigation__arrow {
-  color: #ffffff; /* Color de las flechas de navegación */
+  color: #7898b8 /* Color de las flechas de navegación */
 }
 
 .react-calendar__navigation__label {
@@ -104,12 +106,15 @@
   color: #ffffff; /* Color del texto para eventos */
   border-radius: 5px; /* Bordes redondeados */
 }
+
 .ml-64 {
-  margin-left: 14rem;
+  margin-left: 12rem;
 }
-.justify-center {
+
+/*.justify-center {
   justify-content: right;
-}
-.min-h-screen {
+}*/
+
+/*.min-h-screen {
   min-height: auto;
-}
+}*/

@@ -29,9 +29,9 @@ const Projects = () => {
   };
 
   return (
-    <div className="pr-4">
+    <div className="px-8 min-h-screen">
       <div className="flex justify-between items-center pt-4 pb-4 mb-5">
-        <h1 className="text-2xl font-semibold leading-7 text-Slate-100">
+        <h1 className="text-2xl font-semibold leading-7 text-lightWhiteLetter">
           Projects
         </h1>
         <div className="flex items-center">
@@ -48,42 +48,69 @@ const Projects = () => {
 
       <div>
         <div className="pl-4">
-          <button className="p-2 bg-gray-500 text-sm rounded-t hover:bg-gray-700">
+          <button className="px-4 py-2 bg-gray-500 text-sm rounded-t hover:bg-gray-700">
             <strong>New</strong>
           </button>
         </div>
 
         <div className="flex grid grid-cols-12 gap-2">
           <div
-            className="card border border-gray-500 rounded col-span-12 md:col-span-3"
+            className="card rounded col-span-12 md:col-span-3"
             id="pj-list-projects"
           >
-            <ul className="block list-group list-group-flush">
-              {projectsInfo.map((project) => (
-                <li
-                  key={project.id}
-                  className="m-2 list-group-item border-b border-gray-500 p-4 cursor-pointer hover:bg-gray-700 transition duration-200"
-                  onClick={() => handleMoreInfo(project.id)}
-                >
-                  <div className="text-lg">
-                    <strong>#{project.identification_number}</strong>
-                    <br />
-                  </div>
-                </li>
-              ))}
-            </ul>
+            <table className="table-auto w-full border text-lightWhiteLetter rounded-lg">
+              <tbody>
+                {projectsInfo.map((project) => (
+                  <tr
+                    key={project.id}
+                    className="border text-lightWhiteLetter hover:bg-pageSideMenuTextHover cursor-pointer transition duration-200"
+                    onClick={() => handleMoreInfo(project.id)}
+                  >
+                    <td className="px-4 py-2 border border-gray-500">
+                      {project.id}
+                    </td>
+                    <td className="px-4 py-2 text-lg border border-gray-500">
+                      <strong>#{project.identification_number}</strong>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
 
           <div className="col-span-12 md:col-span-9">
-            <div className="card border border-gray-700 rounded" id="pj-info-projects">
-              <div className="m-4">
+            <div className="card rounded" id="pj-info-projects">
+              {" "}
+              {/* border border-gray-700  */}
+              <div className="m-4 text-lightWhiteLetter">
                 {selectedProject ? (
                   <div>
-                    <h2 className="text-xl font-bold">{selectedProject.name}</h2>
-                    <p><strong>Description</strong><br/>{selectedProject.description}</p><br/>
-                    <p><strong>Delivery Date</strong><br/>{selectedProject.delivery_date}</p><br/>
-                    <p><strong>Completed</strong><br/>{selectedProject.completed ? 'Yes' : 'No'}</p><br/>
-                    <p><strong>Cost Material</strong><br/>${selectedProject.cost_material}</p>
+                    <h2 className="text-3xl font-bold">
+                      #{selectedProject.identification_number}
+                    </h2>
+                    <br />
+                    <p>
+                      <strong>Description</strong>
+                      <br />
+                      {selectedProject.description}
+                    </p>
+                    <br />
+                    <p>
+                      <strong>Delivery Date</strong>
+                      <br />
+                      {selectedProject.delivery_date}
+                    </p>
+                    <br />
+                    <p>
+                      <strong>Cost Material</strong>
+                      <br />${selectedProject.cost_material}
+                    </p>
+
+                    <div className="flex justify-end pt-20 mt-4">
+                      <button className="font-bold bg-gray-500 text-sm px-4 py-2 rounded hover:bg-gray-700 transition duration-200">
+                        Edit
+                      </button>
+                    </div>
                   </div>
                 ) : (
                   "Select a project to see the details"

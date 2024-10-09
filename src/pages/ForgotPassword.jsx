@@ -9,19 +9,26 @@ const ForgotPassword = () => {
     e.preventDefault();
     try {
       // Primero, obtenemos al usuario por email
-      const userResponse = await fetch(`http://10.12.6.181:3001/api/users/${email}`);
-      
+      const userResponse = await fetch(
+        `http://10.12.6.181:3001/api/users/${email}`
+      );
+
       if (userResponse.ok) {
         const user = await userResponse.json();
 
         // Ahora hacemos un PATCH para restablecer la contraseña
-        const resetResponse = await fetch(`http://10.12.6.181:3001/api/users/${user.id}`, {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ /* Aquí puedes incluir el nuevo password u otros datos necesarios */ }),
-        });
+        const resetResponse = await fetch(
+          `http://10.12.6.181:3001/api/users/${user.id}`,
+          {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              /* Aquí puedes incluir el nuevo password u otros datos necesarios */
+            }),
+          }
+        );
 
         if (resetResponse.ok) {
           setMessage("Se ha restablecido la contraseña exitosamente.");

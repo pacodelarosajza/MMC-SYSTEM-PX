@@ -1,11 +1,11 @@
-import react from 'react';
+import react from "react";
 
 const Users = () => {
-    return (
-        <div> 
-            <h3>Usuarios Page</h3>
-        </div>
-    );
+  return (
+    <div className="min-h-screen px-8">
+      <h3>Usuarios Page</h3>
+    </div>
+  );
 };
 
-export default  Users;
+export default Users;
