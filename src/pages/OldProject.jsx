@@ -7,7 +7,7 @@ import {
   FaArrowRight,
 } from "react-icons/fa";
 
-const Projects = () => {
+const OldProject = () => {
   // IP Address for the API
   const apiIpAddress = import.meta.env.VITE_API_IP_ADDRESS;
   
@@ -89,30 +89,6 @@ const Projects = () => {
   const handleButtonClick = () => {
     setShowInfo(!showInfo);
   };
-
-  const [isEditing, setIsEditing] = useState(false);
-  const [date, setDate] = useState('');
-
-  const handleDivClick = () => {
-    setIsEditing(true);
-  };
-
-  const handleDateChange = (event) => {
-    setDate(event.target.value);
-  };
-
-  const handleBlur = () => {
-    setIsEditing(false);
-  };
-
-  const handleConfirmClick = () => {
-    const confirmChange = window.confirm(`¿Deseas añadir la fecha ${date} como fecha de llegada del material?`);
-    if (confirmChange) {
-      setIsEditing(false);
-    }
-  };
-
-  
 
   return (
     <div className="px-4 py-5 min-h-screen">
@@ -372,35 +348,10 @@ const Projects = () => {
                                               </td>
                                             </div>
                                             <div className="px-2">
-                                              <td className="flex">
-                                              <div className="px-4 mx-2 text-sm text-gray-400 hover:text-gray-200">
-          {isEditing ? (
-            <div>
-              <input
-                type="date"
-                value={date}
-                onChange={handleDateChange}
-                onBlur={handleBlur}
-                className="px-4 mx-2 text-sm text-gray-400"
-              />
-              <button
-                onClick={handleConfirmClick}
-                className="px-4 mx-2 text-sm text-gray-400 hover:text-gray-200"
-              >
-                Confirmar
-              </button>
-            </div>
-          ) : (
-            <div
-              className="px-4 mx-2 text-sm text-gray-400 hover:text-gray-200"
-              onClick={handleDivClick}
-            >
-              {date ? date : 'Add date order'}
-            </div>
-          )}
-        </div>
-
-                                                <div>
+                                              <td>
+                                                <button className="px-4 mx-2 text-sm text-gray-400 hover:text-gray-200">
+                                                  Add date order
+                                                </button>
                                                 <input
                                                   type="checkbox"
                                                   className="ml-auto h-4 w-4 text-blue-600 bg-gray-700 border-gray-500 rounded focus:ring-blue-500 focus:ring-2"
@@ -430,8 +381,6 @@ const Projects = () => {
                                                     }
                                                   }}
                                                 />
-                                                </div>
-                                                
                                               </td>
                                             </div>
                                           </div>
@@ -446,13 +395,11 @@ const Projects = () => {
                           ))}
                         </div>
                       </div>
-                      {/*}
                       <div className="flex justify-end pt-20 mt-4">
                         <button className="px-4 py-2 mx-1 bg-yellow-900 text-sm text-yellow-300 bg-pageBackground border border-yellow-500 rounded hover:bg-yellow-700">
                           Edit
                         </button>
                       </div>
-                      */}
                     </div>
                   </div>
                 ) : (
@@ -467,4 +414,4 @@ const Projects = () => {
   );
 };
 
-export default Projects;
+export default OldProject;

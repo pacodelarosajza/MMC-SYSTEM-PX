@@ -116,13 +116,13 @@ const Me = () => {
   return (
     <div
       className={`${
-        darkMode ? "bg-gray-900 text-white" : "bg-white text-black"
+        darkMode ? " text-white" : "bg-white text-black"
       } min-h-screen flex flex-col items-center justify-center`}
     >
       <div className="bg-gray-800 p-8 rounded-lg shadow-lg w-full max-w-3xl">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-semibold">
-            {getGreeting()}, {user.name}!
+            {getGreeting()} {user.name}!
           </h1>
           <button onClick={toggleDarkMode} className="text-xl">
             {darkMode ? <FaSun /> : <FaMoon />}
@@ -157,7 +157,7 @@ const Me = () => {
           <div className="bg-gray-700 p-4 rounded-lg flex items-center space-x-4">
             <FaCalendarAlt className="text-2xl text-blue-400" />
             <div>
-              <p className="font-bold">Created At</p>
+              <p className="font-bold">Date of registration</p>
               <p>{new Date(user.created_at).toLocaleDateString()}</p>
             </div>
           </div>

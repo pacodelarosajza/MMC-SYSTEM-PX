@@ -6,6 +6,7 @@ import { enUS } from "date-fns/locale"; // Importa el idioma inglés
 import { FaBell } from "react-icons/fa"; // Importa el icono de notificaciones
 import "../index.css";
 import { Bar } from "react-chartjs-2";
+
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -71,80 +72,63 @@ const Dashboard = ({ onLogout }) => {
   const addNotification = (type, message, details) => {
     const notification = { type, message, details };
     setNotifications((prevNotifications) => [
-      ...prevNotifications,
-      notification,
+        ...prevNotifications,
+        notification,
     ]);
 
-    // Eliminar la notificación después de 10 segundos
+    // Eliminar la notificación más reciente después de 10 segundos
     setTimeout(() => {
-      setNotifications((prevNotifications) =>
-        prevNotifications.filter((_, index) => index !== 0)
-      );
+        setNotifications((prevNotifications) => {
+            // Solo eliminar la última notificación
+            return prevNotifications.slice(0, -1);
+        });
     }, 10000);
-  };
+};
 
-  const fetchNotifications = async () => {
+const fetchNotifications = async () => {
+    const endpoints = [
+        { url: '/api/getItems/arrived', type: 'success' },
+        { url: '/api/getItems/missing', type: 'warning' },
+        { url: '/api/getAssemblyByDeliveryDate', type: 'info' },
+        { url: '/api/getAssemblyByCompletedDate', type: 'completed' },
+    ];
+
     try {
-      const arrivedResponse = await axios.get(
-        `${apiIpAddress}/api/getItems/arrived`
-      );
-      const missingResponse = await axios.get(
-        `${apiIpAddress}/api/getItems/missing`
-      );
-      const assemblyDeliveryResponse = await axios.get(
-        `${apiIpAddress}/api/getAssemblyByDeliveryDate`
-      );
-      const assemblyCompletedResponse = await axios.get(
-        `${apiIpAddress}/api/getAssemblyByCompletedDate`
-      );
+        const responses = await Promise.all(endpoints.map(endpoint =>
+            axios.get(`${apiIpAddress}${endpoint.url}`)
+        ));
 
-      arrivedResponse.data.forEach((item) => {
-        addNotification(
-          "success",
-          `With ID.${item.id}: ${item.name}, Cantidad: ${item.quantity} (Assembly ID.${item.assembly_id}/Project #${item.project_id}) `,
-          { id: item.id }
-        );
-      });
-
-      missingResponse.data.forEach((item) => {
-        addNotification(
-          "warning",
-          `${item.name}, ID.${item.id}(Assembly ID.${item.assembly_id}/Project #${item.project_id})`,
-          {
-            id: item.id,
-          }
-        );
-      });
-
-      assemblyDeliveryResponse.data.forEach((assembly) => {
-        addNotification(
-          "info",
-          `Assembly ID.${assembly.id}, Proyecto #${assembly.project_id}`,
-          { id: assembly.id }
-        );
-      });
-
-      assemblyCompletedResponse.data.forEach((assembly) => {
-        addNotification(
-          "completed",
-          `Assembly ID.${assembly.id}, Identificación: ${assembly.identification_number}`,
-          { id: assembly.id }
-        );
-      });
+        responses.forEach((response, index) => {
+            const notificationType = endpoints[index].type;
+            response.data.forEach(item => {
+                let message;
+                if (notificationType === 'success') {
+                    message = `With ID.${item.id}: ${item.name}, Cantidad: ${item.quantity} (Assembly ID.${item.assembly_id}/Project #${item.project_id}) `;
+                } else if (notificationType === 'warning') {
+                    message = `${item.name}, ID.${item.id}(Assembly ID.${item.assembly_id}/Project #${item.project_id})`;
+                } else if (notificationType === 'info') {
+                    message = `Assembly ID.${item.id}, Proyecto #${item.project_id}`;
+                } else if (notificationType === 'completed') {
+                    message = `Assembly ID.${item.id}, Identificación: ${item.identification_number}`;
+                }
+                addNotification(notificationType, message, { id: item.id });
+            });
+        });
     } catch (error) {
-      console.error("Error fetching notifications:", error);
+        console.error("Error fetching notifications:", error);
     }
-  };
+};
 
-  useEffect(() => {
+useEffect(() => {
     const intervalId = setInterval(fetchNotifications, 10000);
     return () => clearInterval(intervalId);
-  }, []);
+}, []);
 
-  const handleNotificationClick = (details) => {
+const handleNotificationClick = (details) => {
     console.log("Detalles de la notificación:", details);
     navigate(`/details/${details.id}`);
-  };
+};
+
 
   const handleNavigate = () => {
     setShowChildRoutes(true);
@@ -186,9 +170,13 @@ const Dashboard = ({ onLogout }) => {
           ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
           `}
       >
-        <div className="flex justify-center items-center pt-10 pb-20">
-          <h2 className="">Logo</h2>
+        <div className="flex justify-center">
+          <img
+            src="src/assets/Yaskawa_notBg.png"
+            className="w-auto h-auto" 
+          />
         </div>
+
         <nav className="flex flex-col h-full justify-between ">
           <ul className="flex flex-col space-y-1">
             <button className="text-2x1 text-left py-2 px-2 hover:bg-pageSideMenuTextHover hover:rounded transition duration-300 text-lightWhiteLetter font-medium">
@@ -203,15 +191,22 @@ const Dashboard = ({ onLogout }) => {
               </Link>
             </button>
             <li className="border-b border-lightBlueLetter"></li>
-            <button className="text-2x1 text-left py-2 px-2 hover:bg-pageSideMenuTextHover hover:rounded transition duration-300 text-lightWhiteLetter font-medium">
-              <Link to="/dashboard/historico" onClick={handleNavigate}>
-                Histórico
+            <div className="text-2x1 text-left py-2 px-2 transition duration-300 text-lightWhiteLetter font-medium">
+                Projects
+            </div>
+            <button className="text-sm text-left py-2 px-4 hover:bg-pageSideMenuTextHover hover:rounded transition duration-300 text-lightWhiteLetter">
+              <Link to="/dashboard/projects" onClick={handleNavigate}>
+               In Development 
               </Link>
             </button>
-            <li className="border-b border-lightBlueLetter"></li>
-            <button className="text-2x1 text-left py-2 px-2 hover:bg-pageSideMenuTextHover hover:rounded transition duration-300 text-lightWhiteLetter font-medium">
-              <Link to="/dashboard/projects" onClick={handleNavigate}>
-                Proyectos
+            <button className="text-sm text-left py-2 px-4 hover:bg-pageSideMenuTextHover hover:rounded transition duration-300 text-lightWhiteLetter">
+              <Link to="/dashboard/new-project-form" onClick={handleNavigate}>
+                Add or Delete Projects
+              </Link>
+            </button>
+            <button className="text-sm text-left py-2 px-4 hover:bg-pageSideMenuTextHover hover:rounded transition duration-300 text-lightWhiteLetter">
+              <Link to="/dashboard/history" onClick={handleNavigate}>
+                History
               </Link>
             </button>
             <li className="border-b border-lightBlueLetter"></li>
@@ -223,7 +218,12 @@ const Dashboard = ({ onLogout }) => {
             <li className="border-b border-lightBlueLetter"></li>
             <button className="text-2x1 text-left py-2 px-2 hover:bg-pageSideMenuTextHover hover:rounded transition duration-300 text-lightWhiteLetter font-medium">
               <Link to="/dashboard/usuarios" onClick={handleNavigate}>
-                Usuarios
+                Users
+              </Link>
+            </button>
+            <button className="text-sm text-left py-2 px-4 hover:bg-pageSideMenuTextHover hover:rounded transition duration-300 text-lightWhiteLetter">
+              <Link to="/dashboard/new-user-form" onClick={handleNavigate}>
+                Add User
               </Link>
             </button>
           </ul>
@@ -243,9 +243,8 @@ const Dashboard = ({ onLogout }) => {
               {new Date(assembly.delivery_date).toLocaleDateString()}
             </p>
             <p
-              className={`font-semibold ${
-                assembly.completed_assembly ? "text-green-500" : "text-red-500"
-              }`}
+              className={`font-semibold ${assembly.completed_assembly ? "text-green-500" : "text-red-500"
+                }`}
             >
               <strong>Estado:</strong>{" "}
               {assembly.completed_assembly ? "Completo" : "Incompleto"}
@@ -260,15 +259,14 @@ const Dashboard = ({ onLogout }) => {
         ))}
       </section>
       <main
-        className={`flex-1 pl-2 pr-2 transition-all duration-300 ml-64 ${
-          showChildRoutes ? "mr-" : "mr-64"
-        }`}
+        className={`flex-1 pl-2 pr-2 transition-all duration-300 ml-64 ${showChildRoutes ? "mr-" : "mr-64"
+          }`}
       >
         {!showChildRoutes ? (
           <>
-            <div className="py-6 flex flex-col justify-leftt sm:py-12 px-4 space-y-1">
+            <div className="py-6 flex flex-col justify-leftt px-4 space-y-1">
               <div className="bg-contentCards p-5 rounded-lg shadow shadow-shadowBlueColor shadow-xl">
-                <h1 className="text-right pr-10 text-lg font-semibold text-lightBlueLetter">
+                <h1 className="text-right pr-10 text-lg font-semibold text-lightWhiteLetter">
                   Project progress
                 </h1>
                 {/* Progress Bars */}
@@ -346,11 +344,10 @@ const Dashboard = ({ onLogout }) => {
                       {new Date(assembly.delivery_date).toLocaleDateString()}
                     </p>
                     <p
-                      className={`font-semibold text-xs ${
-                        assembly.completed_assembly
+                      className={`font-semibold text-xs ${assembly.completed_assembly
                           ? "text-green-500"
                           : "text-red-500"
-                      }`}
+                        }`}
                     >
                       <strong>Estado:</strong>{" "}
                       {assembly.completed_assembly ? "Completo" : "Incompleto"}
@@ -365,30 +362,37 @@ const Dashboard = ({ onLogout }) => {
                 ))}
               </section>
               {/* Projects Overview Section */}
-              <h1 className="text-lg font-semibold text-rigth text-lightWhiteLetter pt-8 pb-5">
+              <h1 className="text-lg text-bo font-bold text-rigth text-lightWhiteLetter pt-8 pb-5">
                 Project cards under development
               </h1>
               <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 mb-4">
                 {projects.map((project) => (
                   <div
                     key={project.id}
-                    className="bg-gray-700 p-3 rounded-lg shadow shadow-shadowBlueColor shadow-xl text-sm cursor-pointer hover:bg-gray-600 transition duration-200"
+                    className="relative bg-gray-700 p-3 rounded-lg shadow shadow-shadowBlueColor shadow-xl text-sm cursor-pointer hover:bg-gray-600 transition duration-200"
                     onClick={() =>
                       alert(`Detalles del Proyecto ID: ${project.id}`)
                     }
                   >
                     {/*<h2 className="font-bold text-lg">ID: {project.id}</h2>*/}
-                    <p className="text-lightBlueLetter">
+                    <p className="text-blue-500 text-xl text-right">
                       <strong>#{project.identification_number}</strong>
-                    </p>
-                    <p className="text-lightGrayLetter">
-                      <strong>Project manager:</strong> Nombre del responsable
-                      del proyecto
-                    </p>
-                    <p className="text-lightGrayLetter">
+                    </p><br />
+                    <p className="text-lightWhiteLetter">
+                      <strong>Project manager:</strong><br/>
+                      Nombre del responsable del proyecto
+                    </p><br />
+                    <p className="text-lightWhiteLetter">
+                      <strong>Description:</strong><br/>
+                      {project.description}
+                    </p><br /><br/>
+                    <div className="absolute bottom-5 w-full">
+                    <p className="text-lightGrayLetter text-xs">
                       <strong>Delivery date:</strong>{" "}
                       {new Date(project.delivery_date).toLocaleDateString()}
                     </p>
+                    </div>
+                    
                     {/*<p
                       className={`font-semibold ${
                         project.completed ? "text-green-500" : "text-red-500"
@@ -426,34 +430,33 @@ const Dashboard = ({ onLogout }) => {
             {notifications.map((notification, index) => (
               <li
                 key={index}
-                className={`p-2 rounded text-xs text-left notifiGrayLetter ${
-                  notification.type === "success"
+                className={`p-2 rounded text-xs text-left notifiGrayLetter ${notification.type === "success"
                     ? "border-l-4 border border-blue-800"
                     : notification.type === "warning"
-                    ? "border-l-4 border border-yellow-800"
-                    : notification.type === "info"
-                    ? "border-l-4 border border-cyan-800"
-                    : notification.type === "completed"
-                    ? "border-l-4 border border-green-800"
-                    : "border-l-4 border border-red-800"
-                }`}
+                      ? "border-l-4 border border-yellow-800"
+                      : notification.type === "info"
+                        ? "border-l-4 border border-cyan-800"
+                        : notification.type === "completed"
+                          ? "border-l-4 border border-green-800"
+                          : "border-l-4 border border-red-800"
+                  }`}
               >
                 <span className="font-medium">
                   {notification.type === "success" && (
                     <span className="text-blue-500 font-bold">
-                      ¡A material has arrived!
+                      ¡Un material a llegado.!
                       <br />
                     </span>
                   )}
                   {notification.type === "warning" && (
                     <span className="text-yellow-500 font-bold">
-                      ¡There is one missing item!
+                      ¡Falta un material!
                       <br />
                     </span>
                   )}
                   {notification.type === "info" && (
                     <span className="text-cyan-500 font-bold">
-                      ¡An assembly has been completed!
+                      ¡Ensamblaje completado!
                       <br />
                     </span>
                   )}
@@ -483,6 +486,7 @@ const Dashboard = ({ onLogout }) => {
           </ul>
         </aside>
       )}
+
     </div>
   );
 };

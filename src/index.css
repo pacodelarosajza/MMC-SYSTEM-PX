@@ -6,6 +6,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+/*@import 'tailwind-scrollbar';*/
 
 @layer base {
   html {
@@ -32,24 +33,11 @@
   overflow: hidden; /* Esconde los desbordamientos */
 }
 
-.react-calendar__month-view__days {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr) !important; /* 7 columnas para los días de la semana */
-}
 
-.react-calendar__tile {
-  padding-left: 10px;
-  padding-right: 10px;
-  /*border-radius: 5px;  Bordes redondeados */
-  margin: 2px; /* Espacio entre los días */
-  background-color: #1c2533; /* Color de fondo de los días */
-  color: #ffffff; /* Color del texto */
-  transition: background-color 0.3s ease, transform 0.2s; /* Transiciones suaves */
-  cursor: pointer; /* Cambia el cursor al pasar el ratón */
-}
+
 
 .react-calendar__tile:hover {
-  background-color: #2b394a; /* Color de fondo al pasar el ratón */
+  background-color: #1e40af; /* Color de fondo al pasar el ratón */
   transform: translateY(-3px); /* Efecto de elevación */
 }
 
@@ -60,7 +48,7 @@
 }
 
 .react-calendar__tile--now {
-  background-color: #fc6c5c; /* Color de fondo para el día actual */
+  background-color: #3b82f6; /* Color de fondo para el día actual */
   color: #ffffff; /* Color del texto para el día actual */
   border: 1px solid #ffffff; /* Borde blanco alrededor del día actual */
 }
@@ -69,6 +57,7 @@
   display: grid;
   grid-template-columns: repeat(7, 1fr) !important;
   /* background-color: #333;  Color de fondo para los días de la semana */
+  text-align: center;
 }
 
 .react-calendar__month-view__weekdays__weekday {
@@ -88,7 +77,7 @@
 .react-calendar__navigation {
   /*background-color: #444;  Fondo del contenedor de navegación */
   border: none; /* Sin borde */
-  color: #7898b8; /* Color del texto de navegación */
+  color: #eef2f6; /* Color del texto de navegación */
   text-align: center;
 }
 
@@ -117,4 +106,17 @@
 
 /*.min-h-screen {
   min-height: auto;
+}*/
+
+/*.scrollbar-thumb {
+  border-radius: 20px;
+}
+
+.scrollbar-thumb-custom {
+  background-color: #ff69b4; /* Color de la barra de desplazamiento 
+  border-radius: 20px; /* Radio de borde 
+}
+
+.scrollbar-track-custom {
+  background-color: #f0f0f0; /* Color de la pista de desplazamiento 
 }*/

@@ -25,8 +25,8 @@ Follow these steps to set up and run the project in your local environment:
 1. Clone the repository:
 
    ```sh
-   git clone https://github.com/GlzLXochitl/react-monitoring-control-mts.git
-   cd react-monitoring-control-mts
+   git clone https://github.com/pacodelarosajza/MMC-SYSTEM-PX.git
+   cd MMC-SYSTEM-PX
    ```
 
 2. Installs the project dependencies:
