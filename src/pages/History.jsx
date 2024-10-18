@@ -93,23 +93,6 @@ const History = () => {
 
   return (
     <div className="min-h-screen p-8">
-      {/*<div className="absolute top-0 right-0 m-4">
-        <select
-          value={selectedOption}
-          onChange={(e) => setSelectedOption(e.target.value)}
-          className="p-2 rounded bg-gray-700 text-white border-4 border-gray-700"
-        >
-          <option value="search" className="">
-            Buscar por ID
-          </option>
-          <option value="filter" className="">
-            Aplicar Filtros
-          </option>
-        </select>
-      </div>*/}
-
-      {/*{selectedOption === "search" && (
-        <>*/}
       <div className="flex flex-col items-center justify-center p-[5rem]">
         <div>
           <h1 className="text-2xl font-bold mb-4">
@@ -127,58 +110,29 @@ const History = () => {
           </button>
         </div>
       </div>
-      {/*</>
-      )}*/}
-
-      {/*{selectedOption === "filter" && (
-        <>
-          <h1 className="text-2xl font-bold mb-4">Aplicar Filtros</h1>
-          <div className="flex gap-3 mb-5">
-            <button
-              onClick={handleFilterItemsArrived}
-              className="bg-purple-600 p-2 rounded text-white hover:bg-purple-500"
-            >
-              Mostrar Items Llegados
-            </button>
-            <button
-              onClick={handleFilterItemsMissing}
-              className="bg-pink-600 p-2 rounded text-white hover:bg-pink-500"
-            >
-              Mostrar Items Faltantes
-            </button>
-          </div>
-        </>
-      )}*/}
-
-            <table className="min-w-full">
+      <table className="min-w-full">
         <thead className="hover:bg-gray-500">
           <tr>
-            <th className="text-left px-4 py-2">Project identifier</th>
-            <th className="text-left px-4 py-2">Manager</th>
-            <th className="text-left px-4 py-2">Description</th>
-            <th className="text-left px-4 py-2"></th>
+            <th className="font-semibold text-left px-4 py-2">Project identifier</th>
+            <th className="font-semibold text-left px-4 py-2">Manager</th>
+            <th className="font-semibold text-left px-4 py-2">Description</th>
+            <th className="font-semibold text-left px-4 py-2"></th>
           </tr>
         </thead>
         <tbody className="bg-gray-800 rounded shadow-lg">
           {items.map((item) => (
-            <tr
-              key={item.id}
-              className="border-b border-gray-700 hover:bg-gray-700"
-            >
+            <tr key={item.id} className="hover:bg-gray-700">
+              <td className="px-4 py-2">211715</td>
+              <td className="px-4 py-2">Lorem ipsum dolor sithjughs.</td>
+              <td className="px-4 py-2">Random description.</td>
               <td className="px-4 py-2">
-                <span>211715</span>
-              </td>
-              <td className="px-4 py-2">
-                <span>Lorem ipsum dolor sithjughs.</span>
-              </td>
-              <td className="px-4 py-2">
-                <span>Random description.</span>
-              </td>
-              <td className="px-4 py-2">
-                <button className="p-2 rounded text-gray-300 hover:bg-gray-200 hover:text-gray-800 bg-gray-800">
-                  <Link to="/dashboard/history" onClick={handleNavigate}>
+                <button className="px-4 py-2 text-sm text-gray-300 bg-gray-800 rounded hover:bg-gray-500 hover:text-gray-800">
+                  <FaShare />
+                  {/*<button className="p-2 rounded text-gray-300 hover:bg-gray-200 hover:text-gray-800 bg-gray-800">
+                  <Link to="/dashboard/historico" onClick={handleNavigate}>
                     <FaShare />
                   </Link>
+                </button>*/}
                 </button>
               </td>
             </tr>

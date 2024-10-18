@@ -2,10 +2,10 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate, Outlet } from "react-router-dom";
 import axios from "axios";
 import Calendar from "react-calendar";
-import { enUS } from "date-fns/locale"; // Importa el idioma inglés
+
 import { FaBell } from "react-icons/fa"; // Importa el icono de notificaciones
 import "../index.css";
-import { Bar } from "react-chartjs-2";
+
 
 import {
   Chart as ChartJS,

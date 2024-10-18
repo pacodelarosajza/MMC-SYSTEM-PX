@@ -9,12 +9,15 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
-
+  
   const handleLogin = async (e) => {
+  const apiIpAddress = import.meta.env.VITE_API_IP_ADDRESS;
+   
     e.preventDefault();
     try {
       const response = await fetch(
-        `http://10.12.6.181:3001/api/users/userNum/${userNum}`
+        
+        `${apiIpAddress}/api/users/userNum/${userNum}`
       );
 
       if (!response.ok) {
