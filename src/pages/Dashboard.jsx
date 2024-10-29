@@ -6,7 +6,6 @@ import Calendar from "react-calendar";
 import { FaBell } from "react-icons/fa"; // Importa el icono de notificaciones
 import "../index.css";
 
-
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -72,63 +71,62 @@ const Dashboard = ({ onLogout }) => {
   const addNotification = (type, message, details) => {
     const notification = { type, message, details };
     setNotifications((prevNotifications) => [
-        ...prevNotifications,
-        notification,
+      ...prevNotifications,
+      notification,
     ]);
 
     // Eliminar la notificación más reciente después de 10 segundos
     setTimeout(() => {
-        setNotifications((prevNotifications) => {
-            // Solo eliminar la última notificación
-            return prevNotifications.slice(0, -1);
-        });
+      setNotifications((prevNotifications) => {
+        // Solo eliminar la última notificación
+        return prevNotifications.slice(0, -1);
+      });
     }, 10000);
-};
+  };
 
-const fetchNotifications = async () => {
+  const fetchNotifications = async () => {
     const endpoints = [
-        { url: '/api/getItems/arrived', type: 'success' },
-        { url: '/api/getItems/missing', type: 'warning' },
-        { url: '/api/getAssemblyByDeliveryDate', type: 'info' },
-        { url: '/api/getAssemblyByCompletedDate', type: 'completed' },
+      { url: "/api/getItems/arrived", type: "success" },
+      { url: "/api/getItems/missing", type: "warning" },
+      { url: "/api/getAssemblyByDeliveryDate", type: "info" },
+      { url: "/api/getAssemblyByCompletedDate", type: "completed" },
     ];
 
     try {
-        const responses = await Promise.all(endpoints.map(endpoint =>
-            axios.get(`${apiIpAddress}${endpoint.url}`)
-        ));
+      const responses = await Promise.all(
+        endpoints.map((endpoint) => axios.get(`${apiIpAddress}${endpoint.url}`))
+      );
 
-        responses.forEach((response, index) => {
-            const notificationType = endpoints[index].type;
-            response.data.forEach(item => {
-                let message;
-                if (notificationType === 'success') {
-                    message = `With ID.${item.id}: ${item.name}, Cantidad: ${item.quantity} (Assembly ID.${item.assembly_id}/Project #${item.project_id}) `;
-                } else if (notificationType === 'warning') {
-                    message = `${item.name}, ID.${item.id}(Assembly ID.${item.assembly_id}/Project #${item.project_id})`;
-                } else if (notificationType === 'info') {
-                    message = `Assembly ID.${item.id}, Proyecto #${item.project_id}`;
-                } else if (notificationType === 'completed') {
-                    message = `Assembly ID.${item.id}, Identificación: ${item.identification_number}`;
-                }
-                addNotification(notificationType, message, { id: item.id });
-            });
+      responses.forEach((response, index) => {
+        const notificationType = endpoints[index].type;
+        response.data.forEach((item) => {
+          let message;
+          if (notificationType === "success") {
+            message = `With ID.${item.id}: ${item.name}, Cantidad: ${item.quantity} (Assembly ID.${item.assembly_id}/Project #${item.project_id}) `;
+          } else if (notificationType === "warning") {
+            message = `${item.name}, ID.${item.id}(Assembly ID.${item.assembly_id}/Project #${item.project_id})`;
+          } else if (notificationType === "info") {
+            message = `Assembly ID.${item.id}, Proyecto #${item.project_id}`;
+          } else if (notificationType === "completed") {
+            message = `Assembly ID.${item.id}, Identificación: ${item.identification_number}`;
+          }
+          addNotification(notificationType, message, { id: item.id });
         });
+      });
     } catch (error) {
-        console.error("Error fetching notifications:", error);
+      console.error("Error fetching notifications:", error);
     }
-};
+  };
 
-useEffect(() => {
+  useEffect(() => {
     const intervalId = setInterval(fetchNotifications, 10000);
     return () => clearInterval(intervalId);
-}, []);
+  }, []);
 
-const handleNotificationClick = (details) => {
+  const handleNotificationClick = (details) => {
     console.log("Detalles de la notificación:", details);
     navigate(`/details/${details.id}`);
-};
-
+  };
 
   const handleNavigate = () => {
     setShowChildRoutes(true);
@@ -151,7 +149,7 @@ const handleNotificationClick = (details) => {
     );
   };
   return (
-    <div className="flex bg-pageBackground text-white">
+    <div className="flex bg-pageBackground text-white min-h-screen">
       {" "}
       {/* Fondo de la página */}
       <aside
@@ -170,11 +168,11 @@ const handleNotificationClick = (details) => {
           ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
           `}
       >
-        <div className="flex justify-center">
-          <img
-            src="src/assets/Yaskawa_notBg.png"
-            className="w-auto h-auto" 
-          />
+        <div className="justify-center">
+          <img src="src/assets/Yaskawa_notBg.png" className="w-auto h-auto" />
+          <p className="text-center login-line m-8">
+            <strong>MCM Controller</strong>
+          </p>
         </div>
 
         <nav className="flex flex-col h-full justify-between ">
@@ -192,11 +190,11 @@ const handleNotificationClick = (details) => {
             </button>
             <li className="border-b border-lightBlueLetter"></li>
             <div className="text-2x1 text-left py-2 px-2 transition duration-300 text-lightWhiteLetter font-medium">
-                Projects
+              Projects
             </div>
             <button className="text-sm text-left py-2 px-4 hover:bg-pageSideMenuTextHover hover:rounded transition duration-300 text-lightWhiteLetter">
               <Link to="/dashboard/projects" onClick={handleNavigate}>
-               In Development 
+                In Development
               </Link>
             </button>
             <button className="text-sm text-left py-2 px-4 hover:bg-pageSideMenuTextHover hover:rounded transition duration-300 text-lightWhiteLetter">
@@ -243,8 +241,9 @@ const handleNotificationClick = (details) => {
               {new Date(assembly.delivery_date).toLocaleDateString()}
             </p>
             <p
-              className={`font-semibold ${assembly.completed_assembly ? "text-green-500" : "text-red-500"
-                }`}
+              className={`font-semibold ${
+                assembly.completed_assembly ? "text-green-500" : "text-red-500"
+              }`}
             >
               <strong>Estado:</strong>{" "}
               {assembly.completed_assembly ? "Completo" : "Incompleto"}
@@ -259,8 +258,9 @@ const handleNotificationClick = (details) => {
         ))}
       </section>
       <main
-        className={`flex-1 pl-2 pr-2 transition-all duration-300 ml-64 ${showChildRoutes ? "mr-" : "mr-64"
-          }`}
+        className={`flex-1 pl-2 pr-2 transition-all duration-300 ml-64 ${
+          showChildRoutes ? "mr-" : "mr-64"
+        }`}
       >
         {!showChildRoutes ? (
           <>
@@ -344,10 +344,11 @@ const handleNotificationClick = (details) => {
                       {new Date(assembly.delivery_date).toLocaleDateString()}
                     </p>
                     <p
-                      className={`font-semibold text-xs ${assembly.completed_assembly
+                      className={`font-semibold text-xs ${
+                        assembly.completed_assembly
                           ? "text-green-500"
                           : "text-red-500"
-                        }`}
+                      }`}
                     >
                       <strong>Estado:</strong>{" "}
                       {assembly.completed_assembly ? "Completo" : "Incompleto"}
@@ -377,22 +378,28 @@ const handleNotificationClick = (details) => {
                     {/*<h2 className="font-bold text-lg">ID: {project.id}</h2>*/}
                     <p className="text-blue-500 text-xl text-right">
                       <strong>#{project.identification_number}</strong>
-                    </p><br />
-                    <p className="text-lightWhiteLetter">
-                      <strong>Project manager:</strong><br/>
-                      Nombre del responsable del proyecto
-                    </p><br />
-                    <p className="text-lightWhiteLetter">
-                      <strong>Description:</strong><br/>
-                      {project.description}
-                    </p><br /><br/>
-                    <div className="absolute bottom-5 w-full">
-                    <p className="text-lightGrayLetter text-xs">
-                      <strong>Delivery date:</strong>{" "}
-                      {new Date(project.delivery_date).toLocaleDateString()}
                     </p>
+                    <br />
+                    <p className="text-lightWhiteLetter">
+                      <strong>Project manager:</strong>
+                      <br />
+                      Name of person responsible
+                    </p>
+                    <br />
+                    <p className="text-lightWhiteLetter">
+                      <strong>Description:</strong>
+                      <br />
+                      {project.description}
+                    </p>
+                    <br />
+                    <br />
+                    <div className="absolute bottom-5 w-full">
+                      <p className="text-lightGrayLetter text-xs">
+                        <strong>Delivery date:</strong>{" "}
+                        {new Date(project.delivery_date).toLocaleDateString()}
+                      </p>
                     </div>
-                    
+
                     {/*<p
                       className={`font-semibold ${
                         project.completed ? "text-green-500" : "text-red-500"
@@ -430,16 +437,17 @@ const handleNotificationClick = (details) => {
             {notifications.map((notification, index) => (
               <li
                 key={index}
-                className={`p-2 rounded text-xs text-left notifiGrayLetter ${notification.type === "success"
+                className={`p-2 rounded text-xs text-left notifiGrayLetter ${
+                  notification.type === "success"
                     ? "border-l-4 border border-blue-800"
                     : notification.type === "warning"
-                      ? "border-l-4 border border-yellow-800"
-                      : notification.type === "info"
-                        ? "border-l-4 border border-cyan-800"
-                        : notification.type === "completed"
-                          ? "border-l-4 border border-green-800"
-                          : "border-l-4 border border-red-800"
-                  }`}
+                    ? "border-l-4 border border-yellow-800"
+                    : notification.type === "info"
+                    ? "border-l-4 border border-cyan-800"
+                    : notification.type === "completed"
+                    ? "border-l-4 border border-green-800"
+                    : "border-l-4 border border-red-800"
+                }`}
               >
                 <span className="font-medium">
                   {notification.type === "success" && (
@@ -486,7 +494,6 @@ const handleNotificationClick = (details) => {
           </ul>
         </aside>
       )}
-
     </div>
   );
 };

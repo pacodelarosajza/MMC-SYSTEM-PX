@@ -1,0 +1,95 @@
+/* NewUserForm.css */
+
+body {
+    background-color: #121212; /* Fondo oscuro */
+    color: #ffffff; /* Texto blanco */
+    font-family: 'Arial', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+  }
+  
+  .form-container {
+    background-color: #1e1e1e; /* Fondo del formulario */
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+    max-width: 400px;
+    width: 100%;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .form-container:hover {
+    transform: translateY(-5px); /* Efecto de hover */
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
+  }
+  
+  h2 {
+    text-align: center;
+    font-size: 26px;
+    margin-bottom: 20px;
+    color: #007bff; /* Color del título */
+  }
+  
+  input,
+  select,
+  button {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 5px;
+    border: 1px solid #444;
+    background-color: #2c2c2c;
+    color: #ffffff;
+    font-size: 16px;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+  }
+  
+  input:focus,
+  select:focus {
+    outline: none;
+    border-color: #007bff; /* Color del borde al enfocar */
+    background-color: #333; /* Cambio de fondo al enfocar */
+  }
+  
+  button {
+    background-color: #007bff; /* Color del botón */
+    color: #ffffff;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+  }
+  
+  button:hover {
+    background-color: #0056b3; /* Color del botón al pasar el cursor */
+    transform: translateY(-2px); /* Efecto de elevar el botón */
+  }
+  
+  .password-strength {
+    margin-top: 5px;
+  }
+  
+  .strong {
+    color: #28a745; /* Verde para fuerte */
+  }
+  
+  .moderate {
+    color: #ffc107; /* Amarillo para moderado */
+  }
+  
+  .weak {
+    color: #dc3545; /* Rojo para débil */
+  }
+  
+  .loading {
+    color: #ffc107; /* Color para el mensaje de carga */
+    text-align: center;
+  }
+  
+  .status-message {
+    margin-top: 10px;
+    text-align: center;
+  }
+  

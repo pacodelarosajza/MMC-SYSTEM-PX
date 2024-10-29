@@ -1,94 +1,173 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { FaShare } from "react-icons/fa";
+import { Link } from "react-router-dom";
+import {
+  FaChevronDown,
+  FaChevronUp,
+  FaArrowLeft,
+  FaArrowRight,
+  FaShare,
+} from "react-icons/fa";
+import { CopyToClipboard } from "react-copy-to-clipboard";
 
-const History = () => {
+const History = ({ setShowChildRoutes }) => {
+    // IP Address for the API
   const apiIpAddress = import.meta.env.VITE_API_IP_ADDRESS;
-
-  const [stocks, setStocks] = useState([]);
-  const [newStock, setNewStock] = useState({ item_id: "", quantity: "" });
-  const [selectedStock, setSelectedStock] = useState(null);
-  const [items, setItems] = useState([]);
-
-  //const [selectedOption, setSelectedOption] = useState("search");
-
+  
+  // State hooks
+  const [activeProjects, setActiveProjects] = useState([]);
+  const [adminProjects, setAdminProjects] = useState({});
+  const [assemblies, setAssemblies] = useState({});
+  const [isOpen, setIsOpen] = useState({});
+  const [currentPage, setCurrentPage] = useState(0);
+  const [date, setDate] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [isFocusedContent, setIsFocusedContent] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [textToCopy, setTextToCopy] = useState(""); // Texto para copiar
+  
+  // Constants
+  const recordsPerPage = 25;
+  
+  // Pagination handlers
+  const handleNextPage = () => {
+    setCurrentPage((prevPage) => prevPage + 1);
+  };
+  
+  const handlePreviousPage = () => {
+    setCurrentPage((prevPage) => Math.max(prevPage - 1, 0));
+  };
+  
+  // Navigation handler
+  const handleNavigate = async () => {
+    setLoading(true);
+    setError(null);
+    console.log("Navigating..."); // Debugging
+    try {
+      // Simular una operación asíncrona
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      setShowChildRoutes(true);
+      console.log("Navigation successful"); // Debugging
+    } catch (err) {
+      setError("Error al navegar");
+      console.error("Navigation error:", err); // Debugging
+    } finally {
+      setLoading(false);
+      console.log("Loading state:", loading); // Debugging
+    }
+  };
+  
+  // Pagination logic
+  const startIndex = currentPage * recordsPerPage;
+  const endIndex = startIndex + recordsPerPage;
+  const currentProjects = activeProjects.slice(startIndex, endIndex);
+  
+  // Fetch projects info on component mount or apiIpAddress change
   useEffect(() => {
-    fetchStocks();
-    fetchItems(); // Cargar los items para futuras operaciones
-  }, []);
-
-  const fetchStocks = async () => {
-    try {
-      const response = await axios.get(`${apiIpAddress}/api/getAllStockk`);
-      setStocks(response.data);
-    } catch (error) {
-      console.error("Error fetching stocks:", error);
-    }
-  };
-
-  const fetchItems = async () => {
-    try {
-      const response = await axios.get(`${apiIpAddress}/api/getItems`);
-      setItems(response.data);
-    } catch (error) {
-      console.error("Error fetching items:", error);
-    }
-  };
-
-  const handleCreateStock = async () => {
-    try {
-      await axios.post(`${apiIpAddress}/api/postStock`, newStock);
-      setNewStock({ item_id: "", quantity: "" });
-      fetchStocks(); // Refetch stocks after adding
-    } catch (error) {
-      console.error("Error creating stock:", error);
-    }
-  };
-
-  const handleUpdateStock = async () => {
-    if (selectedStock) {
+    const fetchActiveProjects = async () => {
       try {
-        const updatedStock = {
-          item_id: selectedStock.item_id,
-          quantity: selectedStock.quantity,
-        };
-        await axios.patch(
-          `${apiIpAddress}/api/patchStock/${selectedStock.id}`,
-          updatedStock
+        const activeProjectsResponse = await axios.get(
+          `${apiIpAddress}/api/getProjectsActives`
         );
-        setSelectedStock(null); // Clear selection after update
-        fetchStocks(); // Refetch stocks after updating
+        const projects = activeProjectsResponse.data;
+        setActiveProjects(projects);
+  
+        const adminProjectsData = {};
+        for (const project of projects) {
+          try {
+            const adminProjectResponse = await axios.get(
+              `${apiIpAddress}/api/projects/${project.id}/admins`
+            );
+            adminProjectsData[project.id] = adminProjectResponse.data;
+          } catch (error) {
+            adminProjectsData[project.id] = null;
+          }
+        }
+  
+        setAdminProjects(adminProjectsData);
       } catch (error) {
-        console.error("Error updating stock:", error);
+        console.error(
+          "Error fetching active projects or admin projects:",
+          error
+        );
       }
+    };
+  
+    fetchActiveProjects();
+  }, [apiIpAddress]);
+  
+  // Function to get project manager
+  const getProjectManager = (projectId) => {
+    return Array.isArray(adminProjects[projectId]) &&
+      adminProjects[projectId].length > 0
+      ? adminProjects[projectId][0]?.["user.user_number"] || "Data N/A"
+      : "N/A";
+  };
+  
+  // Event handlers
+  const handleDivClick = () => {
+    setIsEditing(true);
+  };
+  
+  const handleDateChange = (event) => {
+    setDate(event.target.value);
+  };
+  
+  const handleBlur = () => {
+    setIsEditing(false);
+  };
+  
+  const handleConfirmClick = () => {
+    const confirmChange = window.confirm(
+      `¿Deseas añadir la fecha ${date} como fecha de llegada del material?`
+    );
+    if (confirmChange) {
+      setIsEditing(false);
     }
   };
-
-  const handleDeleteStock = async (id) => {
+  
+  const handleSearch = async () => {
     try {
-      await axios.delete(`${apiIpAddress}/api/deleteStock/${id}`);
-      fetchStocks(); // Refetch stocks after deletion
+      const response = await fetch(`${apiIpAddress}/api/getProjects`);
+      const data = await response.json();
+  
+      // Asegúrate de que la respuesta sea un array o conviértela
+      const projects = Array.isArray(data) ? data : [data];
+  
+      // Filtra los proyectos que contienen el número de búsqueda
+      const filteredProjects = projects.filter((project) =>
+        project.identification_number.toString().includes(searchQuery)
+      );
+  
+      setSearchResults(filteredProjects);
+  
+      console.log("Search results:", filteredProjects);
     } catch (error) {
-      console.error("Error deleting stock:", error);
+      console.error("Error fetching search results:", error);
     }
   };
-
-  const handleFilterItemsArrived = async () => {
-    try {
-      const response = await axios.get(`${apiIpAddress}/api/getItems/arrived`);
-      setItems(response.data);
-    } catch (error) {
-      console.error("Error fetching arrived items:", error);
-    }
+  
+  const handleContentFocus = () => {
+    setIsFocusedContent(true);
   };
-
-  const handleFilterItemsMissing = async () => {
-    try {
-      const response = await axios.get(`${apiIpAddress}/api/getItems/missing`);
-      setItems(response.data);
-    } catch (error) {
-      console.error("Error fetching missing items:", error);
+  
+  const handleContentBlur = () => {
+    setIsFocusedContent(false);
+  };
+  
+  const handleButtonClickBySearch = () => {
+    handleSearch();
+    handleContentFocus();
+  };
+  
+  // Utility function
+  const truncateDescription = (description, maxLength) => {
+    if (description.length <= maxLength) {
+      return description;
     }
+    return description.substring(0, maxLength) + "...";
   };
 
   return (
@@ -102,43 +181,147 @@ const History = () => {
         <div className="items-center">
           <input
             type="text"
-            placeholder="ex. 000351 ..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onBlur={handleContentBlur}
+            placeholder="project id. 000351 ..."
             className="w-96 p-2 mb-4 rounded-l focus:bg-gray-800 hover:bg-gray-800 text-sm text-gray-200 bg-pageBackground border border-gray-500 focus:outline-none focus:border-blue-500"
-          />
-          <button className="px-4 py-2 ml-1 bg-gray-500 text-sm text-gray-300 bg-gray-700 border border-gray-500 rounded-r hover:bg-blue-700 hover:border-blue-500 hover:text-blue-300">
+          />{" "}
+          <button
+            onClick={handleButtonClickBySearch}
+            className="px-4 py-2 ml-1 bg-gray-500 text-sm text-gray-300 bg-gray-700 border border-gray-500 rounded-r hover:bg-blue-700 hover:border-blue-500 hover:text-blue-300"
+          >
             <strong>Search</strong>
           </button>
         </div>
       </div>
-      <table className="min-w-full">
-        <thead className="hover:bg-gray-500">
-          <tr>
-            <th className="font-semibold text-left px-4 py-2">Project identifier</th>
-            <th className="font-semibold text-left px-4 py-2">Manager</th>
-            <th className="font-semibold text-left px-4 py-2">Description</th>
-            <th className="font-semibold text-left px-4 py-2"></th>
-          </tr>
-        </thead>
-        <tbody className="bg-gray-800 rounded shadow-lg">
-          {items.map((item) => (
-            <tr key={item.id} className="hover:bg-gray-700">
-              <td className="px-4 py-2">211715</td>
-              <td className="px-4 py-2">Lorem ipsum dolor sithjughs.</td>
-              <td className="px-4 py-2">Random description.</td>
-              <td className="px-4 py-2">
-                <button className="px-4 py-2 text-sm text-gray-300 bg-gray-800 rounded hover:bg-gray-500 hover:text-gray-800">
-                  <FaShare />
-                  {/*<button className="p-2 rounded text-gray-300 hover:bg-gray-200 hover:text-gray-800 bg-gray-800">
-                  <Link to="/dashboard/historico" onClick={handleNavigate}>
-                    <FaShare />
-                  </Link>
-                </button>*/}
-                </button>
-              </td>
+      <br />
+      <div className="card" id="pj-list-projects">
+        <table className="min-w-full px-5 border-t-2 border-b-2 border-gray-600">
+          <thead>
+            <tr>
+              <th className="bg-gray-800 font-semibold text-gray-300 text-left px-4 py-2 border border-gray-700">
+                Proj. ID
+              </th>
+              <th className="font-semibold text-gray-300 text-left px-4 py-2 border border-gray-700">
+                Manager ID
+              </th>
+              <th
+                className="font-semibold text-gray-300 text-left px-4 py-2 border border-gray-700"
+                colSpan="2"
+              >
+                Description
+              </th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="bg-gray-800 shadow-lg">
+            {isFocusedContent ? (
+              Array.isArray(searchResults) && searchResults.length > 0 ? (
+                searchResults.map((project) => (
+                  <tr
+                    key={project.id}
+                    className="hover:bg-gray-700 border border-gray-700 text-sm"
+                    onClick={() => handleMoreInfo(project.id)}
+                  >
+                    <td className="px-8 py-1 border border-gray-700">
+                      <strong># </strong>
+                      {project.identification_number}
+                    </td>
+                    <td className="px-8 py-1 border border-gray-700">
+                      {getProjectManager(project.id)}
+                    </td>
+                    <td className="px-8 py-1 border border-gray-700">
+                      {truncateDescription(project.description, 80)}
+                    </td>
+                    <td className="px-8 py-1 border border-gray-700">
+                      <div className="flex justify-end">
+                        {loading && <p>Cargando...</p>}
+                        {error && <p style={{ color: "red" }}>{error}</p>}
+                        <Link to="/dashboard/old-project">
+                          <button
+                            className="px-4 py-2 text-sm text-gray-300 bg-gray-800 rounded hover:bg-gray-500 hover:text-gray-800"
+                            onClick={handleNavigate}
+                            disabled={loading}
+                          >
+                            <FaShare />
+                          </button>
+                        </Link>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td
+                    colSpan="4"
+                    className="px-4 py-2 border border-gray-500 text-center"
+                  >
+                    No projects found
+                  </td>
+                </tr>
+              )
+            ) : (
+              currentProjects.map((project) => (
+                <tr
+                  key={project.id}
+                  className="hover:bg-gray-700 border border-gray-700 text-sm"
+                  onClick={() => handleMoreInfo(project.id)}
+                >
+                  <td className="px-8 py-1 border border-gray-700">
+                    <strong># </strong>
+                    {project.identification_number}
+                  </td>
+                  <td className="px-8 py-1 border border-gray-700">
+                    {getProjectManager(project.id)}
+                  </td>
+                  <td className="px-8 py-1 border border-gray-700">
+                    {truncateDescription(project.description, 80)}
+                  </td>
+                  <td className="px-8 py-1 border border-gray-700">
+                    <div className="flex justify-end">
+                      {loading && <p>Cargando...</p>}
+                      {error && <p style={{ color: "red" }}>{error}</p>}
+                      <Link to="/dashboard/old-project">
+                        <button
+                          className="px-4 py-2 text-sm text-gray-300 bg-gray-800 rounded hover:bg-gray-500 hover:text-gray-800"
+                          onClick={handleNavigate}
+                          disabled={loading}
+                        >
+                          <FaShare />
+                        </button>
+                      </Link>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+        <div className="flex justify-between items-center mt-4">
+          {currentPage > 0 && (
+            <button
+              className="px-4 py-2 bg-gray-500 text-sm text-gray-300 bg-pageBackground rounded hover:bg-gray-700"
+              onClick={handlePreviousPage}
+            >
+              <FaArrowLeft />
+            </button>
+          )}
+          <span className="text-sm text-gray-300">
+            Page {currentPage + 1} of{" "}
+            {Math.ceil(activeProjects.length / recordsPerPage)}
+          </span>
+          {endIndex < activeProjects.length && (
+            <button
+              className="px-4 py-2 bg-gray-500 text-sm text-gray-300 bg-pageBackground rounded hover:bg-gray-700"
+              onClick={handleNextPage}
+              disabled={endIndex >= activeProjects.length}
+            >
+              <FaArrowRight />
+            </button>
+          )}
+        </div>
+      </div>
+
     </div>
   );
 };

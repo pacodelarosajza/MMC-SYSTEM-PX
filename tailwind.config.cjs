@@ -7,11 +7,14 @@ module.exports = {
         Montserrat: "Montserrat",
       },
       colors: {
-        loginBackground : "#f8fafd",
+        loginBackgroundWhite : "#f8fafd",
+        loginBackgroundBlue: "#161f2d",
+        loginBackgroundCard: "#2b394a",
         yaskawaBlue: "#0857ba",
         yaskawaBlueHoverFirst: "#0e4f9a",
         yaskawaBlueHoverSecond: "#0e315d",
         pageBackground: "#17202e",
+        lightPageBackground: "#293a51",
         pageSideMenu: "#2b394a",
         pageSideMenuTextHover: "#222f3e",
         calendarNotifiBackground: "#1c2533",
@@ -22,6 +25,7 @@ module.exports = {
         progressBarsBackground: "#d0dbe725",
         notifiGrayLetter: "#e7edf3",
         shadowBlueColor: "#0f151f",
+
       },
     },
   },

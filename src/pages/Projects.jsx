@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { Link } from "react-router-dom";
 import {
   FaChevronDown,
   FaChevronUp,
@@ -7,9 +8,9 @@ import {
   FaArrowRight,
   FaShare,
 } from "react-icons/fa";
-import { CopyToClipboard } from "react-copy-to-clipboard";         // 1.      Import the CopyToClipboard component fo the text to copy   
+import { CopyToClipboard } from "react-copy-to-clipboard"; // Text to copy. Import the CopyToClipboard component fo the text to copy
 
-const Projects = () => {
+const Projects = ({ setShowChildRoutes }) => {
   // IP Address for the API
   const apiIpAddress = import.meta.env.VITE_API_IP_ADDRESS;
 
@@ -29,14 +30,7 @@ const Projects = () => {
   const [searchResults, setSearchResults] = useState([]);
 
   const recordsPerPage = 5;
-
-  /*
-
-  const [copySuccess, setCopySuccess] = useState("");
-  const textToCopy = "Este es el texto que quiero copiar.";       //  2.   Text to copy
-
-
-  */
+  const [textToCopy, setTextToCopy] = useState(""); // Texto para copiar
 
   // Pagination handlers
   const handleNextPage = () => {
@@ -45,6 +39,27 @@ const Projects = () => {
 
   const handlePreviousPage = () => {
     setCurrentPage((prevPage) => Math.max(prevPage - 1, 0));
+  };
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const handleNavigate = async () => {
+    setLoading(true);
+    setError(null);
+    console.log("Navigating..."); // Debugging
+    try {
+      // Simular una operación asíncrona
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      setShowChildRoutes(true);
+      console.log("Navigation successful"); // Debugging
+    } catch (err) {
+      setError("Error al navegar");
+      console.error("Navigation error:", err); // Debugging
+    } finally {
+      setLoading(false);
+      console.log("Loading state:", loading); // Debugging
+    }
   };
 
   const startIndex = currentPage * recordsPerPage;
@@ -87,6 +102,7 @@ const Projects = () => {
 
         const assembliesData = {};
         const itemsData = {};
+        //let itemsText = ""; // Aquí guardaremos los datos en texto para copiar
 
         for (const project of projects) {
           try {
@@ -102,6 +118,8 @@ const Projects = () => {
                   `${apiIpAddress}/api/getItems/project/assembly/${project.id}/${assembly.id}`
                 );
                 itemsData[assembly.id] = itemsResponse.data;
+                // Agregar los ítems a la variable itemsText
+                //itemsText += `Assembly ${assembly.id} Items: ${JSON.stringify(itemsResponse.data)}\n`;
               } catch (error) {
                 itemsData[assembly.id] = null;
               }
@@ -115,6 +133,8 @@ const Projects = () => {
         setUserOperProjects(userOperProjectsData);
         setAssemblies(assembliesData);
         setItems(itemsData);
+
+        //setTextToCopy(itemsText); // Guardar el texto de los items en textToCopy
       } catch (error) {
         console.error(
           "Error fetching active projects or admin projects:",
@@ -154,6 +174,18 @@ const Projects = () => {
       assemblies[projectId].length > 0
       ? assemblies[projectId]
       : null;
+  };
+
+  const handleCopyAssemblyMaterials = (projectId, assemblyId) => {
+    const materials = getItemsForAssembly(projectId, assemblyId);
+    if (materials) {
+      const materialsText = materials
+        .map((material) => JSON.stringify(material))
+        .join("\n");
+      setTextToCopy(materialsText);
+    } else {
+      setTextToCopy("No materials found");
+    }
   };
 
   function getAssemblyStatus(completed_assembly) {
@@ -258,21 +290,6 @@ const Projects = () => {
       {/* 1. FIRST PART */}
       <div className="flex justify-between items-center pt-4 pb-4 mb-5">
         <h1 className="text-2xl font-bold mb-4">Projects Under Development</h1>
-
-              {/*      3.     Text to copy
-
-              <div>       
-                <p>{textToCopy}</p>
-                <CopyToClipboard text={textToCopy} onCopy={() => setCopySuccess("Texto copiado!")}>
-                  <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
-                    Copiar al portapapeles
-                  </button>
-                </CopyToClipboard>
-                {copySuccess && <p>{copySuccess}</p>}
-              </div>
-
-              */}
-
         <div className="flex items-center">
           <input
             type="text"
@@ -281,10 +298,15 @@ const Projects = () => {
             onBlur={handleContentBlur}
             placeholder="project id. 000351 ..."
             className="w-80 p-2 rounded-l focus:bg-gray-800 hover:bg-gray-800 text-sm text-gray-200 bg-pageBackground border border-gray-500 focus:outline-none focus:border-gray-400"
-          />
+          />{" "}
+          {/*onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              handleButtonClickBySearch();
+            }
+          }}*/}
           <button
             onClick={handleButtonClickBySearch}
-            className="px-4 py-2 ml-1 bg-gray-500 text-sm text-gray-300 bg-pageBackground border border-gray-500 rounded-r hover:bg-gray-700"
+            className="px-4 py-2 ml-1 bg-gray-700 text-sm text-gray-300 border border-gray-500 rounded-r hover:bg-gray-600"
           >
             <strong>Search</strong>
           </button>
@@ -297,7 +319,7 @@ const Projects = () => {
             <thead>
               <tr className="w-full bg-gray-700 text-left">
                 <th className="px-4 py-2 border border-gray-500">
-                  Identification Number
+                  Proj. ID
                 </th>
                 <th className="px-4 py-2 border border-gray-500">
                   Description
@@ -323,18 +345,29 @@ const Projects = () => {
                     <td className="border text-gray-400 border-gray-500 px-4 py-2 italic">
                       {project.completed ? (
                         <>
-                        <div className="flex items-center space-between">
-                          <div>
-                            <span className="text-gray-400px-4 italic">
-                              Completed
-                            </span>
+                          <div className="flex items-center space-between">
+                            <div>
+                              <span className="text-gray-400px-4 italic">
+                                Completed.
+                                <br />
+                                If you want to share this project, click the
+                                button below.
+                              </span>
+                            </div>
+                            <div className="px-5">
+                              {loading && <p>Cargando...</p>}
+                              {error && <p style={{ color: "red" }}>{error}</p>}
+                              <Link to="/dashboard/old-project">
+                                <button
+                                  className="px-4 py-2 text-sm text-gray-300 bg-gray-800 rounded hover:bg-gray-500 hover:text-gray-800"
+                                  onClick={handleNavigate}
+                                  disabled={loading}
+                                >
+                                  <FaShare />
+                                </button>
+                              </Link>
+                            </div>
                           </div>
-                          <div className="px-5">
-                            <button className="px-4 py-2 text-sm text-gray-300 bg-gray-800 rounded hover:bg-gray-500 hover:text-gray-800">
-                              <FaShare />
-                            </button>
-                          </div>
-                        </div>
                         </>
                       ) : (
                         "In Progress"
@@ -360,7 +393,7 @@ const Projects = () => {
               <thead>
                 <tr className="w-full bg-gray-700 text-left">
                   <th className="px-4 py-2 border border-gray-500">
-                    Identification Number
+                    Proj. ID
                   </th>
                   <th className="px-4 py-2 border border-gray-500">
                     Project Manager
@@ -428,48 +461,54 @@ const Projects = () => {
               <div>
                 <div>
                   {/* 2.1. Project details */}
-                  <div className="flex pb-2">
-                    <div className="text-xl pr-2 font-medium ">
-                      Identification Number
+                  <div className="flex pb-2 text-2xl">
+                    <div className="pr-2 font-medium ">
+                      IDENTIFICATION NUMBER
                     </div>
                     <div>
-                      <h2 className="text-3xl font-bold">
+                      <h2 className="font-bold italic">
                         #{selectedProject.identification_number}
                       </h2>
                     </div>
                   </div>
-                  <br />
-                  <div className="p-4 grid grid-cols-12 w-full gap-4">
-                    <div className="col-span-3">
-                      <strong>Project manager</strong>
+                  <hr className="mb-5 border-b border-gray-700" />
+                  <div className="flex mx-5 grid-cols-12 text-lg">
+                    <div className="col-span-6">
+                      <div className="grid grid-cols-12 w-full gap-4">
+                        <div className="col-span-5">
+                          <strong>Project manager: </strong>
+                        </div>
+                        <div className="col-span-7">
+                          <ul>
+                            <li>{getProjectManager(selectedProject.id)}</li>
+                          </ul>
+                        </div>
+                      </div>
                     </div>
-                    <div className="col-span-9">
-                      <ul>
-                        <li>{getProjectManager(selectedProject.id)}</li>
-                      </ul>
+                    <div className="col-span-6">
+                      <div className="grid grid-cols-12 w-full gap-4">
+                        <div className="col-span-5">
+                          <strong>Operational users:</strong>
+                        </div>
+                        <div className="col-span-7">
+                          <ul>
+                            {getUserOperational(selectedProject.id).map(
+                              (userNumber, index) => (
+                                <div key={index}>• {userNumber}</div>
+                              )
+                            )}
+                          </ul>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                  <div className="p-4 grid grid-cols-12 w-full gap-4">
-                    <div className="col-span-3">
-                      <strong>Operational users</strong>
-                    </div>
-                    <div className="col-span-9">
-                      <ul>
-                        {getUserOperational(selectedProject.id).map(
-                          (userNumber, index) => (
-                            <div key={index}>{userNumber}</div>
-                          )
-                        )}
-                      </ul>
-                    </div>
-                  </div>
-                  <br />
-                  <div>
-                    <strong>Description</strong>
+
+                  <div className="mt-5">
+                    <strong className="text-xl">Description</strong>
                     <br />
                     {selectedProject.description}
                   </div>
-                  <hr className="my-5 border-b border-gray-700" />
+                  <hr className="mb-3 mt-2 border-b border-gray-700" />
                   <div className="px-20 grid grid-cols-12 w-full gap-4">
                     <div className="col-span-6">
                       Delivery Date.{" "}
@@ -481,11 +520,11 @@ const Projects = () => {
                     </div>
                   </div>
                 </div>
-                <div>
+                <div className="pt-5">
                   {/* 2.2. Assemblies */}
                   {getAssemblyMaterials(selectedProject.id) && (
-                    <div className="py-20 px-4">
-                      <h2 className="text-xl font-semibold mb-3">
+                    <div className="pt-10 pb-20 px-4">
+                      <h2 className="text-2xl font-semibold mb-3">
                         List of Assemblies
                       </h2>
                       <div className="pt-3">
@@ -505,9 +544,19 @@ const Projects = () => {
                                   </h3>
                                 </div>
                                 <div className="">
-                                  <button className="px-4 pb-2 mx-2 text-sm text-gray-500 hover:text-gray-200">
-                                    Copy assembly materials
-                                  </button>
+                                  <CopyToClipboard text={textToCopy}>
+                                    <button
+                                      className="px-4 pb-2 mx-2 text-sm text-gray-500 hover:text-gray-200"
+                                      onClick={() =>
+                                        handleCopyAssemblyMaterials(
+                                          selectedProject.id,
+                                          assembly.id
+                                        )
+                                      }
+                                    >
+                                      Copy assembly materials
+                                    </button>
+                                  </CopyToClipboard>
                                   <button className="px-4 pb-2 mx-2 text-sm text-gray-500 hover:text-gray-200">
                                     Format for EPICOR
                                   </button>
@@ -571,7 +620,6 @@ const Projects = () => {
                                               {assembly.delivery_date}
                                             </td>
                                           </tr>
-
                                           <tr>
                                             <td className="border border-gray-500 px-4 py-2 bg-gray-800">
                                               <strong>Status</strong>
@@ -589,96 +637,104 @@ const Projects = () => {
                                   {getItemsForAssembly(
                                     selectedProject.id,
                                     assembly.id
-                                  ).map((item, index) => (
-                                    <table
-                                      key={index}
-                                      className="text-sm table-auto w-full text-lightWhiteLetter"
-                                    >
-                                      <tbody className="bg-gray-800 shadow-lg">
-                                        <tr className="border-b border-gray-500 hover:bg-pageSideMenuTextHover cursor-pointer transition duration-200">
-                                          <td className="py-3 px-2 flex justify-between items-center">
-                                            <div className="px-2">
-                                              <span className="pr-6">
-                                                {index + 1}
-                                              </span>
-                                              <span>{item.name}</span>
-                                            </div>
-                                            <div className="px-2">
-                                              <div className="flex">
-                                                <div className="px-4 mx-2 text-sm text-gray-400 hover:text-gray-200">
-                                                  {isEditing ? (
-                                                    <div>
-                                                      <input
-                                                        type="date"
-                                                        value={date}
-                                                        onChange={
-                                                          handleDateChange
-                                                        }
-                                                        onBlur={handleBlur}
-                                                        className="px-4 mx-2 text-sm text-gray-400"
-                                                      />
-                                                      <button
-                                                        onClick={
-                                                          handleConfirmClick
-                                                        }
+                                  )?.length > 0 ? (
+                                    getItemsForAssembly(
+                                      selectedProject.id,
+                                      assembly.id
+                                    ).map((item, index) => (
+                                      <table
+                                        key={index}
+                                        className="text-sm table-auto w-full text-lightWhiteLetter"
+                                      >
+                                        <tbody className="bg-gray-800 shadow-lg">
+                                          <tr className="border-b border-gray-500 hover:bg-pageSideMenuTextHover cursor-pointer transition duration-200">
+                                            <td className="py-3 px-2 flex justify-between items-center">
+                                              <div className="px-2">
+                                                <span className="pr-6">
+                                                  {index + 1}
+                                                </span>
+                                                <span>{item.name}</span>
+                                              </div>
+                                              <div className="px-2">
+                                                <div className="flex">
+                                                  <div className="px-4 mx-2 text-sm text-gray-400 hover:text-gray-200">
+                                                    {isEditing ? (
+                                                      <div>
+                                                        <input
+                                                          type="date"
+                                                          value={date}
+                                                          onChange={
+                                                            handleDateChange
+                                                          }
+                                                          onBlur={handleBlur}
+                                                          className="px-4 mx-2 text-sm text-gray-400"
+                                                        />
+                                                        <button
+                                                          onClick={
+                                                            handleConfirmClick
+                                                          }
+                                                          className="px-4 mx-2 text-sm text-gray-400 hover:text-gray-200"
+                                                        >
+                                                          Confirmar
+                                                        </button>
+                                                      </div>
+                                                    ) : (
+                                                      <div
                                                         className="px-4 mx-2 text-sm text-gray-400 hover:text-gray-200"
+                                                        onClick={handleDivClick}
                                                       >
-                                                        Confirmar
-                                                      </button>
-                                                    </div>
-                                                  ) : (
-                                                    <div
-                                                      className="px-4 mx-2 text-sm text-gray-400 hover:text-gray-200"
-                                                      onClick={handleDivClick}
-                                                    >
-                                                      {date
-                                                        ? date
-                                                        : "Add date order"}
-                                                    </div>
-                                                  )}
-                                                </div>
-
-                                                <div>
-                                                  <input
-                                                    type="checkbox"
-                                                    className="ml-auto h-4 w-4 text-blue-600 bg-gray-700 border-gray-500 rounded focus:ring-blue-500 focus:ring-2"
-                                                    onChange={(e) => {
-                                                      if (e.target.checked) {
-                                                        if (
-                                                          window.confirm(
-                                                            "¿Está seguro de marcar como llegado el producto?"
-                                                          )
-                                                        ) {
-                                                          alert(
-                                                            "Producto marcado como llegado exitosamente."
-                                                          );
+                                                        {date
+                                                          ? date
+                                                          : "Add date order"}
+                                                      </div>
+                                                    )}
+                                                  </div>
+                                                  <div>
+                                                    <input
+                                                      type="checkbox"
+                                                      className="ml-auto h-4 w-4 text-blue-600 bg-gray-700 border-gray-500 rounded focus:ring-blue-500 focus:ring-2"
+                                                      onChange={(e) => {
+                                                        if (e.target.checked) {
+                                                          if (
+                                                            window.confirm(
+                                                              "¿Está seguro de marcar como llegado el producto?"
+                                                            )
+                                                          ) {
+                                                            alert(
+                                                              "Producto marcado como llegado exitosamente."
+                                                            );
+                                                          } else {
+                                                            e.target.checked = false;
+                                                          }
                                                         } else {
-                                                          e.target.checked = false;
+                                                          if (
+                                                            window.confirm(
+                                                              "¿Está seguro de eliminar la marca de llegado del producto?"
+                                                            )
+                                                          ) {
+                                                            e.target.checked = false;
+                                                          } else {
+                                                            e.target.checked = true;
+                                                          }
                                                         }
-                                                      } else {
-                                                        if (
-                                                          window.confirm(
-                                                            "¿Está seguro de eliminar la marca de llegado del producto?"
-                                                          )
-                                                        ) {
-                                                          e.target.checked = false;
-                                                        } else {
-                                                          e.target.checked = true;
-                                                        }
-                                                      }
-                                                    }}
-                                                  />
+                                                      }}
+                                                    />
+                                                  </div>
                                                 </div>
                                               </div>
-                                            </div>
-                                          </td>
-                                        </tr>
-                                      </tbody>
-                                    </table>
-                                  ))}
+                                            </td>
+                                          </tr>
+                                        </tbody>
+                                      </table>
+                                    ))
+                                  ) : (
+                                    <div className="text-gray-400 text-center">
+                                      No items found
+                                    </div>
+                                  )}
                                 </div>
                               )}
-                              <hr className="my-5 border-b border-gray-700" />
+                              <hr className="my-5 border-b border-gray-500" />
                             </div>
                           )
                         )}
@@ -688,7 +744,7 @@ const Projects = () => {
                 </div>
               </div>
             ) : (
-              "Select a project to see the details"
+              "Select a project to see the details ..."
             )}
           </div>
         </div>

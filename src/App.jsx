@@ -12,7 +12,7 @@ import Users from './pages/Users';
 import ForgotPass from './pages/ForgotPassword';
 import NewProjectForm from './pages/NewProjectForm';
 import NewUserForm from './pages/NewUserForm';
-//import OldProject from './pages/OldProject';         <Route path="project" element={<OldProject />} />
+import OldProject from './pages/OldProject';
 
 const App = () => {
   return (
@@ -27,7 +27,7 @@ const App = () => {
         <Route path="stock" element={<Stock />} />
         <Route path="usuarios" element={<Users />} />
         <Route path="new-user-form" element={<NewUserForm />} />
-        
+        <Route path="old-project" element={<OldProject />} />
         <Route path="forgotpass" element={<ForgotPass />} />
 
       </Route>

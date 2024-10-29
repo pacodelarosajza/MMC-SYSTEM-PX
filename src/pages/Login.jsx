@@ -9,14 +9,13 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
-  
+
   const handleLogin = async (e) => {
-  const apiIpAddress = import.meta.env.VITE_API_IP_ADDRESS;
-   
+    const apiIpAddress = import.meta.env.VITE_API_IP_ADDRESS;
+
     e.preventDefault();
     try {
       const response = await fetch(
-        
         `${apiIpAddress}/api/users/userNum/${userNum}`
       );
 
@@ -40,19 +39,19 @@ const Login = () => {
   };
 
   return (
-    <div className="bg-loginBackground">
+    <div className="bg-pageBackground">
       <div className="login-main flex items-center justify-center min-h-screen p-10 gap-10">
         <div className="">
           {" "}
           {/*login-left */}
           <img src={Logo} alt="Logo" />
         </div>
-        <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full">
+        <div className="bg-loginBackgroundCard p-8 rounded-lg shadow-md max-w-md w-full">
           <div className="login-right-container">
-            <h2 className="text-2xl font-bold text-center">
+            <h2 className="text-2xl font-bold text-center text-lightWhiteLetter">
               Welcome to the MMC system.
             </h2>
-            <p className="text-sm text-center login-line mt-4">
+            <p className="text-sm text-center login-line mt-4 text-lightGrayLetter">
               Material Monitoring and Progress System
               <br />
               MCM-Controller
@@ -63,23 +62,24 @@ const Login = () => {
               <div className="mb-4">
                 <label
                   htmlFor="userNum"
-                  className="block text-sm font-medium text-gray-700"
+                  className="block text-sm font-medium text-lightWhiteLetter"
                 >
                   User Number
                 </label>
-                <input
+                                <input
                   type="text"
                   id="userNum"
                   value={userNum}
                   onChange={(e) => setUserNum(e.target.value)}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  className="focus:bg-gray-800 hover:bg-gray-800 text-gray-200 bg-pageBackground border border-gray-500 focus:outline-none focus:border-blue-500
+                  mt-1 block w-full px-3 py-2 rounded-md shadow-sm sm:text-base"
                   required
                 />
               </div>
               <div className="mb-6 pass-input-div">
                 <label
                   htmlFor="password"
-                  className="block text-sm font-medium text-gray-700"
+                  className="block text-sm font-medium text-lightWhiteLetter"
                 >
                   Password
                 </label>
@@ -89,16 +89,21 @@ const Login = () => {
                     id="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm pr-10"
+                    className="focus:bg-gray-800 hover:bg-gray-800 text-gray-200 bg-pageBackground border border-gray-500 focus:outline-none focus:border-blue-500 mt-1 block w-full px-3 py-2 rounded-md shadow-sm sm:text-base"
                     required
                   />
+
                   <div className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer">
                     {showPassword ? (
                       <FaEyeSlash
+                        className="text-lightWhiteLetter"
                         onClick={() => setShowPassword(!showPassword)}
                       />
                     ) : (
-                      <FaEye onClick={() => setShowPassword(!showPassword)} />
+                      <FaEye
+                        className="text-lightWhiteLetter"
+                        onClick={() => setShowPassword(!showPassword)}
+                      />
                     )}
                   </div>
                 </div>
@@ -106,23 +111,23 @@ const Login = () => {
               <div className="login-center-buttons">
                 <button
                   type="submit"
-                  className="w-full bg-yaskawaBlue text-white py-2 px-4 rounded-md hover:bg-yaskawaBlueHoverFirst"
+                  className="bg-yaskawaBlue text-sm text-lightWhiteLetter border-2 border-yaskawaBlue rounded font-bold hover:shadow-lg hover:shadow-pageBackground w-full py-2 px-4 rounded-md"
                 >
-                  Log In
+                  LOG IN
                 </button>
               </div>
-              <br />
+              {/*<br />
               <div className="login-center-options text-center text-sm">
                 <a
                   href="forgotpass"
                   onClick={() => navigate("/forgotpass")}
                   className="forgot-pass-link"
                 >
-                  <span className="text-yaskawaBlue hover:text-yaskawaBlueHoverSecond">
+                  <button className="text-lightGrayLetter">
                     Forgot your password?
-                  </span>
+                  </button>
                 </a>
-              </div>
+              </div>*/}
             </form>
           </div>
         </div>
