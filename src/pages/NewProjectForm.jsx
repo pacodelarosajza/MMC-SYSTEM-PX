@@ -1,57 +1,48 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 
 const NewProjectForm = () => {
-  const apiIpAddress = import.meta.env.VITE_API_IP_ADDRESS;
+  const apiIpAddress = import.meta.env.VITE_API_IP_ADDRESS; // API IP address
 
-  const [stocks, setStocks] = useState([]);
-  const [newStock, setNewStock] = useState({ item_id: "", quantity: "" });
-  const [items, setItems] = useState([]);
-  const [activeProjects, setActiveProjects] = useState([]);
+  // ACTIVE PROJECTS AND POST NEW PROJECT STATES
+  const [activeProjects, setActiveProjects] = useState([]); // get active projects states
   const [newProject, setNewProject] = useState({
+    //OPTIMIZE: STATE POST PROJECT
+    // post new project states
     identification_number: "",
     delivery_date: "",
     completed: 0,
     cost_material: "",
     description: "",
   });
+  const [newUserProject, setNewUserProject] = useState({
+    //OPTIMIZE: STATE POST USER_PROJECT
+    // post new user project states
+    projectId: 0,
+    users_id: 0,
+  });
 
-  const [currentPage, setCurrentPage] = useState(0);
-  const [showCard, setShowCard] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const recordsPerPage = 10;
-
+  //  PROJECT MANAGER AND PERSONNEL WITH RECEPTION AUTHORIZATION SELECTOR STATES
+  // project manager selector
+  const [adminUsers, setAdminUsers] = useState([]);
   const [userSelections, setUserSelections] = useState([
     { id: Date.now(), value: "" },
   ]);
-  const users = ["user1", "user2", "user3"];
+  // personnel with reception authorization selector
+  const [operUsers, setOperUsers] = useState([]);
+  const [userOperSelections, setUserOperSelections] = useState([
+    { id: Date.now(), value: "" },
+  ]);
 
+  // USEEFFECT API OPERATIONS
   useEffect(() => {
-    fetchStocks();
-    fetchItems();
     fetchActiveProjects();
+    fetchAdminUsers();
+    fetchOperUsers();
   }, []);
-
-  const fetchStocks = async () => {
-    try {
-      const response = await axios.get(`${apiIpAddress}/api/getAllStockk`);
-      setStocks(response.data);
-    } catch (error) {
-      console.error("Error fetching stocks:", error);
-    }
-  };
-
-  const fetchItems = async () => {
-    try {
-      const response = await axios.get(`${apiIpAddress}/api/getItems`);
-      setItems(response.data);
-    } catch (error) {
-      console.error("Error fetching items:", error);
-    }
-  };
-
   const fetchActiveProjects = async () => {
+    // Fetch active projects from API
     try {
       const response = await axios.get(
         `${apiIpAddress}/api/getProjectsActives`
@@ -61,29 +52,50 @@ const NewProjectForm = () => {
       console.error("Error fetching projects info:", error);
     }
   };
-
-  const handleCreateStock = async () => {
+  const fetchAdminUsers = async () => {
     try {
-      await axios.post(`${apiIpAddress}/api/postStock`, newStock);
-      setNewStock({ item_id: "", quantity: "" });
-      fetchStocks();
+      const response = await axios.get(`${apiIpAddress}/getUsersByUserType/1`);
+      setAdminUsers(response.data);
     } catch (error) {
-      console.error("Error creating stock:", error);
+      console.error("Error fetching admin users:", error);
+    }
+  };
+  const fetchOperUsers = async () => {
+    // Fetch oper users from API
+    try {
+      const response = await axios.get(`${apiIpAddress}/getUsersByUserType/2`);
+      setOperUsers(response.data);
+    } catch (error) {
+      console.error("Error fetching users oper:", error);
     }
   };
 
-  const handleDeleteStock = async (id) => {
+  //HANDLE API OPERATIONS
+  //HANDLE CREATE AND DELETE PROJECT OPERATIONS
+  //OPTIMIZE: HANDLE CREATE PROJECT
+    const handleCreateProject = async () => {
     try {
-      await axios.delete(`${apiIpAddress}/api/deleteStock/${id}`);
-      fetchStocks();
-    } catch (error) {
-      console.error("Error deleting stock:", error);
-    }
-  };
-
-  const handleCreateProject = async () => {
-    try {
-      await axios.post(`${apiIpAddress}/api/postProject`, newProject);
+      const projectResponse = await axios.post(
+        `${apiIpAddress}/api/postProject`,
+        newProject
+      );
+      const projectId = projectResponse.data.id;
+  
+      // Validar que userSelections no esté vacío y que los valores sean correctos
+      if (userSelections.length === 0 || userSelections.some(selection => !selection.value)) {
+        throw new Error("Please select at least one user for the project.");
+      }
+  
+      // Asignar el projectId a newUserProject
+      const userProjectPromises = userSelections.map((userSelection) =>
+        axios.post(`${apiIpAddress}/api/user_assign_project`, {
+          projectId: projectId,
+          users_id: userSelection.value,
+        })
+      );
+  
+      await Promise.all(userProjectPromises);
+  
       setNewProject({
         identification_number: "",
         delivery_date: "",
@@ -92,18 +104,17 @@ const NewProjectForm = () => {
         description: "",
       });
       fetchActiveProjects();
-      alert("Project registration successful");
+      alert(`Project registration successful. Project ID: ${projectId}`);
     } catch (error) {
       console.error("Error creating project:", error);
-      alert("Project registration failed");
+      alert("Project registration failed: " + error.message);
     }
   };
-
   const handleDeleteProject = async (id) => {
+    // Delete a project
     const confirmDelete = window.confirm(
       "Are you sure you want to delete this project? This action cannot be undone."
     );
-
     if (confirmDelete) {
       try {
         await axios.delete(`${apiIpAddress}/api/deleteProject/${id}`);
@@ -116,42 +127,169 @@ const NewProjectForm = () => {
     }
   };
 
+  // EDIT MODAL OPERATIONS
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const openModal = () => {
+    // Open the modal
+    setIsModalOpen(true);
+  };
+  const closeModal = () => {
+    // Close the modal
+    setIsModalOpen(false);
+  };
+
+  // PAGINATION OPERATIONS
+  const [currentPage, setCurrentPage] = useState(0);
+  const recordsPerPage = 10; // Number of records per page
+  const handleNextPage = () => {
+    // Go to the next page
+    setCurrentPage((prevPage) => prevPage + 1);
+  };
+  const handlePreviousPage = () => {
+    // Go to the previous page
+    setCurrentPage((prevPage) => Math.max(prevPage - 1, 0));
+  };
+  const startIndex = currentPage * recordsPerPage; // Calculate the start and end index for pagination
+  const endIndex = startIndex + recordsPerPage;
+  const currentProjects = activeProjects.slice(startIndex, endIndex);
+
+  // NEW PROJECT "CARD" OPERATIONS
+  const [showCard, setShowCard] = useState(false);
+  const handleButtonClick = () => {
+    // Toggle show/hide card
+    setShowCard(!showCard);
+  };
   const handleChange = (event) => {
-    const { name, value } = event.target;
+    // Handle input change for new project
+    const { name, value } = event.target; // this function is used to handle the change in the input fields of the new project form
     setNewProject((prevProject) => ({
       ...prevProject,
       [name]: value,
     }));
   };
 
-  const handleButtonClick = () => {
-    setShowCard(!showCard);
+  // PROJECT MANAGER AND PERSONNEL WITH RECEPTION AUTHORIZATION SELECTOR OPERATIONS
+  // PROJECT MANAGER SELECTOR OPERATIONS
+  const addUserSelection = () => {
+    setUserSelections([...userSelections, { id: Date.now(), value: "" }]);
   };
-
-  const handleNextPage = () => {
-    setCurrentPage((prevPage) => prevPage + 1);
+  const removeUserSelection = (id) => {
+    // Remove a user selection
+    setUserSelections(
+      userSelections.filter((userSelection) => userSelection.id !== id)
+    );
   };
+  const handleUserChange = (id, value) => {
+    setUserSelections(
+      userSelections.map((userSelection) =>
+        userSelection.id === id ? { ...userSelection, value } : userSelection
+      )
+    );
 
-  const handlePreviousPage = () => {
-    setCurrentPage((prevPage) => Math.max(prevPage - 1, 0));
+    // Actualizar newUserProject con el users_id seleccionado
+    setNewUserProject((prevNewUserProject) => ({
+      ...prevNewUserProject,
+      users_id: value,
+    }));
   };
-
-  const openModal = () => {
-    setIsModalOpen(true);
+  const selectedUsers = userSelections.map(
+    // Get selected users
+    (userSelection) => userSelection.value
+  );
+  // PERSONNEL WITH RECEPTION AUTHORIZATION SELECTOR OPERATIONS
+  const addUserOperSelection = () => {
+    setUserOperSelections([
+      ...userOperSelections,
+      { id: Date.now(), value: "" },
+    ]);
   };
-
-  const closeModal = () => {
-    setIsModalOpen(false);
+  const removeUserOperSelection = (id) => {
+    setUserOperSelections(
+      userOperSelections.filter(
+        (userOperSelection) => userOperSelection.id !== id
+      )
+    );
   };
+  const handleUserOperChange = (id, value) => {
+    setUserOperSelections(
+      userOperSelections.map((userOperSelection) =>
+        userOperSelection.id === id
+          ? { ...userOperSelection, value }
+          : userOperSelection
+      )
+    );
+  };
+  const selectedUsersOper = userOperSelections.map(
+    (userOperSelection) => userOperSelection.value
+  );
 
-  const startIndex = currentPage * recordsPerPage;
-  const endIndex = startIndex + recordsPerPage;
-  const currentProjects = activeProjects.slice(startIndex, endIndex);
-
+  // TABLES OPERATIONS
+  // ASSEMBLIES TABLE
+  const [InTable, setInTable] = useState([]); // Assemblies table states
+  const [isDivVisible, setIsDivVisible] = useState(false);
+  const handleToggleDiv = () => {
+    setIsDivVisible(!isDivVisible); // Toggle visibility of the div
+  };
+  const addRowInTable = () => {
+    const newRow = {
+      // Add a row to the assemblies table
+      id: Date.now(),
+      assemblyId: "",
+      description: "",
+      deliveryDate: "",
+      completedDate: "",
+      price: "",
+    };
+    setInTable([...InTable, newRow]);
+  };
+  const removeRow = (id) => {
+    setInTable(InTable.filter((row) => row.id !== id)); // Remove a row from the assemblies table
+  };
+  const handleInputChange = (id, field, value) => {
+    const updatedTable = InTable.map((row) => {
+      // Handle input change in the assemblies table
+      if (row.id === id) {
+        return { ...row, [field]: value };
+      }
+      return row;
+    });
+    setInTable(updatedTable);
+  };
+  // SUBASSEMBLIES TABLES
+  const [InTableSubass, setInTableSubass] = useState([]); // Subassemblies table states
+  const [isDivVisibleSubass, setIsDivVisibleSubass] = useState(false);
+  const handleToggleDivSubass = () => {
+    setIsDivVisibleSubass(!isDivVisibleSubass); // Toggle visibility of the subassemblies div
+  };
+  const addRowInTableSubass = () => {
+    const newRowSubass = {
+      // Add a row to the subassemblies table
+      id: Date.now(),
+      assemblyId: "",
+      description: "",
+      deliveryDate: "",
+      completedDate: "",
+      price: "",
+    };
+    setInTableSubass([...InTableSubass, newRowSubass]);
+  };
+  const removeRowSubass = (id) => {
+    setInTableSubass(InTableSubass.filter((rowSubass) => rowSubass.id !== id)); // Remove a row from the subassemblies table
+  };
+  const handleInputChangeSubass = (id, field, value) => {
+    const updatedTable = InTableSubass.map((rowSubass) => {
+      // Handle input change in the subassemblies table
+      if (rowSubass.id === id) {
+        return { ...rowSubass, [field]: value };
+      }
+      return rowSubass;
+    });
+    setInTableSubass(updatedTable);
+  };
+  // HANDLE ASSEMBLY TABLE OPERATIONS
   const handleAddAssembly = async (event) => {
     event.preventDefault();
     const formData = new FormData(event.target);
-
     try {
       await axios.post(`${apiIpAddress}/api/addAssembly`, formData, {
         headers: {
@@ -167,60 +305,43 @@ const NewProjectForm = () => {
     }
   };
 
-  const addUserSelection = () => {
-    setUserSelections([...userSelections, { id: Date.now(), value: "" }]);
+  //SELECTOR FOR CHOOSING THE WAY TO REGISTER MATERIALS
+  const [addItemsForm, setaddItemsForm] = useState("");
+  const handleAddItemsForm = (event) => {
+    setaddItemsForm(event.target.value); // Handle change in the selector for choosing the way to register materials
   };
 
-  const removeUserSelection = (id) => {
-    setUserSelections(
-      userSelections.filter((userSelection) => userSelection.id !== id)
-    );
+  // SELECTOR FILE CONTAINER OPERATIONS
+  const fileInputRef = useRef(null);
+  const [fileName, setFileName] = useState("");
+  const [dragActive, setDragActive] = useState(false);
+  const handleFileClick = () => {
+    fileInputRef.current.click();
   };
-
-  const handleUserChange = (id, value) => {
-    setUserSelections(
-      userSelections.map((userSelection) =>
-        userSelection.id === id ? { ...userSelection, value } : userSelection
-      )
-    );
+  const handleFileChange = (event) => {
+    const file = event.target.files[0]; // Handle file change
+    if (file) {
+      setFileName(file.name);
+    }
   };
-
-  const selectedUsers = userSelections.map(
-    (userSelection) => userSelection.value
-  );
-
-  const [InTable, setInTable] = useState([]);
-
-  const addRowInTable = () => {
-    const newRow = {
-      id: Date.now(),
-      assemblyId: "",
-      description: "",
-      deliveryDate: "",
-      completedDate: "",
-      price: "",
-    };
-    setInTable([...InTable, newRow]);
+  const handleDragOver = (event) => {
+    event.preventDefault(); // Handle drag over
+    setDragActive(true);
   };
-
-  const removeRow = (id) => {
-    setInTable(InTable.filter((row) => row.id !== id));
+  const handleDragLeave = () => {
+    setDragActive(false); // Handle drag leave
   };
-
-  const handleInputChange = (id, field, value) => {
-    const updatedTable = InTable.map((row) => {
-      if (row.id === id) {
-        return { ...row, [field]: value };
-      }
-      return row;
-    });
-    setInTable(updatedTable);
+  const handleDrop = (event) => {
+    event.preventDefault(); // Handle drop
+    setDragActive(false);
+    const file = event.dataTransfer.files[0];
+    if (file) {
+      setFileName(file.name);
+    }
   };
-
-  const [isDivVisible, setIsDivVisible] = useState(false);
-
-  const handleToggleDiv = () => {
-    setIsDivVisible(!isDivVisible);
+  const handleRemoveFile = () => {
+    setFileName(""); // Handle remove file
+    fileInputRef.current.value = null;
   };
 
   return (
@@ -253,7 +374,7 @@ const NewProjectForm = () => {
                   className="hover:bg-pageSideMenuTextHover cursor-pointer transition duration-200"
                 >
                   <td className="px-4 border-t border-r border-b border-gray-500">
-                    # {project.identification_number}
+                    #{project.identification_number}
                   </td>
                   <td className="px-4 border-t border-b border-gray-500">
                     {project.description}
@@ -391,18 +512,22 @@ const NewProjectForm = () => {
 
         {showCard && (
           <div className="bg-gray-800 px-5 rounded-lg shadow-lg mb-5">
+            {" "}
+            {/*OPTIMIZE: NEW PROJECT FORM*/}
             <div className="px-2 pb-5">
               <div className="pt-5 pb-3 text-sm text-gray-200">
                 <h5 className=" pb-1 ">
-                  Complete the following information to register a new project.
-                  Make sure that all data is accurate and complete and remember
-                  that, although you can edit the data later, once published,
-                  all users with permissions will be able to view the project
-                  information. <br />
-                </h5>
-                <h5 className=" pb-5 font-bold">
-                  Fields marked with <span className="text-red-500">*</span> are
-                  required. <br />
+                  Complete the following information to register a project.
+                  Remember that, although you can edit the data later, once
+                  uploaded, all users will be able to see the project
+                  information.
+                  <strong>
+                    {" "}
+                    Fields marked with <span className="text-red-500">
+                      *
+                    </span>{" "}
+                    are required.
+                  </strong>
                 </h5>
               </div>
 
@@ -415,7 +540,8 @@ const NewProjectForm = () => {
                     htmlFor="identification_number"
                     className="block text-sm font-medium leading-6 text-gray-200"
                   >
-                    Identification Number
+                    Identification Number{" "}
+                    <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -431,7 +557,7 @@ const NewProjectForm = () => {
                     htmlFor="cost_material"
                     className="block text-sm font-medium leading-6 text-gray-200"
                   >
-                    Cost Material
+                    Cost Material <span className="text-red-500">*</span>
                   </label>
                   <div>
                     $<span className="pr-2"></span>
@@ -443,7 +569,7 @@ const NewProjectForm = () => {
                       value={newProject.cost_material}
                       onChange={handleChange}
                     />
-                    <span className="pr-2"></span>USD
+                    <span className="pr-2"></span>MXN
                   </div>
                 </div>
                 <div>
@@ -451,12 +577,12 @@ const NewProjectForm = () => {
                     htmlFor="delivery_date"
                     className="block text-sm font-medium leading-6 text-gray-200"
                   >
-                    Delivery Date
+                    Delivery Date <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="date"
                     name="delivery_date"
-                    className="p-2 rounded bg-gray-700 text-white"
+                    className="p-2 rounded bg-gray-700 text-white "
                     value={newProject.delivery_date}
                     onChange={handleChange}
                   />
@@ -492,13 +618,15 @@ const NewProjectForm = () => {
               <div className="col-span-full pt-3">
                 <div className="mb-5">
                   <h2 className="text-xl text-gray-200 font-bold">
-                    Project manager
+                    Project manager <span className="text-red-500">*</span>
                   </h2>
                   <h5 className="text-sm text-gray-200">
                     Select the project manager.
                   </h5>
                 </div>
                 <div>
+                  {" "}
+                  {/*OPTIMIZE: SELECTOR PROJECT MANAGER*/}
                   {userSelections.map((userSelection) => (
                     <div
                       key={userSelection.id}
@@ -506,7 +634,7 @@ const NewProjectForm = () => {
                     >
                       <select
                         name={`identification_number_${userSelection.id}`}
-                        className="p-2 rounded bg-gray-700 text-white w-1/2"
+                        className="p-2 rounded bg-gray-700 text-white w-1/2 cursor-pointer"
                         value={userSelection.value}
                         onChange={(e) =>
                           handleUserChange(userSelection.id, e.target.value)
@@ -515,22 +643,22 @@ const NewProjectForm = () => {
                         <option value="" disabled>
                           N/A
                         </option>
-                        {users
+                        {adminUsers
                           .filter(
                             (user) =>
-                              !selectedUsers.includes(user) ||
-                              user === userSelection.value
+                              !selectedUsers.includes(user.id) ||
+                              user.id === userSelection.value
                           )
                           .map((user) => (
-                            <option key={user} value={user}>
-                              {user}
+                            <option key={user.id} value={user.id}>
+                              {user.user_number}
                             </option>
                           ))}
                       </select>
                       <button
                         type="button"
                         onClick={() => removeUserSelection(userSelection.id)}
-                        className="ml-2 px-2 py-1 border border-red-500 bg-red-900 text-red-300 hover:border hover:border-red-400 hover:bg-red-700 hover:text-red-200 rounded"
+                        className="ml-2 px-2 py-1 border border-red-500 bg-red-900 text-red-300 hover:border-red-400 hover:bg-red-700 hover:text-red-200 rounded"
                       >
                         <strong>X</strong>
                       </button>
@@ -539,7 +667,7 @@ const NewProjectForm = () => {
                   <button
                     type="button"
                     onClick={addUserSelection}
-                    className="px-2 border border-blue-500 bg-blue-900 text-blue-300 hover:border hover:border-blue-400 hover:bg-blue-700 hover:text-blue-200 rounded"
+                    className="px-2 border border-blue-500 bg-blue-900 text-blue-300 hover:border-blue-400 hover:bg-blue-700 hover:text-blue-200 rounded"
                   >
                     <strong>+</strong>
                   </button>
@@ -553,45 +681,51 @@ const NewProjectForm = () => {
               <div className="col-span-full pt-3">
                 <div className="mb-5">
                   <h2 className="text-xl text-gray-200 font-bold">
-                    Personnel with reception authorization
+                    Personnel with reception authorization{" "}
+                    <span className="text-red-500">*</span>
                   </h2>
                   <h5 className="text-sm text-gray-200">
                     Selects personnel authorized to receive project materials.
                   </h5>
                 </div>
                 <div>
-                  {userSelections.map((userSelection) => (
+                  {userOperSelections.map((userOperSelection) => (
                     <div
-                      key={userSelection.id}
+                      key={userOperSelection.id}
                       className="mb-2 flex items-center"
                     >
                       <select
-                        name={`identification_number_${userSelection.id}`}
-                        className="p-2 rounded bg-gray-700 text-white w-1/2"
-                        value={userSelection.value}
+                        name={`identification_number_${userOperSelection.id}`}
+                        className="p-2 rounded bg-gray-700 text-white w-1/2 cursor-pointer"
+                        value={userOperSelection.value}
                         onChange={(e) =>
-                          handleUserChange(userSelection.id, e.target.value)
+                          handleUserOperChange(
+                            userOperSelection.id,
+                            e.target.value
+                          )
                         }
                       >
                         <option value="" disabled>
                           N/A
                         </option>
-                        {users
+                        {operUsers
                           .filter(
                             (user) =>
-                              !selectedUsers.includes(user) ||
-                              user === userSelection.value
+                              !selectedUsersOper.includes(user.id) ||
+                              user.id === userOperSelection.value
                           )
                           .map((user) => (
-                            <option key={user} value={user}>
-                              {user}
+                            <option key={user.id} value={user.id}>
+                              {user.user_number}
                             </option>
                           ))}
                       </select>
                       <button
                         type="button"
-                        onClick={() => removeUserSelection(userSelection.id)}
-                        className="ml-2 px-2 py-1 border border-red-500 bg-red-900 text-red-300 hover:border hover:border-red-400 hover:bg-red-700 hover:text-red-200 rounded"
+                        onClick={() =>
+                          removeUserOperSelection(userOperSelection.id)
+                        }
+                        className="ml-2 px-2 py-1 border border-red-500 bg-red-900 text-red-300 hover:border-red-400 hover:bg-red-700 hover:text-red-200 rounded"
                       >
                         <strong>X</strong>
                       </button>
@@ -599,8 +733,8 @@ const NewProjectForm = () => {
                   ))}
                   <button
                     type="button"
-                    onClick={addUserSelection}
-                    className="px-2 border border-blue-500 bg-blue-900 text-blue-300 hover:border hover:border-blue-400 hover:bg-blue-700 hover:text-blue-200 rounded"
+                    onClick={addUserOperSelection}
+                    className="px-2 border border-blue-500 bg-blue-900 text-blue-300 hover:border-blue-400 hover:bg-blue-700 hover:text-blue-200 rounded"
                   >
                     <strong>+</strong>
                   </button>
@@ -617,12 +751,9 @@ const NewProjectForm = () => {
                     Registration of assemblies
                   </h2>
                   <h5 className="text-sm text-gray-200">
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit ut
-                    aliquam, purus sit amet luctus venenatis, lectus magna
-                    fringilla urna, porttitor rhoncus dolor purus non enim.
-                    <br />
-                    Solo puedes usar un maximo de 255 palabras en la descripcion
-                    del ensamble.
+                    Register the assemblies that will be part of the project.
+                    You may use a maximum of 255 characters in the description
+                    of each assembly.
                   </h5>
                 </div>
                 <table className="text-sm table-auto w-full text-lightWhiteLetter">
@@ -630,19 +761,19 @@ const NewProjectForm = () => {
                     <tr>
                       <th className="px-4 py-2 border border-gray-500">No</th>
                       <th className="px-4 py-2 border border-gray-500">
-                        Assembly ID
+                        Assembly ID <span className="text-red-500">*</span>
                       </th>
                       <th className="px-4 py-2 border border-gray-500">
                         Description
                       </th>
                       <th className="px-4 py-2 border border-gray-500">
-                        Delivery Date
+                        Delivery Date <span className="text-red-500">*</span>
                       </th>
                       <th className="px-4 py-2 border border-gray-500">
-                        Completed Date
+                        Completed Date <span className="text-red-500">*</span>
                       </th>
                       <th className="px-4 py-2 border border-gray-500">
-                        Price
+                        Price <span className="text-red-500">*</span>
                       </th>
                     </tr>
                   </thead>
@@ -650,7 +781,7 @@ const NewProjectForm = () => {
                     {InTable.map((row, index) => (
                       <tr
                         key={row.id}
-                        className="hover:bg-pageSideMenuTextHover cursor-pointer transition duration-200"
+                        className="hover:bg-pageSideMenuTextHover transition duration-200"
                       >
                         <td className="px-4 border-t border-r border-b border-gray-500">
                           {index + 1}
@@ -732,7 +863,7 @@ const NewProjectForm = () => {
                             onClick={handleToggleDiv}
                             className="ml-2 px-2 mt-1 text-xs border border-orange-500 bg-orange-900 text-orange-300 hover:border-orange-400 hover:bg-orange-700 hover:text-orange-200 rounded"
                           >
-                            More
+                            Mtl
                           </button>
                           <button
                             type="button"
@@ -758,31 +889,321 @@ const NewProjectForm = () => {
                   <div className="pt-3">
                     <div>
                       <h2 className="text-xl text-gray-200 font-bold">
-                        Registration of materials. 
-                      </h2> 
-                      <h2 className="text-xl text-gray-200">
-                        Assembly #12837 
+                        Registration of materials.
                       </h2>
-                    </div>
-                    <div> {/* Añade un bton para subir archivos en formato .xlsx */}
-                      <h5 className="my-5 text-sm text-gray-200">
-                      Load materials directly to the assembly, use this option in case the assembly does not have sub-assemblies or you need to load data directly to the assembly. 
+                      <h2 className="text-xl text-gray-200">Assembly #12837</h2>
+                      <h5 className="text-sm pt-5 pb-3 text-gray-200">
+                        Select the way in which the materials will be registered
+                        in the project.
                       </h5>
-                      <input 
-                        type="file"
-                        id="file" 
-                        name="file" 
-                        accept=".xlsx" 
-                        className="mt-1 bg-gray-700 text-white"
-                      />
                     </div>
-                    
-                   
+                    <div>
+                      <select
+                        value={addItemsForm}
+                        onChange={handleAddItemsForm}
+                        className="w-full mb-4 p-2 border border-gray-500 rounded bg-gray-800 text-white cursor-pointer"
+                      >
+                        <option value="" disabled>
+                          Select an option
+                        </option>
+                        {/*<option value="option1">
+                          Not now. Discharge the project without registration of
+                          materials for the time being.
+                        </option>*/}
+                        <option value="option2">
+                          Discharge materials without the use of subassemblies.
+                        </option>
+                        <option value="option3">
+                          Discharge materials by means of subassemblies.
+                        </option>
+                      </select>
+
+                      {/*addItemsForm === "option1" ? (
+                        <div className="px-10">
+                          <h5 className="pt-5 text-gray-400">
+                            Register the project without materials for now; come
+                            back later and add them by clicking the “Edit”
+                            button in the project list at the top of this page.
+                          </h5>{" "}
+                        </div>
+                      ) :*/}
+
+                      {addItemsForm === "option2" ? (
+                        <div className="px-10">
+                          <div className="py-5">
+                            <h5 className="text-sm py-5 text-gray-200">
+                              Upload the materials concentrate. Only .xlsx files
+                              will be accepted. FORMAT ...
+                            </h5>
+                            <input
+                              type="file"
+                              id="file"
+                              name="file"
+                              accept=".xlsx"
+                              className="hidden"
+                              ref={fileInputRef}
+                              onChange={handleFileChange}
+                            />
+                            <div
+                              onDragOver={handleDragOver}
+                              onDragLeave={handleDragLeave}
+                              onDrop={handleDrop}
+                              className={`rounded p-6 flex flex-col items-center justify-center ${
+                                dragActive
+                                  ? "border-2 border-blue-400 border-dashed bg-blue-900 bg-opacity-50"
+                                  : "border-2 border-opacity-30 border-purple-500 border-dashed"
+                              }`}
+                            >
+                              <div className="flex items-center justify-center">
+                                <p className="text-sm text-purple-200">
+                                  {fileName ? (
+                                    <strong>Selected file:</strong>
+                                  ) : (
+                                    "Drag or select a file"
+                                  )}{" "}
+                                  {fileName}
+                                </p>
+                                {fileName && (
+                                  <button
+                                    type="button"
+                                    onClick={handleRemoveFile}
+                                    className="ml-2 px-2 border border-transparent bg-transparent text-red-500 hover:text-red-300 hover:border hover:bg-red-900 rounded"
+                                  >
+                                    x
+                                  </button>
+                                )}
+                              </div>
+                              <div>
+                                <button
+                                  type="button"
+                                  onClick={handleFileClick}
+                                  className="text-sm px-3 mt-6 py-1 border border-purple-500 bg-purple-900 text-purple-300 hover:border-purple-400 hover:bg-purple-700 hover:text-purple-200 rounded"
+                                >
+                                  Seleccionar archivo
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ) : addItemsForm === "option3" ? (
+                        <div className="px-3">
+                          <h5 className="text-sm pt-5 pb-3 text-gray-200">
+                            Register the subassemblies. You may use a maximum of
+                            255 characters within the description of each
+                            subassembly.
+                          </h5>
+                          <table className="text-sm table-auto w-full text-lightWhiteLetter">
+                            <thead className="w-full bg-gray-700 text-left">
+                              <tr>
+                                <th className="px-4 py-2 border border-gray-500">
+                                  No
+                                </th>
+                                <th className="px-4 py-2 border border-gray-500">
+                                  Subassembly ID
+                                </th>
+                                <th className="px-4 py-2 border border-gray-500">
+                                  Description
+                                </th>
+                                <th className="px-4 py-2 border border-gray-500">
+                                  Delivery Date
+                                </th>
+                                <th className="px-4 py-2 border border-gray-500">
+                                  Completed Date
+                                </th>
+                                <th className="px-4 py-2 border border-gray-500">
+                                  Price
+                                </th>
+                              </tr>
+                            </thead>
+
+                            <tbody
+                              className="bg-gray-800 shadow-lg"
+                              id="table-body"
+                            >
+                              {InTableSubass.map((rowSubass, index) => (
+                                <tr
+                                  key={rowSubass.id}
+                                  className="hover:bg-pageSideMenuTextHover transition duration-200"
+                                >
+                                  <td className="px-4 border-t border-r border-b border-gray-500">
+                                    {index + 1}
+                                  </td>
+                                  <td className="px-4 border border-gray-500">
+                                    <input
+                                      type="text"
+                                      className="w-full p-1 bg-transparent outline-none"
+                                      value={rowSubass.assemblyId}
+                                      onChange={(e) =>
+                                        handleInputChangeSubass(
+                                          rowSubass.id,
+                                          "assemblyId",
+                                          e.target.value
+                                        )
+                                      }
+                                    />
+                                  </td>
+                                  <td className="px-4 border border-gray-500">
+                                    <textarea
+                                      className="w-full bg-transparent outline-none resize-none overflow-hidden"
+                                      value={rowSubass.description}
+                                      onChange={(e) =>
+                                        handleInputChangeSubass(
+                                          rowSubass.id,
+                                          "description",
+                                          e.target.value
+                                        )
+                                      }
+                                      rows={1}
+                                      onInput={(e) => {
+                                        e.target.style.height = "auto";
+                                        e.target.style.height = `${e.target.scrollHeight}px`;
+                                      }}
+                                    />
+                                  </td>
+                                  <td className="px-4 border border-gray-500">
+                                    <input
+                                      type="date"
+                                      className="w-full bg-transparent outline-none"
+                                      value={rowSubass.deliveryDate}
+                                      onChange={(e) =>
+                                        handleInputChangeSubass(
+                                          rowSubass.id,
+                                          "deliveryDate",
+                                          e.target.value
+                                        )
+                                      }
+                                    />
+                                  </td>
+                                  <td className="px-4 border border-gray-500">
+                                    <input
+                                      type="date"
+                                      className="w-full bg-transparent outline-none"
+                                      value={rowSubass.completedDate}
+                                      onChange={(e) =>
+                                        handleInputChangeSubass(
+                                          rowSubass.id,
+                                          "completedDate",
+                                          e.target.value
+                                        )
+                                      }
+                                    />
+                                  </td>
+                                  <td className="px-4 border-t border-b border-l border-gray-500">
+                                    <input
+                                      type="number"
+                                      step="0.01"
+                                      className="w-full bg-transparent outline-none"
+                                      value={rowSubass.price}
+                                      onChange={(e) =>
+                                        handleInputChangeSubass(
+                                          rowSubass.id,
+                                          "price",
+                                          e.target.value
+                                        )
+                                      }
+                                    />
+                                  </td>
+                                  <div className="flex">
+                                    <button
+                                      type="button"
+                                      onClick={handleToggleDivSubass}
+                                      className="ml-2 px-2 mt-1 text-xs border border-orange-500 bg-orange-900 text-orange-300 hover:border-orange-400 hover:bg-orange-700 hover:text-orange-200 rounded"
+                                    >
+                                      Mtl
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        removeRowSubass(rowSubass.id)
+                                      }
+                                      className="ml-2 mr-2 mt-1 px-2 border border-red-500 bg-red-900 text-red-300 hover:border-red-400 hover:bg-red-700 hover:text-red-200 rounded"
+                                    >
+                                      <strong>X</strong>
+                                    </button>
+                                  </div>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                          <div className="flex">
+                            <button
+                              onClick={addRowInTableSubass}
+                              className="text-sm m-3 px-3 py-1 border border-blue-500 bg-blue-900 text-blue-300 hover:border-blue-400 hover:bg-blue-700 hover:text-blue-200 rounded"
+                            >
+                              Add row
+                            </button>
+                          </div>
+                          {isDivVisibleSubass && (
+                            <div className="px-10">
+                              <div className="py-5">
+                                <h5 className="text-sm py-5 text-gray-200">
+                                  Upload the materials concentrate. Only .xlsx
+                                  files will be accepted. FORMAT ...
+                                </h5>
+                                <input
+                                  type="file"
+                                  id="file"
+                                  name="file"
+                                  accept=".xlsx"
+                                  className="hidden"
+                                  ref={fileInputRef}
+                                  onChange={handleFileChange}
+                                />
+                                <div
+                                  onDragOver={handleDragOver}
+                                  onDragLeave={handleDragLeave}
+                                  onDrop={handleDrop}
+                                  className={`rounded p-6 flex flex-col items-center justify-center ${
+                                    dragActive
+                                      ? "border-2 border-blue-400 border-dashed bg-blue-900 bg-opacity-50"
+                                      : "border-2 border-opacity-30 border-purple-500 border-dashed"
+                                  }`}
+                                >
+                                  <div className="flex items-center justify-center">
+                                    <p className="text-sm text-purple-200">
+                                      {fileName ? (
+                                        <strong>Selected file:</strong>
+                                      ) : (
+                                        "Drag or select a file"
+                                      )}{" "}
+                                      {fileName}
+                                    </p>
+                                    {fileName && (
+                                      <button
+                                        type="button"
+                                        onClick={handleRemoveFile}
+                                        className="ml-2 px-2 border border-transparent bg-transparent text-red-500 hover:text-red-300 hover:border hover:bg-red-900 rounded"
+                                      >
+                                        x
+                                      </button>
+                                    )}
+                                  </div>
+                                  <div>
+                                    <button
+                                      type="button"
+                                      onClick={handleFileClick}
+                                      className="text-sm px-3 mt-6 py-1 border border-purple-500 bg-purple-900 text-purple-300 hover:border-purple-400 hover:bg-purple-700 hover:text-purple-200 rounded"
+                                    >
+                                      Seleccionar archivo
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div>
+                          <p>Seleccione una opción para ver el contenido</p>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
 
               <div className="flex justify-end pt-10 items-center">
+                {/*OPTIMIZE: SAVE PROJECT*/}
                 <button
                   onClick={handleCreateProject}
                   className="px-12 py-2 mx-1 bg-green-900 text-sm text-green-300 bg-pageBackground border border-green-500 rounded hover:bg-green-700"

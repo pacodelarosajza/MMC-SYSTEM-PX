@@ -169,8 +169,8 @@ const Dashboard = ({ onLogout }) => {
           `}
       >
         <div className="justify-center">
-          <img src="src/assets/Yaskawa_notBg.png" className="w-auto h-auto" />
-          <p className="text-center login-line m-8">
+          <img src="src/assets/YaskawaLogo6.png" alt="YASKAWA" className="w-auto mt-8 h-auto" style={{ display: 'block', margin: '0 auto', textAlign: 'center', fontWeight: 'bold' }} />
+          <p className="text-center login-line mb-8">
             <strong>MCM Controller</strong>
           </p>
         </div>
