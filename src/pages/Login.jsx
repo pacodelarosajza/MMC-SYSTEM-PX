@@ -42,8 +42,6 @@ const Login = () => {
     <div className="bg-pageBackground">
       <div className="login-main flex items-center justify-center min-h-screen p-10 gap-10">
         <div className="">
-          {" "}
-          {/*login-left */}
           <img src={Logo} alt="Logo" />
         </div>
         <div className="bg-loginBackgroundCard p-8 rounded-lg shadow-md max-w-md w-full">
@@ -66,12 +64,12 @@ const Login = () => {
                 >
                   User Number
                 </label>
-                                <input
+                <input
                   type="text"
                   id="userNum"
                   value={userNum}
                   onChange={(e) => setUserNum(e.target.value)}
-                  className="focus:bg-gray-800 hover:bg-gray-800 text-gray-200 bg-pageBackground border border-gray-500 focus:outline-none focus:border-blue-500
+                  className="border border-gray-500 focus:outline-none focus:border-blue-500
                   mt-1 block w-full px-3 py-2 rounded-md shadow-sm sm:text-base"
                   required
                 />
@@ -89,21 +87,17 @@ const Login = () => {
                     id="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="focus:bg-gray-800 hover:bg-gray-800 text-gray-200 bg-pageBackground border border-gray-500 focus:outline-none focus:border-blue-500 mt-1 block w-full px-3 py-2 rounded-md shadow-sm sm:text-base"
+                    className="border border-gray-500 focus:outline-none focus:border-blue-500 mt-1 block w-full px-3 py-2 rounded-md shadow-sm sm:text-base"
                     required
                   />
 
                   <div className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer">
                     {showPassword ? (
                       <FaEyeSlash
-                        className="text-lightWhiteLetter"
                         onClick={() => setShowPassword(!showPassword)}
                       />
                     ) : (
-                      <FaEye
-                        className="text-lightWhiteLetter"
-                        onClick={() => setShowPassword(!showPassword)}
-                      />
+                      <FaEye onClick={() => setShowPassword(!showPassword)} />
                     )}
                   </div>
                 </div>
@@ -116,18 +110,6 @@ const Login = () => {
                   LOG IN
                 </button>
               </div>
-              {/*<br />
-              <div className="login-center-options text-center text-sm">
-                <a
-                  href="forgotpass"
-                  onClick={() => navigate("/forgotpass")}
-                  className="forgot-pass-link"
-                >
-                  <button className="text-lightGrayLetter">
-                    Forgot your password?
-                  </button>
-                </a>
-              </div>*/}
             </form>
           </div>
         </div>

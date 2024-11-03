@@ -198,8 +198,8 @@ const Dashboard = ({ onLogout }) => {
               </Link>
             </button>
             <button className="text-sm text-left py-2 px-4 hover:bg-pageSideMenuTextHover hover:rounded transition duration-300 text-lightWhiteLetter">
-              <Link to="/dashboard/new-project-form" onClick={handleNavigate}>
-                Add or Delete Projects
+              <Link to="/dashboard/projects-managment" onClick={handleNavigate}>
+                Projects Managment
               </Link>
             </button>
             <button className="text-sm text-left py-2 px-4 hover:bg-pageSideMenuTextHover hover:rounded transition duration-300 text-lightWhiteLetter">

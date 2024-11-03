@@ -8,7 +8,6 @@ const NewProjectForm = () => {
   // ACTIVE PROJECTS AND POST NEW PROJECT STATES
   const [activeProjects, setActiveProjects] = useState([]); // get active projects states
   const [newProject, setNewProject] = useState({
-    //OPTIMIZE: STATE POST PROJECT
     // post new project states
     identification_number: "",
     delivery_date: "",
@@ -17,7 +16,6 @@ const NewProjectForm = () => {
     description: "",
   });
   const [newUserProject, setNewUserProject] = useState({
-    //OPTIMIZE: STATE POST USER_PROJECT
     // post new user project states
     projectId: 0,
     users_id: 0,
@@ -72,7 +70,6 @@ const NewProjectForm = () => {
 
   //HANDLE API OPERATIONS
   //HANDLE CREATE AND DELETE PROJECT OPERATIONS
-  //OPTIMIZE: HANDLE CREATE PROJECT
     const handleCreateProject = async () => {
     try {
       const projectResponse = await axios.post(
@@ -371,7 +368,7 @@ const NewProjectForm = () => {
               {currentProjects.map((project) => (
                 <tr
                   key={project.id}
-                  className="hover:bg-pageSideMenuTextHover cursor-pointer transition duration-200"
+                  className="hover:bg-pageSideMenuTextHover transition duration-200"
                 >
                   <td className="px-4 border-t border-r border-b border-gray-500">
                     #{project.identification_number}
@@ -512,8 +509,6 @@ const NewProjectForm = () => {
 
         {showCard && (
           <div className="bg-gray-800 px-5 rounded-lg shadow-lg mb-5">
-            {" "}
-            {/*OPTIMIZE: NEW PROJECT FORM*/}
             <div className="px-2 pb-5">
               <div className="pt-5 pb-3 text-sm text-gray-200">
                 <h5 className=" pb-1 ">
@@ -625,8 +620,6 @@ const NewProjectForm = () => {
                   </h5>
                 </div>
                 <div>
-                  {" "}
-                  {/*OPTIMIZE: SELECTOR PROJECT MANAGER*/}
                   {userSelections.map((userSelection) => (
                     <div
                       key={userSelection.id}
@@ -1203,7 +1196,6 @@ const NewProjectForm = () => {
               </div>
 
               <div className="flex justify-end pt-10 items-center">
-                {/*OPTIMIZE: SAVE PROJECT*/}
                 <button
                   onClick={handleCreateProject}
                   className="px-12 py-2 mx-1 bg-green-900 text-sm text-green-300 bg-pageBackground border border-green-500 rounded hover:bg-green-700"

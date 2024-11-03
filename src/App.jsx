@@ -10,28 +10,26 @@ import Stock from './pages/Stock';
 import Me from './pages/Me';
 import Users from './pages/Users';
 import ForgotPass from './pages/ForgotPassword';
-import NewProjectForm from './pages/NewProjectForm';
+import ProjectsManagment from './pages/RefactoringProjectsManagment';   //Refactoring Projects Table(Edit and Delete) and Projects Form(Add new project)
 import NewUserForm from './pages/NewUserForm';
 import OldProject from './pages/OldProject';
+
 
 const App = () => {
   return (
     <Routes>
       <Route path="/" element={<Login />} />
       <Route path="/dashboard" element={<Dashboard />}>
-
         <Route path="me" element={<Me />} />
         <Route path="projects" element={<Projects />} />
-        <Route path="new-project-form" element={<NewProjectForm />} />
+        <Route path="projects-managment" element={<ProjectsManagment />} />
         <Route path="history" element={<History />} />
         <Route path="stock" element={<Stock />} />
         <Route path="usuarios" element={<Users />} />
         <Route path="new-user-form" element={<NewUserForm />} />
         <Route path="old-project" element={<OldProject />} />
         <Route path="forgotpass" element={<ForgotPass />} />
-
       </Route>
-
     </Routes>
   );
 };

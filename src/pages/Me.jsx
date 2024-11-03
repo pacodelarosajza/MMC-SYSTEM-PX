@@ -107,7 +107,7 @@ const Me = () => {
 
   if (!user) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
+      <div className=" flex justify-center items-center min-h-screen">
         <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-500"></div>
       </div>
     );
@@ -116,8 +116,8 @@ const Me = () => {
   return (
     <div
       className={`${
-        darkMode ? " text-white" : "bg-white text-black"
-      } min-h-screen flex flex-col items-center justify-center`}
+        darkMode ? "text-white" : "bg-white text-black"
+      } flex flex-col items-center justify-center min-h-screen`}
     >
       <div className="bg-gray-800 p-8 rounded-lg shadow-lg w-full max-w-3xl">
         <div className="flex justify-between items-center mb-6">
