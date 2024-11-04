@@ -1,42 +1,38 @@
 import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
-import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 
 const ProjectsManagmentForm = () => {
   const apiIpAddress = import.meta.env.VITE_API_IP_ADDRESS; // API IP address
 
-  // ACTIVE PROJECTS AND POST NEW PROJECT STATES
-  const [newProject, setNewProject] = useState({
-    // post new project states
+  //STATES FOR THE NEW PROJECT
+  // Initial states for the project and user-project relationship
+  const initialProjectState = {
     identification_number: "",
     delivery_date: "",
     completed: 0,
     cost_material: "",
     description: "",
-  });
-  const [newUserProject, setNewUserProject] = useState({
-    // post new user project states
-    projectId: 0,
-    users_id: 0,
-  });
+  };
+  const [newProject, setNewProject] = useState(initialProjectState);
 
-  //  PROJECT MANAGER AND PERSONNEL WITH RECEPTION AUTHORIZATION SELECTOR STATES
-  // project manager selector
+  // STATES FOR THE PROJECT MANAGER AND PERSONNEL WITH RECEPTION AUTHORIZATION SELECTORS
   const [adminUsers, setAdminUsers] = useState([]);
   const [userSelections, setUserSelections] = useState([
+    // Initial state for the project manager selector
     { id: Date.now(), value: "" },
   ]);
-  // personnel with reception authorization selector
   const [operUsers, setOperUsers] = useState([]);
   const [userOperSelections, setUserOperSelections] = useState([
+    // Initial state for the personnel with reception authorization selector
     { id: Date.now(), value: "" },
   ]);
 
-  // USEEFFECT API OPERATIONS
+  // FETCH ADMIN AND OPERATIONAL USERS WHEN THE COMPONENT MOUNTS
   useEffect(() => {
     fetchAdminUsers();
     fetchOperUsers();
   }, []);
+
   const fetchAdminUsers = async () => {
     try {
       const response = await axios.get(`${apiIpAddress}/getUsersByUserType/1`);
@@ -45,52 +41,62 @@ const ProjectsManagmentForm = () => {
       console.error("Error fetching admin users:", error);
     }
   };
+
   const fetchOperUsers = async () => {
-    // Fetch oper users from API
     try {
       const response = await axios.get(`${apiIpAddress}/getUsersByUserType/2`);
       setOperUsers(response.data);
     } catch (error) {
-      console.error("Error fetching users oper:", error);
+      console.error("Error fetching operational users:", error);
     }
   };
 
-  //HANDLE API OPERATIONS
-  //HANDLE CREATE AND DELETE PROJECT OPERATIONS
+  // HANDLE CREATE PROJECT
   const handleCreateProject = async () => {
     try {
+      // Post the new project
       const projectResponse = await axios.post(
         `${apiIpAddress}/api/postProject`,
         newProject
       );
       const projectId = projectResponse.data.id;
 
-      // Validar que userSelections no esté vacío y que los valores sean correctos
+      // Ensure user selections are valid
       if (
         userSelections.length === 0 ||
         userSelections.some((selection) => !selection.value)
       ) {
         throw new Error("Please select at least one user for the project.");
       }
+      if (
+        userOperSelections.length === 0 ||
+        userOperSelections.some((selection) => !selection.value)
+      ) {
+        throw new Error(
+          "Please select at least one user with reception authorization."
+        );
+      }
 
-      // Asignar el projectId a newUserProject
+      // Post each user-project relationship
       const userProjectPromises = userSelections.map((userSelection) =>
         axios.post(`${apiIpAddress}/api/user_assign_project`, {
-          projectId: projectId,
           users_id: userSelection.value,
+          project_id: projectId, // Use `project_id` as expected by the API
         })
       );
+      const userOperProjectPromises = userOperSelections.map(
+        (userOperSelection) =>
+          axios.post(`${apiIpAddress}/api/user_assign_project`, {
+            users_id: userOperSelection.value,
+            project_id: projectId, // Use `project_id` as expected by the API
+          })
+      );
+      await Promise.all([...userProjectPromises, ...userOperProjectPromises]);
 
-      await Promise.all(userProjectPromises);
-
-      setNewProject({
-        identification_number: "",
-        delivery_date: "",
-        completed: 0,
-        cost_material: "",
-        description: "",
-      });
-      fetchActiveProjects();
+      // Reset form state after successful submission
+      setNewProject(initialProjectState);
+      setUserSelections([{ id: Date.now(), value: "" }]);
+      setUserOperSelections([{ id: Date.now(), value: "" }]);
       alert(`Project registration successful. Project ID: ${projectId}`);
     } catch (error) {
       console.error("Error creating project:", error);
@@ -98,49 +104,39 @@ const ProjectsManagmentForm = () => {
     }
   };
 
-  // NEW PROJECT "CARD" OPERATIONS
-  const [showCard, setShowCard] = useState(false);
-  const handleButtonClick = () => {
-    // Toggle show/hide card
-    setShowCard(!showCard);
-  };
+  //HANDLE INPUT CHANGE FOR NEW PROJECT
   const handleChange = (event) => {
-    // Handle input change for new project
-    const { name, value } = event.target; // this function is used to handle the change in the input fields of the new project form
+    const { name, value } = event.target;
     setNewProject((prevProject) => ({
       ...prevProject,
       [name]: value,
     }));
   };
 
-  // PROJECT MANAGER AND PERSONNEL WITH RECEPTION AUTHORIZATION SELECTOR OPERATIONS
+  //PROJECT MANAGER AND PERSONNEL WITH RECEPTION AUTHORIZATION SELECTORS OPERATIONS
   // PROJECT MANAGER SELECTOR OPERATIONS
   const addUserSelection = () => {
     setUserSelections([...userSelections, { id: Date.now(), value: "" }]);
   };
+
   const removeUserSelection = (id) => {
-    // Remove a user selection
     setUserSelections(
       userSelections.filter((userSelection) => userSelection.id !== id)
     );
   };
+
   const handleUserChange = (id, value) => {
     setUserSelections(
       userSelections.map((userSelection) =>
         userSelection.id === id ? { ...userSelection, value } : userSelection
       )
     );
-
-    // Actualizar newUserProject con el users_id seleccionado
-    setNewUserProject((prevNewUserProject) => ({
-      ...prevNewUserProject,
-      users_id: value,
-    }));
   };
+
   const selectedUsers = userSelections.map(
-    // Get selected users
     (userSelection) => userSelection.value
   );
+
   // PERSONNEL WITH RECEPTION AUTHORIZATION SELECTOR OPERATIONS
   const addUserOperSelection = () => {
     setUserOperSelections([
@@ -148,6 +144,7 @@ const ProjectsManagmentForm = () => {
       { id: Date.now(), value: "" },
     ]);
   };
+
   const removeUserOperSelection = (id) => {
     setUserOperSelections(
       userOperSelections.filter(
@@ -155,6 +152,7 @@ const ProjectsManagmentForm = () => {
       )
     );
   };
+
   const handleUserOperChange = (id, value) => {
     setUserOperSelections(
       userOperSelections.map((userOperSelection) =>
@@ -164,20 +162,27 @@ const ProjectsManagmentForm = () => {
       )
     );
   };
+
   const selectedUsersOper = userOperSelections.map(
     (userOperSelection) => userOperSelection.value
   );
 
-  // TABLES OPERATIONS
-  // ASSEMBLIES TABLE
+  // NEW PROJECT "CARD" OPERATIONS
+  const [showCard, setShowCard] = useState(false);
+  const handleButtonClick = () => {
+    setShowCard(!showCard);
+  };
+
+  // ASSEMBLIES AND SUBASSEMBLIES TABLE OPERATIONS
+  // ASSEMBLIES TABLE OPERATIONS
   const [InTable, setInTable] = useState([]); // Assemblies table states
   const [isDivVisible, setIsDivVisible] = useState(false);
   const handleToggleDiv = () => {
     setIsDivVisible(!isDivVisible); // Toggle visibility of the div
   };
+
   const addRowInTable = () => {
     const newRow = {
-      // Add a row to the assemblies table
       id: Date.now(),
       assemblyId: "",
       description: "",
@@ -187,12 +192,13 @@ const ProjectsManagmentForm = () => {
     };
     setInTable([...InTable, newRow]);
   };
+
   const removeRow = (id) => {
     setInTable(InTable.filter((row) => row.id !== id)); // Remove a row from the assemblies table
   };
+
   const handleInputChange = (id, field, value) => {
     const updatedTable = InTable.map((row) => {
-      // Handle input change in the assemblies table
       if (row.id === id) {
         return { ...row, [field]: value };
       }
@@ -200,15 +206,16 @@ const ProjectsManagmentForm = () => {
     });
     setInTable(updatedTable);
   };
-  // SUBASSEMBLIES TABLES
+
+  // SUBASSEMBLIES TABLE OPERATIONS
   const [InTableSubass, setInTableSubass] = useState([]); // Subassemblies table states
   const [isDivVisibleSubass, setIsDivVisibleSubass] = useState(false);
   const handleToggleDivSubass = () => {
     setIsDivVisibleSubass(!isDivVisibleSubass); // Toggle visibility of the subassemblies div
   };
+
   const addRowInTableSubass = () => {
     const newRowSubass = {
-      // Add a row to the subassemblies table
       id: Date.now(),
       assemblyId: "",
       description: "",
@@ -218,12 +225,13 @@ const ProjectsManagmentForm = () => {
     };
     setInTableSubass([...InTableSubass, newRowSubass]);
   };
+
   const removeRowSubass = (id) => {
     setInTableSubass(InTableSubass.filter((rowSubass) => rowSubass.id !== id)); // Remove a row from the subassemblies table
   };
+
   const handleInputChangeSubass = (id, field, value) => {
     const updatedTable = InTableSubass.map((rowSubass) => {
-      // Handle input change in the subassemblies table
       if (rowSubass.id === id) {
         return { ...rowSubass, [field]: value };
       }
@@ -231,7 +239,8 @@ const ProjectsManagmentForm = () => {
     });
     setInTableSubass(updatedTable);
   };
-  // HANDLE ASSEMBLY TABLE OPERATIONS
+
+  // OPTIMIZE: HANDLE ASSEMNLY TABLE OPERATIONS. continue with this secction
   const handleAddAssembly = async (event) => {
     event.preventDefault();
     const formData = new FormData(event.target);
@@ -250,7 +259,7 @@ const ProjectsManagmentForm = () => {
     }
   };
 
-  //SELECTOR FOR CHOOSING THE WAY TO REGISTER MATERIALS
+  // SELECTOR FOR CHOOSING THE WAY TO REGISTER MATERIALS
   const [addItemsForm, setaddItemsForm] = useState("");
   const handleAddItemsForm = (event) => {
     setaddItemsForm(event.target.value); // Handle change in the selector for choosing the way to register materials
@@ -260,22 +269,27 @@ const ProjectsManagmentForm = () => {
   const fileInputRef = useRef(null);
   const [fileName, setFileName] = useState("");
   const [dragActive, setDragActive] = useState(false);
+
   const handleFileClick = () => {
     fileInputRef.current.click();
   };
+
   const handleFileChange = (event) => {
     const file = event.target.files[0]; // Handle file change
     if (file) {
       setFileName(file.name);
     }
   };
+
   const handleDragOver = (event) => {
     event.preventDefault(); // Handle drag over
     setDragActive(true);
   };
+
   const handleDragLeave = () => {
     setDragActive(false); // Handle drag leave
   };
+
   const handleDrop = (event) => {
     event.preventDefault(); // Handle drop
     setDragActive(false);
@@ -284,10 +298,12 @@ const ProjectsManagmentForm = () => {
       setFileName(file.name);
     }
   };
+
   const handleRemoveFile = () => {
     setFileName(""); // Handle remove file
     fileInputRef.current.value = null;
   };
+
   return (
     <div className=" py-10 pb-20">
       <button
@@ -363,7 +379,7 @@ const ProjectsManagmentForm = () => {
                 <input
                   type="date"
                   name="delivery_date"
-                  className="p-2 rounded bg-gray-700 text-white "
+                  className="p-2 rounded bg-gray-700 text-white"
                   value={newProject.delivery_date}
                   onChange={handleChange}
                 />
@@ -374,24 +390,18 @@ const ProjectsManagmentForm = () => {
                 htmlFor="description"
                 className="block text-sm font-medium leading-6 text-gray-200"
               >
-                Descripcion
+                Description
               </label>
-              <div className="mt-2">
-                <textarea
-                  id="description"
-                  name="description"
-                  rows="3"
-                  placeholder="Write a short description of the project to quickly identify it."
-                  className="block w-full rounded-md border-0 p-3 text-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 bg-gray-700 caret-white"
-                  value={newProject.description}
-                  onChange={handleChange}
-                ></textarea>
-                <div className="m-1 text-gray-400">
-                  {newProject.description.length}/255 characters
-                </div>
-              </div>
+              <textarea
+                id="description"
+                name="description"
+                rows="3"
+                placeholder="Write a short description of the project to quickly identify it."
+                className="block w-full rounded-md border-0 p-3 text-white shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 bg-gray-700 caret-white"
+                value={newProject.description}
+                onChange={handleChange}
+              ></textarea>
             </div>
-
             <div className="col-span-full py-5">
               <hr className="border border-1 border-gray-500" />
             </div>
@@ -399,11 +409,8 @@ const ProjectsManagmentForm = () => {
             <div className="col-span-full pt-3">
               <div className="mb-5">
                 <h2 className="text-xl text-gray-200 font-bold">
-                  Project manager <span className="text-red-500">*</span>
+                  Project Manager <span className="text-red-500">*</span>
                 </h2>
-                <h5 className="text-sm text-gray-200">
-                  Select the project manager.
-                </h5>
               </div>
               <div>
                 {userSelections.map((userSelection) => (
@@ -437,7 +444,7 @@ const ProjectsManagmentForm = () => {
                     <button
                       type="button"
                       onClick={() => removeUserSelection(userSelection.id)}
-                      className="ml-2 px-2 py-1 border border-red-500 bg-red-900 text-red-300 hover:border-red-400 hover:bg-red-700 hover:text-red-200 rounded"
+                      className="ml-2 px-2 py-1 border border-red-500 bg-red-900 text-red-300 rounded"
                     >
                       <strong>X</strong>
                     </button>
@@ -446,77 +453,76 @@ const ProjectsManagmentForm = () => {
                 <button
                   type="button"
                   onClick={addUserSelection}
-                  className="px-2 border border-blue-500 bg-blue-900 text-blue-300 hover:border-blue-400 hover:bg-blue-700 hover:text-blue-200 rounded"
+                  className="px-2 border border-blue-500 bg-blue-900 text-blue-300 rounded"
                 >
                   <strong>+</strong>
                 </button>
               </div>
-            </div>
-
-            <div className="col-span-full py-5">
-              <hr className="border border-1 border-gray-500" />
-            </div>
-
-            <div className="col-span-full pt-3">
-              <div className="mb-5">
-                <h2 className="text-xl text-gray-200 font-bold">
-                  Personnel with reception authorization{" "}
-                  <span className="text-red-500">*</span>
-                </h2>
-                <h5 className="text-sm text-gray-200">
-                  Selects personnel authorized to receive project materials.
-                </h5>
+              <div className="col-span-full py-5">
+                <hr className="border border-1 border-gray-500" />
               </div>
-              <div>
-                {userOperSelections.map((userOperSelection) => (
-                  <div
-                    key={userOperSelection.id}
-                    className="mb-2 flex items-center"
+
+              <div className="col-span-full pt-3">
+                <div className="mb-5">
+                  <h2 className="text-xl text-gray-200 font-bold">
+                    Personnel with reception authorization{" "}
+                    <span className="text-red-500">*</span>
+                  </h2>
+                  <h5 className="text-sm text-gray-200">
+                    Selects personnel authorized to receive project materials.
+                  </h5>
+                </div>
+                <div>
+                  {userOperSelections.map((userOperSelection) => (
+                    <div
+                      key={userOperSelection.id}
+                      className="mb-2 flex items-center"
+                    >
+                      <select
+                        name={`identification_number_${userOperSelection.id}`}
+                        className="p-2 rounded bg-gray-700 text-white w-1/2 cursor-pointer"
+                        value={userOperSelection.value}
+                        onChange={(e) =>
+                          handleUserOperChange(
+                            userOperSelection.id,
+                            e.target.value
+                          )
+                        }
+                      >
+                        <option value="" disabled>
+                          N/A
+                        </option>
+                        {operUsers
+                          .filter(
+                            (user) =>
+                              !selectedUsersOper.includes(user.id) ||
+                              user.id === userOperSelection.value
+                          )
+                          .map((user) => (
+                            <option key={user.id} value={user.id}>
+                              {user.user_number}
+                            </option>
+                          ))}
+                      </select>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          removeUserOperSelection(userOperSelection.id)
+                        }
+                        className="ml-2 px-2 py-1 border border-red-500 bg-red-900 text-red-300 hover:border-red-400 hover:bg-red-700 hover:text-red-200 rounded"
+                      >
+                        <strong>X</strong>
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={addUserOperSelection}
+                    className="px-2 border border-blue-500 bg-blue-900 text-blue-300 hover:border-blue-400 hover:bg-blue-700 hover:text-blue-200 rounded"
                   >
-                    <select
-                      name={`identification_number_${userOperSelection.id}`}
-                      className="p-2 rounded bg-gray-700 text-white w-1/2 cursor-pointer"
-                      value={userOperSelection.value}
-                      onChange={(e) =>
-                        handleUserOperChange(
-                          userOperSelection.id,
-                          e.target.value
-                        )
-                      }
-                    >
-                      <option value="" disabled>
-                        N/A
-                      </option>
-                      {operUsers
-                        .filter(
-                          (user) =>
-                            !selectedUsersOper.includes(user.id) ||
-                            user.id === userOperSelection.value
-                        )
-                        .map((user) => (
-                          <option key={user.id} value={user.id}>
-                            {user.user_number}
-                          </option>
-                        ))}
-                    </select>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        removeUserOperSelection(userOperSelection.id)
-                      }
-                      className="ml-2 px-2 py-1 border border-red-500 bg-red-900 text-red-300 hover:border-red-400 hover:bg-red-700 hover:text-red-200 rounded"
-                    >
-                      <strong>X</strong>
-                    </button>
-                  </div>
-                ))}
-                <button
-                  type="button"
-                  onClick={addUserOperSelection}
-                  className="px-2 border border-blue-500 bg-blue-900 text-blue-300 hover:border-blue-400 hover:bg-blue-700 hover:text-blue-200 rounded"
-                >
-                  <strong>+</strong>
-                </button>
+                    <strong>+</strong>
+                  </button>
+                </div>
               </div>
             </div>
 
