@@ -1,7 +1,7 @@
 import React from "react";
 
 import AppTable from "./ProjectsManagmentTable"; //Import projects table file
-import AppForm from "./ProjectsManagmentForm"; //Import projects form file
+import AppForm from "./ProjectsManagmentNewProject"; //Import projects form file
 
 function RefactoringProjectsManagment() {
   return (

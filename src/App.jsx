@@ -2,6 +2,9 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 
 import Login from './pages/Login';
+import { AuthProvider } from './pages/AuthContext'; // Asegúrate de la ruta correcta
+import PrivateRoute from './pages/PrivateRoute'; // Asegúrate de la ruta correcta
+
 
 import Dashboard from './pages/Dashboard';
 import History from './pages/History';
@@ -14,23 +17,25 @@ import ProjectsManagment from './pages/RefactoringProjectsManagment';   //Refact
 import NewUserForm from './pages/NewUserForm';
 import OldProject from './pages/OldProject';
 
-
 const App = () => {
   return (
-    <Routes>
-      <Route path="/" element={<Login />} />
-      <Route path="/dashboard" element={<Dashboard />}>
-        <Route path="me" element={<Me />} />
-        <Route path="projects" element={<Projects />} />
-        <Route path="projects-managment" element={<ProjectsManagment />} />
-        <Route path="history" element={<History />} />
-        <Route path="stock" element={<Stock />} />
-        <Route path="usuarios" element={<Users />} />
-        <Route path="new-user-form" element={<NewUserForm />} />
-        <Route path="old-project" element={<OldProject />} />
-        <Route path="forgotpass" element={<ForgotPass />} />
-      </Route>
-    </Routes>
+    <AuthProvider>
+      <Routes>
+        <Route path="/" element={<Login />} />
+        {/* Ruta protegida */}
+        <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>}>
+          <Route path="me" element={<PrivateRoute><Me /></PrivateRoute>} />
+          <Route path="projects" element={<PrivateRoute><Projects /></PrivateRoute>} />
+          <Route path="projects-managment" element={<PrivateRoute><ProjectsManagment /></PrivateRoute>} />
+          <Route path="history" element={<PrivateRoute><History /></PrivateRoute>} />
+          <Route path="stock" element={<PrivateRoute><Stock /></PrivateRoute>} />
+          <Route path="usuarios" element={<PrivateRoute><Users /></PrivateRoute>} />
+          <Route path="new-user-form" element={<PrivateRoute><NewUserForm /></PrivateRoute>} />
+          <Route path="old-project" element={<PrivateRoute><OldProject /></PrivateRoute>} />
+          <Route path="forgotpass" element={<PrivateRoute><ForgotPass /></PrivateRoute>} />
+        </Route>
+      </Routes>
+    </AuthProvider>
   );
 };
 

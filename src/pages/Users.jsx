@@ -6,12 +6,10 @@ const UsersPage = () => {
   const [error, setError] = useState(null);
   const [visibleUsers, setVisibleUsers] = useState(5);
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortOrder, setSortOrder] = useState("asc");
   const [editUser, setEditUser] = useState(null);
-  const [userTypeId, setUserTypeId] = useState("");
-  const [emailSearch, setEmailSearch] = useState("");
-  const [userNumberSearch, setUserNumberSearch] = useState("");
-  const [showSearchMenu, setShowSearchMenu] = useState(false);
+  const [message, setMessage] = useState('');
+
+
 
   const apiIpAddress = import.meta.env.VITE_API_IP_ADDRESS;
 
@@ -34,6 +32,34 @@ const UsersPage = () => {
     fetchUsers();
   }, [apiIpAddress]);
 
+  // Mapeo de tipos de usuario a sus valores numéricos
+  const userTypeMapping = {
+    admin: 1,
+    operational: 2,
+    viewer: 3
+  };
+
+  // Función que convierte un término de búsqueda parcial a un ID de tipo de usuario
+  const getUserTypeId = (term) => {
+    const lowerTerm = term.toLowerCase();
+    // Encuentra un tipo de usuario cuyo nombre contenga el término de búsqueda
+    const matchedType = Object.keys(userTypeMapping).find((type) => type.includes(lowerTerm));
+    return matchedType ? userTypeMapping[matchedType] : term;
+  };
+
+  // Filtrado de usuarios en función del término de búsqueda
+  const filteredUsers = users.filter((user) => {
+    const search = searchTerm.toLowerCase();
+    const userTypeId = getUserTypeId(search);
+
+    return (
+      user.email.toLowerCase().includes(search) ||
+      user.user_number.toLowerCase().includes(search) ||
+      user.user_type_id === Number(userTypeId)
+    );
+  });
+
+
   const handleShowMore = () => {
     setVisibleUsers((prev) => prev + 5);
   };
@@ -49,46 +75,11 @@ const UsersPage = () => {
     }
   };
 
-  const handleSearchByEmail = async () => {
-    if (emailSearch) {
-      try {
-        const response = await fetch(
-          `${apiIpAddress}/api/users/${emailSearch}`
-        );
-        if (response.ok) {
-          const user = await response.json();
-          setUsers([user]);
-        } else {
-          setError("Usuario no encontrado");
-        }
-      } catch (error) {
-        setError("Error al buscar el usuario");
-      }
-    }
-  };
 
-  const handleSearchByUserNumber = async () => {
-    if (userNumberSearch) {
-      try {
-        const response = await fetch(
-          `${apiIpAddress}/api/users/userNum/${userNumberSearch}`
-        );
-        if (response.ok) {
-          const user = await response.json();
-          setUsers([user]);
-        } else {
-          setError("Usuario no encontrado");
-        }
-      } catch (error) {
-        setError("Error al buscar el usuario");
-      }
-    }
-  };
 
-  // Llamada para actualizar el usuario
+
   const handleUpdateUser = async (id) => {
     try {
-      // Si el usuario está siendo "eliminado", asigna la fecha actual
       const currentDate = new Date().toISOString(); // Fecha en formato ISO
 
       const response = await fetch(`${apiIpAddress}/api/users/${id}`, {
@@ -113,42 +104,15 @@ const UsersPage = () => {
       const updatedUser = await response.json();
       console.log("Usuario actualizado:", updatedUser);
 
+      setMessage('Usuario actualizado correctamente.'); // Mensaje de éxito
       setEditUser(null); // Cierra el formulario de edición
     } catch (error) {
       console.error("Error en la actualización:", error);
-    }
-  };
-  const handleGetUsersByUserType = async () => {
-    if (userTypeId) {
-      try {
-        const response = await fetch(
-          `${apiIpAddress}/getUsersByUserType/${userTypeId}`
-        );
-        if (response.ok) {
-          const data = await response.json();
-          setUsers(data);
-        } else {
-          setError("No se encontraron usuarios con el tipo de usuario dado");
-        }
-      } catch (error) {
-        setError("Error al obtener usuarios por tipo");
-      }
+      setMessage('Error al actualizar el usuario.'); // Mensaje de error
     }
   };
 
-  const filteredUsers = users
-    .filter(
-      (user) =>
-        user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.user_number.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-    .sort((a, b) => {
-      if (sortOrder === "asc") {
-        return a.email.localeCompare(b.email);
-      } else {
-        return b.email.localeCompare(a.email);
-      }
-    });
+
 
   if (loading) {
     return (
@@ -165,110 +129,51 @@ const UsersPage = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-10 bg-gray-900 rounded-lg shadow-lg">
-      <h1 className="text-3xl font-bold text-center text-white mb-6">
-        Users list
-      </h1>
 
-      {/* Contenedor principal para las búsquedas */}
-      <div className="p-4 bg-gray-900 rounded-lg shadow-lg mb-6">
-        {/* Campo de búsqueda por email */}
-        <div className="mb-4">
-          <label className="block text-gray-300 mb-1">Email:</label>
-          <div className="flex items-center">
-            <input
-              type="text"
-              placeholder="Search for Email"
-              className="flex-grow p-2 border border-gray-700 rounded-lg bg-gray-800 text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-600 transition duration-200"
-              value={emailSearch}
-              onChange={(e) => setEmailSearch(e.target.value)}
-            />
-            <button
-              onClick={handleSearchByEmail}
-              className="ml-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200"
-            >
-              Search
-            </button>
-          </div>
-        </div>
+    <div className=" ">
+      <br></br>
+      <h2 className="text-4xl text-center font-extrabold text-gradient bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-blue-500 mb-8">
+        Search a User
+      </h2>
 
-        {/* Campo de búsqueda por número de usuario */}
-        <div className="mb-4">
-          <label className="block text-gray-300 mb-1">User Number:</label>
-          <div className="flex items-center">
-            <input
-              type="text"
-              placeholder="Search for User Number"
-              className="flex-grow p-2 border border-gray-700 rounded-lg bg-gray-800 text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-600 transition duration-200"
-              value={userNumberSearch}
-              onChange={(e) => setUserNumberSearch(e.target.value)}
-            />
-            <button
-              onClick={handleSearchByUserNumber}
-              className="ml-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200"
-            >
-              Search
-            </button>
-          </div>
-        </div>
-
-        {/* Campo para obtener usuarios por tipo */}
-        <div className="mb-4">
-          <label className="block text-gray-300 mb-1">Users type:</label>
-          <div className="flex items-center">
-            <input
-              type="number"
-              placeholder="User For Type Admin, Operational, Viewer"
-              className="flex-grow p-2 border border-gray-700 rounded-lg bg-gray-800 text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-600 transition duration-200"
-              value={userTypeId}
-              onChange={(e) => setUserTypeId(e.target.value)}
-            />
-            <button
-              onClick={handleGetUsersByUserType}
-              className="ml-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200"
-            >
-              Obtain
-            </button>
-          </div>
-        </div>
-
-        {/* Opciones de ordenación */}
-        <div className="mb-4 flex items-center">
-          <label className="text-gray-300 mr-2">Order for:</label>
-          <select
-            className="p-1 border border-gray-700 rounded-lg bg-gray-800 text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-600 transition duration-200"
-            onChange={(e) => setSortOrder(e.target.value)}
-            value={sortOrder}
-          >
-            <option value="asc">Ascending Email</option>
-            <option value="desc">Descending Email </option>
-          </select>
-          <button
-            className="ml-2 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg hover:bg-blue-700 transition duration-200"
-            onClick={handleShowMore}
-          >
-            Show More
-          </button>
+      {/* Campo de búsqueda general */}
+      <div className="relative mb-6">
+        <label className="block text-gray-300 mb-2 text-lg font-semibold">
+          Search Users
+        </label>
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="Search by Email, User Number, or User Type (e.g., 'admin')"
+            className="w-full p-3 pl-10 border border-gray-700 rounded-lg bg-gray-900 text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600 transition duration-200"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          <span className="absolute left-3 top-3 text-gray-400">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zm-5.707 8.293a1 1 0 011.414 0l1.586 1.586a7 7 0 109.192 0l1.586-1.586a1 1 0 011.414 1.414l-1.586 1.586a7 7 0 11-9.192 0l-1.586-1.586a1 1 0 010-1.414z" clipRule="evenodd" />
+            </svg>
+          </span>
         </div>
       </div>
 
       {/* Tabla de usuarios */}
-      <table className="min-w-full bg-gray-800 border border-gray-700 rounded-lg shadow-md">
-        <thead className="bg-gray-700">
+      <table className="min-w-full bg-gray-900 border border-gray-800 rounded-lg shadow-lg">
+        <thead className="bg-gray-800">
           <tr>
-            <th className="border-b border-gray-600 px-4 py-3 text-left text-gray-300">
+            <th className="border-b border-gray-700 px-6 py-4 text-left text-gray-300 font-semibold text-sm uppercase tracking-wider">
               ID
             </th>
-            <th className="border-b border-gray-600 px-4 py-3 text-left text-gray-300">
+            <th className="border-b border-gray-700 px-6 py-4 text-left text-gray-300 font-semibold text-sm uppercase tracking-wider">
               Email
             </th>
-            <th className="border-b border-gray-600 px-4 py-3 text-left text-gray-300">
+            <th className="border-b border-gray-700 px-6 py-4 text-left text-gray-300 font-semibold text-sm uppercase tracking-wider">
               User Type
             </th>
-            <th className="border-b border-gray-600 px-4 py-3 text-left text-gray-300">
+            <th className="border-b border-gray-700 px-6 py-4 text-left text-gray-300 font-semibold text-sm uppercase tracking-wider">
               User Number
             </th>
-            <th className="border-b border-gray-600 px-4 py-3 text-left text-gray-300">
+            <th className="border-b border-gray-700 px-6 py-4 text-left text-gray-300 font-semibold text-sm uppercase tracking-wider">
               Actions
             </th>
           </tr>
@@ -277,41 +182,41 @@ const UsersPage = () => {
           {filteredUsers.slice(0, visibleUsers).map((user) => (
             <tr
               key={user.id}
-              className="hover:bg-gray-600 transition duration-200"
+              className="hover:bg-gray-700 transition duration-200 ease-in-out"
             >
-              <td className="border-b border-gray-600 px-4 py-3 text-gray-200">
+              <td className="border-b border-gray-700 px-6 py-4 text-gray-200 text-sm">
                 {user.id}
               </td>
-              <td className="border-b border-gray-600 px-4 py-3 text-gray-200">
+              <td className="border-b border-gray-700 px-6 py-4 text-gray-200 text-sm">
                 {user.email}
               </td>
-              <td className="border-b border-gray-600 px-4 py-3 text-gray-200">
+              <td className="border-b border-gray-700 px-6 py-4 text-gray-200 text-sm">
                 {user.user_type_id === 1
                   ? "Admin"
                   : user.user_type_id === 2
-                  ? "Operational"
-                  : user.user_type_id === 3
-                  ? "Viewer"
-                  : "Desconocido"}
+                    ? "Operational"
+                    : user.user_type_id === 3
+                      ? "Viewer"
+                      : "Desconocido"}
               </td>
-
-              <td className="border-b border-gray-600 px-4 py-3 text-gray-200">
+              <td className="border-b border-gray-700 px-6 py-4 text-gray-200 text-sm">
                 {user.user_number}
               </td>
-              <td className="border-b border-gray-600 px-4 py-3">
+              <td className="border-b border-gray-700 px-6 py-4 flex space-x-2">
                 <button
                   onClick={() => setEditUser(user)}
-                  className="bg-gradient-to-r from-green-500 to-green-400 text-white font-bold py-2 px-4 rounded-lg shadow-lg hover:from-green-600 hover:to-green-500 hover:shadow-xl transition-all duration-300 ease-in-out"
+                  className="bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:from-blue-600 hover:to-blue-700 transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-opacity-50"
                 >
                   Edit
                 </button>
                 <button
                   onClick={() => handleDeleteUser(user.id)}
-                  className="ml-2 bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 transition duration-200"
+                  className="bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:from-red-600 hover:to-red-700 transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-300 focus:ring-opacity-50"
                 >
                   Delete
                 </button>
               </td>
+
             </tr>
           ))}
         </tbody>
@@ -319,13 +224,20 @@ const UsersPage = () => {
 
       {/* Formulario para editar usuario */}
       {editUser && (
-        <div className="mt-8 p-4 bg-gray-700 rounded-lg shadow-lg">
-          <h2 className="text-lg font-bold text-white mb-4">Edit User</h2>
+        <div className="mt-8 p-6 bg-gray-900 border border-gray-800 rounded-lg shadow-lg">
+          {/* Mensaje de éxito o error */}
+          {message && (
+            <div className={`mt-4 p-3 rounded-lg ${message.includes('Error') ? 'bg-red-600' : 'bg-green-600'} text-white`}>
+              {message}
+            </div>
+          )}
+
+          <h2 className="text-2xl font-extrabold text-gray-300 mb-4">Edit User</h2>
           <div>
             {/* Dropdown para seleccionar el tipo de usuario */}
-            <label className="text-gray-300">Tipo de Usuario:</label>
+            <label className="text-gray-300 mb-2">User Type:</label>
             <select
-              className="w-full p-2 mb-4 border border-gray-600 rounded-lg bg-gray-800 text-gray-200"
+              className="w-full p-3 mb-4 border border-gray-700 rounded-lg bg-gray-800 text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-600 transition duration-200"
               value={editUser.user_type_id}
               onChange={(e) =>
                 setEditUser({ ...editUser, user_type_id: e.target.value })
@@ -336,51 +248,58 @@ const UsersPage = () => {
               <option value="3">Viewer</option>
             </select>
 
-            <label className="text-gray-300">Email:</label>
+            <label className="text-gray-300 mb-2">Email:</label>
             <input
               type="email"
-              className="w-full p-2 mb-4 border border-gray-600 rounded-lg bg-gray-800 text-gray-200"
+              className="w-full p-3 mb-4 border border-gray-700 rounded-lg bg-gray-800 text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600 transition duration-200"
+              placeholder="Enter user email"
               value={editUser.email}
               onChange={(e) =>
                 setEditUser({ ...editUser, email: e.target.value })
               }
             />
 
-            <label className="text-gray-300">Número de Usuario:</label>
+            <label className="text-gray-300 mb-2">User Number:</label>
             <input
               type="text"
-              className="w-full p-2 mb-4 border border-gray-600 rounded-lg bg-gray-800 text-gray-200"
+              className="w-full p-3 mb-4 border border-gray-700 rounded-lg bg-gray-800 text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600 transition duration-200"
+              placeholder="Enter user number"
               value={editUser.user_number}
               onChange={(e) =>
                 setEditUser({ ...editUser, user_number: e.target.value })
               }
             />
 
-            <label className="text-gray-300">Password:</label>
+            <label className="text-gray-300 mb-2">Password:</label>
             <input
               type="password"
-              className="w-full p-2 mb-4 border border-gray-600 rounded-lg bg-gray-800 text-gray-200"
+              className="w-full p-3 mb-4 border border-gray-700 rounded-lg bg-gray-800 text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600 transition duration-200"
+              placeholder="Enter password"
               value={editUser.password}
               onChange={(e) =>
                 setEditUser({ ...editUser, password: e.target.value })
               }
             />
 
-            <button
-              onClick={() => handleUpdateUser(editUser.id)}
-              className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition duration-200"
-            >
-              Save Changes
-            </button>
+            <div className="flex space-x-2">
+              <button
+                onClick={() => handleUpdateUser(editUser.id)}
+                className="bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:from-blue-600 hover:to-blue-700 transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-opacity-50"
+              >
+                Save Changes
+              </button>
 
-            <button
-              onClick={() => setEditUser(null)}
-              className="ml-2 bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-500 transition duration-200"
-            >
-              Cancel
-            </button>
+              <button
+                onClick={() => setEditUser(null)}
+                className="bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:from-red-600 hover:to-red-700 transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-300 focus:ring-opacity-50"
+              >
+                Cancel
+              </button>
+
+            </div>
           </div>
         </div>
+
       )}
     </div>
   );

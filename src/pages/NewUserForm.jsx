@@ -89,7 +89,7 @@ const NewUserForm = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center px-1">
+    <div className="min-h-screen flex items-center justify-center px-1">
       <div className="bg-gray-800 border border-gray-700 rounded-lg w-full max-w-md p-6 shadow-lg">
         <h2 className="text-2xl font-bold text-center text-white mb-4">Create User</h2>
 

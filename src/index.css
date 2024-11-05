@@ -121,3 +121,117 @@
   background-color: #f0f0f0; /* Color de la pista de desplazamiento 
 }*/
 
+/* Fondo de la página de login */
+.login-bg-page {
+  background-color: #45454b;
+}
+
+/* Contenedor animado de óvalos */
+.login-ovals-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: -1;
+}
+
+.login-ovals-background::before,
+.login-ovals-background::after {
+  content: "";
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  background-color: rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  animation: login-rotate 10s infinite linear;
+}
+
+.login-ovals-background::after {
+  width: 300px;
+  height: 300px;
+  background-color: rgba(0, 0, 0, 0.15);
+  animation-direction: reverse;
+}
+
+@keyframes login-rotate {
+  0% {
+    transform: rotate(0deg) translateX(0) translateY(0);
+  }
+  50% {
+    transform: rotate(180deg) translateX(-20px) translateY(20px);
+  }
+  100% {
+    transform: rotate(360deg) translateX(0) translateY(0);
+  }
+}
+
+/* Logo con opacidad */
+.login-logo {
+  opacity: 0.6;
+}
+
+/* Contenedor del formulario */
+.login-form-container {
+  background-color: #555151;
+}
+
+/* Estilos de texto */
+.login-text-light {
+  color: #f0f0f5;
+}
+
+.login-subtitle {
+  color: #a0a0a0;
+}
+
+/* Mensaje de error */
+.login-error-message {
+  color: #ff4d4f;
+}
+
+/* Etiquetas y campos de entrada */
+.login-label {
+  color: #333333;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.login-input {
+  border: 1px solid #cccccc;
+  outline: none;
+  width: 100%;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  transition: border-color 0.3s;
+}
+
+.login-input:focus {
+  border-color: #007bff;
+}
+
+/* Contenedor del icono para ver la contraseña */
+.login-eye-icon-container {
+  right: 0.75rem;
+}
+
+/* Botón de inicio de sesión */
+.login-submit-button {
+  background-color: #0056b3;
+  color: #ffffff;
+  font-weight: bold;
+  padding: 0.75rem;
+  width: 100%;
+  border: none;
+  border-radius: 0.25rem;
+  transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.login-submit-button:hover {
+  background-color: #004494;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}

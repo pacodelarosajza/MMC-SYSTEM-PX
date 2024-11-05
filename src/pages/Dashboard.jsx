@@ -32,6 +32,7 @@ const Dashboard = ({ onLogout }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [showChildRoutes, setShowChildRoutes] = useState(false);
   const [assemblies, setAssemblies] = useState([]);
+  const [projectAdmins, setProjectAdmins] = useState({});
 
   const fetchAssemblies = async () => {
     try {
@@ -52,14 +53,38 @@ const Dashboard = ({ onLogout }) => {
         const projectsResponse = await axios.get(
           `${apiIpAddress}/api/getProjectsActives`
         );
-        setProjects(projectsResponse.data);
+        const loadedProjects = projectsResponse.data;
+        setProjects(loadedProjects);
+  
+        // Llama a la función para obtener los administradores después de cargar proyectos
+        fetchAdminsForProjects(loadedProjects);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Error fetching projects:", error);
       }
     };
 
     fetchData();
   }, []);
+
+  // Cargar administradores por cada proyecto
+  const fetchAdminsForProjects = async (projects) => {
+    const updatedProjectsWithAdmins = {};
+
+    for (const project of projects) {
+      try {
+        const response = await axios.get(
+          `${apiIpAddress}/api/projects/${project.id}/admins`
+        );
+        updatedProjectsWithAdmins[project.id] = response.data;
+      } catch (error) {
+        console.error(`Error fetching admins for project ${project.id}:`, error);
+        updatedProjectsWithAdmins[project.id] = [];
+      }
+    }
+
+    setProjectsWithAdmins(updatedProjectsWithAdmins);
+  };
+
 
   const handleLogout = () => {
     console.log("Cerrando sesión...");
@@ -68,55 +93,87 @@ const Dashboard = ({ onLogout }) => {
     navigate("/");
   };
 
-  const addNotification = (type, message, details) => {
-    const notification = { type, message, details };
-    setNotifications((prevNotifications) => [
-      ...prevNotifications,
-      notification,
-    ]);
+  // Función para agregar una notificación
+const addNotification = (type, message, details) => {
+  const notification = { id: Date.now(), type, message, details };
 
-    // Eliminar la notificación más reciente después de 10 segundos
-    setTimeout(() => {
-      setNotifications((prevNotifications) => {
-        // Solo eliminar la última notificación
-        return prevNotifications.slice(0, -1);
-      });
-    }, 10000);
+  // Actualiza el estado con la nueva notificación
+  setNotifications((prevNotifications) => [...prevNotifications, notification]);
+
+  // Configura un temporizador para eliminar la notificación después de 10 segundos
+  setTimeout(() => {
+    removeNotification(notification.id);
+  }, 10000);
+};
+
+// Función para eliminar una notificación por ID
+const removeNotification = (id) => {
+  setNotifications((prevNotifications) => 
+    prevNotifications.filter((notification) => notification.id !== id)
+  );
+};
+
+// Función para generar mensajes basados en el tipo de notificación
+const generateMessage = (notificationType, item) => {
+  const messages = {
+    success: `With ID.${item.id}: ${item.name}, Cantidad: ${item.quantity} (Assembly ID.${item.assembly_id}/Project #${item.project_id})`,
+    warning: `${item.name}, ID.${item.id} (Assembly ID.${item.assembly_id}/Project #${item.project_id})`,
+    info: `Assembly ID.${item.id}, Proyecto #${item.project_id}`,
+    completed: `Assembly ID.${item.id}, Identificación: ${item.identification_number}`,
   };
+  
+  return messages[notificationType] || '';
+};
 
-  const fetchNotifications = async () => {
-    const endpoints = [
-      { url: "/api/getItems/arrived", type: "success" },
-      { url: "/api/getItems/missing", type: "warning" },
-      { url: "/api/getAssemblyByDeliveryDate", type: "info" },
-      { url: "/api/getAssemblyByCompletedDate", type: "completed" },
-    ];
+// Función para obtener notificaciones de múltiples endpoints
+const fetchNotifications = async () => {
+  const endpoints = [
+    { url: "/api/getItems/arrived", type: "success" },
+    { url: "/api/getItems/missing", type: "warning" },
+    { url: "/api/getAssemblyByDeliveryDate", type: "info" },
+    { url: "/api/getAssemblyByCompletedDate", type: "completed" },
+  ];
 
-    try {
-      const responses = await Promise.all(
-        endpoints.map((endpoint) => axios.get(`${apiIpAddress}${endpoint.url}`))
-      );
+  try {
+    const responses = await Promise.all(
+      endpoints.map((endpoint) => axios.get(`${apiIpAddress}${endpoint.url}`))
+    );
 
-      responses.forEach((response, index) => {
-        const notificationType = endpoints[index].type;
-        response.data.forEach((item) => {
-          let message;
-          if (notificationType === "success") {
-            message = `With ID.${item.id}: ${item.name}, Cantidad: ${item.quantity} (Assembly ID.${item.assembly_id}/Project #${item.project_id}) `;
-          } else if (notificationType === "warning") {
-            message = `${item.name}, ID.${item.id}(Assembly ID.${item.assembly_id}/Project #${item.project_id})`;
-          } else if (notificationType === "info") {
-            message = `Assembly ID.${item.id}, Proyecto #${item.project_id}`;
-          } else if (notificationType === "completed") {
-            message = `Assembly ID.${item.id}, Identificación: ${item.identification_number}`;
+    responses.forEach((response, index) => {
+      const notificationType = endpoints[index].type;
+
+      // Comprobar si hay cambios en los datos
+      const previousData = previousResponses[index]?.data || [];
+      const newData = response.data;
+
+      // Comparar los datos anteriores con los nuevos
+      if (newData.length > previousData.length) {
+        newData.forEach((item) => {
+          if (!previousData.some(prevItem => prevItem.id === item.id)) {
+            let message;
+            if (notificationType === "success") {
+              message = `With ID.${item.id}: ${item.name}, Cantidad: ${item.quantity} (Assembly ID.${item.assembly_id}/Project #${item.project_id}) `;
+            } else if (notificationType === "warning") {
+              message = `${item.name}, ID.${item.id}(Assembly ID.${item.assembly_id}/Project #${item.project_id})`;
+            } else if (notificationType === "info") {
+              message = `Assembly ID.${item.id}, Proyecto #${item.project_id}`;
+            } else if (notificationType === "completed") {
+              message = `Assembly ID.${item.id}, Identificación: ${item.identification_number}`;
+            }
+
+            addNotification(notificationType, message, { id: item.id });
           }
-          addNotification(notificationType, message, { id: item.id });
         });
-      });
-    } catch (error) {
-      console.error("Error fetching notifications:", error);
-    }
-  };
+      }
+      
+      // Actualizar el estado previo
+      previousResponses[index] = response;
+    });
+  } catch (error) {
+    console.error("Error fetching notifications:", error);
+  }
+};
+
 
   useEffect(() => {
     const intervalId = setInterval(fetchNotifications, 10000);
@@ -373,25 +430,19 @@ const Dashboard = ({ onLogout }) => {
                     className="relative bg-gray-700 p-3 rounded-lg shadow shadow-shadowBlueColor shadow-xl text-sm cursor-pointer hover:bg-gray-600 transition duration-200"
                     onClick={() =>
                       alert(`Detalles del Proyecto ID: ${project.id}`)
+                      
                     }
                   >
                     {/*<h2 className="font-bold text-lg">ID: {project.id}</h2>*/}
-                    <p className="text-blue-500 text-xl text-right">
+                    <p className="text-green-500 text-xl text-right">
                       <strong>#{project.identification_number}</strong>
                     </p>
-                    <br />
-                    <p className="text-lightWhiteLetter">
-                      <strong>Project manager:</strong>
-                      <br />
-                      Name of person responsible
-                    </p>
-                    <br />
+
                     <p className="text-lightWhiteLetter">
                       <strong>Description:</strong>
                       <br />
                       {project.description}
                     </p>
-                    <br />
                     <br />
                     <div className="absolute bottom-5 w-full">
                       <p className="text-lightGrayLetter text-xs">

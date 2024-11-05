@@ -16,6 +16,12 @@ const AddItemForm = () => {
   const [successfulCount, setSuccessfulCount] = useState(0);
   const [errorCount, setErrorCount] = useState(0);
   const [visibleItems, setVisibleItems] = useState(3);
+  const [totalCost, setTotalCost] = useState(0);
+
+
+
+
+
 
 
   const apiIpAddress = import.meta.env.VITE_API_IP_ADDRESS;
@@ -34,15 +40,26 @@ const AddItemForm = () => {
     const fetchItemsWithStock = async () => {
       try {
         const response = await axios.get(`${apiIpAddress}/api/items-with-stock`);
-        setSearchResults(response.data);
+        const items = response.data;
+
+        // Calcular el costo total
+        const total = items.reduce((sum, item) => {
+          const itemCost = item.stock_items.reduce((stockSum, stockItem) => {
+            const quantity = parseFloat(stockItem.stock.stock_quantity);
+            const price = parseFloat(item.price);
+            return stockSum + quantity * price;
+          }, 0);
+          return sum + itemCost;
+        }, 0);
+
+        setTotalCost(total.toFixed(2)); // Redondea a 2 decimales
       } catch (error) {
-        console.error('Error al obtener ítems con stock:', error);
-        setMessage('Error al cargar ítems con stock.');
+        console.error("Error fetching items with stock:", error);
       }
     };
 
     fetchItemsWithStock();
-  }, [apiIpAddress]);
+  }, []);
 
   // Función para manejar la búsqueda de ítems
   const handleSearch = async () => {
@@ -166,82 +183,101 @@ const AddItemForm = () => {
   // fin de seccion de excel ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   return (
-    <div className="max-w-screen-2xl mb-80 p-16 bg-gray-900 shadow-lg rounded-lg animate-fadeIn">
-      <h2 className="text-3xl text-center font-extrabold text-gradient bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-blue-500">Search Stock Item</h2>
+    <div className="relative max-w-screen-xl mx-auto mb-40 p-10 bg-gray-900 shadow-2xl rounded-lg animate-fadeIn">
+      
+ {/* Indicador del Costo Total del Stock compacto y animado */}
+<div className="absolute top-4 right-4 flex items-center bg-gradient-to-r  text-white text-xs font-medium rounded-full px-4 py-2 shadow-lg border border-green-200 transform transition-all duration-300 hover:scale-105 hover:shadow-emerald-500/80 hover:bg-gradient-to-l bg-gray-900 via-emerald-500 bg-gray-900">
+  
+  {/* Ícono de dinero con animación de pulso */}
+  <div className="relative flex items-center justify-center w-6 h-6 mr-2 bg-green-400 rounded-full">
+    <span className="absolute inset-0 bg-green-200 rounded-full blur-sm opacity-50 animate-pulse"></span>
+    <span className="relative text-yellow-200 text-lg animate-bounce">💵</span>
+  </div>
 
-      {/* Sección de búsqueda de ítems */}
-      <div className="mb-6">
-        <label className="text-center font-extrabold  bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-blue-500">Search for an Item:</label>
-        <div className="flex space-x-4">
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-4 py-2 border-2 border-white rounded-lg bg-gray-800 text-white focus:outline-none focus:border-blue-700 transition duration-300"
-            placeholder="Enter item name or supplier..."
-          />
-          <button
-            onClick={handleSearch}
-            className="bg-white hover:bg-white text-black px-4 py-2 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 flex items-center"
-          >
-            <FontAwesomeIcon icon={faSearch} className="mr-2" /> Search
-          </button>
+  {/* Texto de costo con formato destacado */}
+  <div className="relative text-left">
+    <p className="text-[0.7rem] uppercase tracking-widest">Costo Total</p>
+    <p className="text-lg font-bold tracking-wide text-yellow-100">
+      ${totalCost.toLocaleString('en-US')} <span className="text-sm">MXN</span>
+    </p>
+  </div>
+</div>
+
+      {/* Sección de búsqueda y barra de búsqueda */}
+      <div className="mt-12">
+        <h2 className="text-4xl text-center font-extrabold text-gradient bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-blue-500 mb-8">
+          Buscar Ítem de Stock
+        </h2>
+        <div className="flex flex-col items-center space-y-4">
+          <label className="text-lg font-bold text-gray-200 text-center">Buscar un Ítem:</label>
+          <div className="flex justify-center space-x-4 w-full max-w-lg">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full px-6 py-3 border border-transparent rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 transition duration-300"
+              placeholder="Ingrese el nombre del ítem o proveedor..."
+            />
+            <button
+              onClick={handleSearch}
+              className="bg-gradient-to-r from-green-400 to-blue-500 text-white font-bold px-6 py-3 rounded-lg transition duration-300 ease-in-out transform hover:scale-110 flex items-center shadow-lg"
+            >
+              <FontAwesomeIcon icon={faSearch} className="mr-2" /> Buscar
+            </button>
+          </div>
+          {message && <p className="mt-4 text-green-400 text-center font-semibold">{message}</p>}
         </div>
-        {message && <p className="mt-4 text-green-500 text-center font-semibold">{message}</p>}
       </div>
-
+  
       {/* Spinner de carga */}
       {loading && (
-        <div className="flex justify-center items-center text-green mt-4">
-          <div className="spinner-border animate-spin inline-block w-8 h-8 border-4 rounded-full" role="status">
-            <span className="sr-only">Loading...</span>
-          </div>
-          <p className="ml-2">Buscando...</p>
+        <div className="flex justify-center items-center mt-10">
+          <div className="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12"></div>
+          <p className="ml-3 text-lg text-white font-semibold">Buscando...</p>
         </div>
       )}
-
+  
       {/* Lista de resultados de búsqueda en formato de recuadros */}
-      {/* Lista de resultados de búsqueda en formato de recuadros */}
-{searchResults.length > 0 && (
-  <>
-    <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 animate-slideIn">
-      {searchResults.slice(0, visibleItems).map((item) => (
-        <div
-          key={item.id}
-          className="flex flex-col p-6 bg-gray-700 hover:bg-gray-600 rounded-xl shadow-lg cursor-pointer transition duration-300 ease-in-out transform hover:scale-105"
-          onClick={() => handleSelectItem(item)}
-        >
-          <div className="flex items-center mb-4">
-            <FontAwesomeIcon icon={faWarehouse} className="text-blue-400 mr-2" />
-            <h3 className="text-lg font-semibold text-white">{item.name}</h3>
+      {searchResults.length > 0 && (
+        <>
+          <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 animate-slideIn">
+            {searchResults.slice(0, visibleItems).map((item) => (
+              <div
+                key={item.id}
+                className="flex flex-col p-6 bg-gray-700 hover:bg-gray-600 rounded-xl shadow-lg cursor-pointer transition duration-300 ease-in-out transform hover:scale-105"
+                onClick={() => handleSelectItem(item)}
+              >
+                <div className="flex items-center mb-4">
+                  <FontAwesomeIcon icon={faWarehouse} className="text-blue-400 mr-2" />
+                  <h3 className="text-lg font-semibold text-white">{item.name}</h3>
+                </div>
+                <p className="text-sm text-gray-300">Supplier: {item.supplier}</p>
+              </div>
+            ))}
           </div>
-          <p className="text-sm text-gray-300">Supplier: {item.supplier}</p>
-        </div>
-      ))}
-    </div>
-
-    {/* Botones para ver más y ver menos */}
-    <div className="flex justify-center mt-4 space-x-4">
-      {visibleItems < searchResults.length && (
-        <button
-          onClick={showMoreItems}
-          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition duration-300 ease-in-out transform hover:scale-105"
-        >
-          Ver más
-        </button>
+          {/* Botones de navegación de resultados */}
+          <div className="flex justify-center mt-12 space-x-6">
+            {visibleItems < searchResults.length && (
+              <button
+                onClick={showMoreItems}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-lg transition duration-300 ease-in-out transform hover:scale-110"
+              >
+                Ver más
+              </button>
+            )}
+            {visibleItems > 3 && (
+              <button
+                onClick={showLessItems}
+                className="bg-gray-600 hover:bg-gray-700 text-white font-bold px-6 py-3 rounded-lg transition duration-300 ease-in-out transform hover:scale-110"
+              >
+                Ver menos
+              </button>
+            )}
+          </div>
+        </>
       )}
-      {visibleItems > 3 && (
-        <button
-          onClick={showLessItems}
-          className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition duration-300 ease-in-out transform hover:scale-105"
-        >
-          Ver menos
-        </button>
-      )}
-    </div>
-  </>
-)}
-
+   
+  
 
 
       {/* Selected Item Details */}

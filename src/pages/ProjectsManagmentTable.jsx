@@ -1,6 +1,9 @@
 import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
-import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
+import AppForm from "./ProjectsManagmentForm"; //Import projects form file
+import { FaArrowLeft, FaArrowRight, FaSync } from "react-icons/fa";
+import Modal from "./Modal";
+import ModalAcept from "./ModalAcept";
 
 const ProjectsManagmentTable = () => {
   const apiIpAddress = import.meta.env.VITE_API_IP_ADDRESS; // API IP address
@@ -24,22 +27,42 @@ const ProjectsManagmentTable = () => {
     }
   };
 
-  //HANDLE API OPERATIONS
-  //HANDLE DELETE PROJECT OPERATIONS
-  const handleDeleteProject = async (id) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this project? This action cannot be undone."
-    );
-    if (confirmDelete) {
-      try {
-        await axios.delete(`${apiIpAddress}/api/deleteProject/${id}`);
-        fetchActiveProjects();
-        alert("Project deletion successful");
-      } catch (error) {
-        console.error("Error deleting project:", error);
-        alert("Project deletion failed");
+  const [isModalErrorOpen, setIsModalErrorOpen] = useState(false);
+  const [isModalDeleteSuccessOpen, setIsModalDeleteSuccessOpen] =
+    useState(false);
+  const [isModalDeleteAceptOpen, setIsModalDeleteAceptOpen] = useState(false);
+  const [projectToDelete, setProjectToDelete] = useState(null);
+
+  const handleDeleteProject = (id) => {
+    setProjectToDelete(id); // Guardamos el ID del proyecto a eliminar
+    setIsModalDeleteAceptOpen(true); // Mostramos el modal de confirmación
+  };
+
+  const confirmDeleteProject = async () => {
+    try {
+      if (projectToDelete) {
+        try {
+          await axios.delete(
+            `${apiIpAddress}/api/deleteProject/${projectToDelete}`
+          );
+          fetchActiveProjects(); // Actualizamos la lista de proyectos activos
+          setIsModalDeleteSuccessOpen(true); // Mostramos el modal de éxito
+        } catch (error) {
+          console.error("Error al eliminar el proyecto:", error);
+          setIsModalErrorOpen(true); // Mostramos el modal de error
+        } finally {
+          setIsModalDeleteAceptOpen(false); // Cerramos el modal de confirmación
+          setProjectToDelete(null); // Reiniciamos el proyecto a eliminar
+        }
       }
+    } catch (error) {
+      console.error("Error deleting project:", error);
     }
+  };
+
+  const cancelDeleteProject = () => {
+    setIsModalDeleteAceptOpen(false);
+    setProjectToDelete(null);
   };
 
   // EDIT MODAL OPERATIONS
@@ -72,9 +95,16 @@ const ProjectsManagmentTable = () => {
     <>
       {/* PROJECTS MANAGEMENT TABLE */}
       <div className="px-10">
-        <h2 className="text-xl pt-10 text-gray-300 font-bold">
-          Projects Actives
-        </h2>
+        <div className="flex items-center justify-between py-1 mt-5">
+          <h2 className="text-xl text-gray-300 font-bold">Projects Actives</h2>
+          <button
+            onClick={fetchActiveProjects}
+            className="p-2 mx-4 text-white rounded-full hover:bg-gray-700 transition duration-200"
+          >
+            <FaSync color="gray" size={20} />
+          </button>
+        </div>
+
         <div>
           <table
             className="text-sm table-auto w-full text-lightWhiteLetter"
@@ -152,76 +182,47 @@ const ProjectsManagmentTable = () => {
         </div>
       </div>
 
-      {/* MODAL SECTION FOR EDITING PROJECTS */}
+      {/* MODAL SECTION FOR ERROR FORM WINDOW */}
+      <Modal
+        isOpen={isModalErrorOpen}
+        onClose={() => setIsModalErrorOpen(false)}
+        title="Error"
+      >
+        <p>There was an error deleting the project.</p>
+      </Modal>
+
+      {/* MODAL SECTION FOR SUCCESSFUL PROJECT DELETION */}
+      <Modal
+        isOpen={isModalDeleteSuccessOpen}
+        onClose={() => setIsModalDeleteSuccessOpen(false)}
+        title="Project Deletion Successful"
+      >
+        <p>The project has been successfully deleted.</p>
+      </Modal>
+
+      {/* MODAL SECTION FOR ACCEPT PROJECT DELETION */}
+      <ModalAcept
+        isOpen={isModalDeleteAceptOpen}
+        onClose={() => setIsModalDeleteAceptOpen(false)}
+        onContinue={confirmDeleteProject}
+        title="Delete Project"
+      >
+        <p>Are you sure you want to delete this project?</p>
+      </ModalAcept>
+
+      {/* MODAL SECTION FOR EDITING PROJECTS  */}
       {isModalOpen && (
-        <div className="fixed z-10 inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg w-full max-w-md">
-            <h2 className="text-2xl font-semibold mb-6 text-gray-900 dark:text-gray-100">
-              Add Assembly
-            </h2>
-            <form form onSubmit={handleAddAssembly}>
-              <div className="mb-4">
-                <label
-                  htmlFor="assembly-name"
-                  className="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100"
-                >
-                  Assembly Name
-                </label>
-                <input
-                  type="text"
-                  id="assembly-name"
-                  name="assembly-name"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:text-gray-100"
-                  required
-                />
-              </div>
-              <div className="mb-4">
-                <label
-                  htmlFor="assembly-description"
-                  className="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100"
-                >
-                  Assembly Description
-                </label>
-                <textarea
-                  id="assembly-description"
-                  name="assembly-description"
-                  rows="3"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:text-gray-100"
-                  required
-                ></textarea>
-              </div>
-              <div className="mb-6">
-                <label
-                  htmlFor="assembly-file"
-                  className="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100"
-                >
-                  Upload Assembly File (.xlsx)
-                </label>
-                <input
-                  type="file"
-                  id="assembly-file"
-                  name="assembly-file"
-                  accept=".xlsx"
-                  className="mt-1 block w-full text-gray-900 dark:text-gray-100"
-                  required
-                />
-              </div>
-              <div className="flex justify-end">
-                <button
-                  type="submit"
-                  className="px-4 py-2 mr-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition duration-200"
-                >
-                  Add Assembly
-                </button>
-                <button
-                  type="button"
-                  onClick={closeModal}
-                  className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition duration-200"
-                >
-                  Close
-                </button>
-              </div>
-            </form>
+        <div className="fixed py-5 z-10 inset-0 flex items-center justify-center bg-black bg-opacity-50 overflow-auto">
+          <div className="bg-gray-800 rounded-lg p-4 mt-5 max-w-6xl w-full max-h-full overflow-y-auto">
+            <AppForm />
+            <div className="flex justify-end pr-2">
+              <button
+                onClick={closeModal}
+                className="px-12 py-2 mx-1 bg-orange-900 text-sm text-yellow-300 bg-pageBackground border border-yellow-500 rounded hover:bg-yellow-700"
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         </div>
       )}
