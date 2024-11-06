@@ -93,11 +93,11 @@ const Login = () => {
 
                   <div className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer">
                     {showPassword ? (
-                      <FaEyeSlash
-                        onClick={() => setShowPassword(!showPassword)}
+                      <FaEyeSlash 
+                      color="gray" onClick={() => setShowPassword(!showPassword)}
                       />
                     ) : (
-                      <FaEye onClick={() => setShowPassword(!showPassword)} />
+                      <FaEye color="gray" onClick={() => setShowPassword(!showPassword)} />
                     )}
                   </div>
                 </div>

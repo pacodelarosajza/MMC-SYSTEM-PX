@@ -99,9 +99,9 @@ const ProjectsManagmentTable = () => {
           <h2 className="text-xl text-gray-300 font-bold">Projects Actives</h2>
           <button
             onClick={fetchActiveProjects}
-            className="p-2 mx-4 text-white rounded-full hover:bg-gray-700 transition duration-200"
+            className="p-2 mx-4 text-white rounded hover:bg-gray-800 transition duration-200"
           >
-            <FaSync color="gray" size={20} />
+            <FaSync color="gray" size={15} />
           </button>
         </div>
 

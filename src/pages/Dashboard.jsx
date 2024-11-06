@@ -55,7 +55,7 @@ const Dashboard = ({ onLogout }) => {
         );
         const loadedProjects = projectsResponse.data;
         setProjects(loadedProjects);
-  
+
         // Llama a la función para obtener los administradores después de cargar proyectos
         fetchAdminsForProjects(loadedProjects);
       } catch (error) {
@@ -77,14 +77,16 @@ const Dashboard = ({ onLogout }) => {
         );
         updatedProjectsWithAdmins[project.id] = response.data;
       } catch (error) {
-        console.error(`Error fetching admins for project ${project.id}:`, error);
+        console.error(
+          `Error fetching admins for project ${project.id}:`,
+          error
+        );
         updatedProjectsWithAdmins[project.id] = [];
       }
     }
 
     setProjectsWithAdmins(updatedProjectsWithAdmins);
   };
-
 
   const handleLogout = () => {
     console.log("Cerrando sesión...");
@@ -94,86 +96,88 @@ const Dashboard = ({ onLogout }) => {
   };
 
   // Función para agregar una notificación
-const addNotification = (type, message, details) => {
-  const notification = { id: Date.now(), type, message, details };
+  const addNotification = (type, message, details) => {
+    const notification = { id: Date.now(), type, message, details };
 
-  // Actualiza el estado con la nueva notificación
-  setNotifications((prevNotifications) => [...prevNotifications, notification]);
+    // Actualiza el estado con la nueva notificación
+    setNotifications((prevNotifications) => [
+      ...prevNotifications,
+      notification,
+    ]);
 
-  // Configura un temporizador para eliminar la notificación después de 10 segundos
-  setTimeout(() => {
-    removeNotification(notification.id);
-  }, 10000);
-};
-
-// Función para eliminar una notificación por ID
-const removeNotification = (id) => {
-  setNotifications((prevNotifications) => 
-    prevNotifications.filter((notification) => notification.id !== id)
-  );
-};
-
-// Función para generar mensajes basados en el tipo de notificación
-const generateMessage = (notificationType, item) => {
-  const messages = {
-    success: `With ID.${item.id}: ${item.name}, Cantidad: ${item.quantity} (Assembly ID.${item.assembly_id}/Project #${item.project_id})`,
-    warning: `${item.name}, ID.${item.id} (Assembly ID.${item.assembly_id}/Project #${item.project_id})`,
-    info: `Assembly ID.${item.id}, Proyecto #${item.project_id}`,
-    completed: `Assembly ID.${item.id}, Identificación: ${item.identification_number}`,
+    // Configura un temporizador para eliminar la notificación después de 10 segundos
+    setTimeout(() => {
+      removeNotification(notification.id);
+    }, 10000);
   };
-  
-  return messages[notificationType] || '';
-};
 
-// Función para obtener notificaciones de múltiples endpoints
-const fetchNotifications = async () => {
-  const endpoints = [
-    { url: "/api/getItems/arrived", type: "success" },
-    { url: "/api/getItems/missing", type: "warning" },
-    { url: "/api/getAssemblyByDeliveryDate", type: "info" },
-    { url: "/api/getAssemblyByCompletedDate", type: "completed" },
-  ];
-
-  try {
-    const responses = await Promise.all(
-      endpoints.map((endpoint) => axios.get(`${apiIpAddress}${endpoint.url}`))
+  // Función para eliminar una notificación por ID
+  const removeNotification = (id) => {
+    setNotifications((prevNotifications) =>
+      prevNotifications.filter((notification) => notification.id !== id)
     );
+  };
 
-    responses.forEach((response, index) => {
-      const notificationType = endpoints[index].type;
+  // Función para generar mensajes basados en el tipo de notificación
+  const generateMessage = (notificationType, item) => {
+    const messages = {
+      success: `With ID.${item.id}: ${item.name}, Cantidad: ${item.quantity} (Assembly ID.${item.assembly_id}/Project #${item.project_id})`,
+      warning: `${item.name}, ID.${item.id} (Assembly ID.${item.assembly_id}/Project #${item.project_id})`,
+      info: `Assembly ID.${item.id}, Proyecto #${item.project_id}`,
+      completed: `Assembly ID.${item.id}, Identificación: ${item.identification_number}`,
+    };
 
-      // Comprobar si hay cambios en los datos
-      const previousData = previousResponses[index]?.data || [];
-      const newData = response.data;
+    return messages[notificationType] || "";
+  };
 
-      // Comparar los datos anteriores con los nuevos
-      if (newData.length > previousData.length) {
-        newData.forEach((item) => {
-          if (!previousData.some(prevItem => prevItem.id === item.id)) {
-            let message;
-            if (notificationType === "success") {
-              message = `With ID.${item.id}: ${item.name}, Cantidad: ${item.quantity} (Assembly ID.${item.assembly_id}/Project #${item.project_id}) `;
-            } else if (notificationType === "warning") {
-              message = `${item.name}, ID.${item.id}(Assembly ID.${item.assembly_id}/Project #${item.project_id})`;
-            } else if (notificationType === "info") {
-              message = `Assembly ID.${item.id}, Proyecto #${item.project_id}`;
-            } else if (notificationType === "completed") {
-              message = `Assembly ID.${item.id}, Identificación: ${item.identification_number}`;
+  // Función para obtener notificaciones de múltiples endpoints
+  const fetchNotifications = async () => {
+    const endpoints = [
+      { url: "/api/getItems/arrived", type: "success" },
+      { url: "/api/getItems/missing", type: "warning" },
+      { url: "/api/getAssemblyByDeliveryDate", type: "info" },
+      { url: "/api/getAssemblyByCompletedDate", type: "completed" },
+    ];
+
+    try {
+      const responses = await Promise.all(
+        endpoints.map((endpoint) => axios.get(`${apiIpAddress}${endpoint.url}`))
+      );
+
+      responses.forEach((response, index) => {
+        const notificationType = endpoints[index].type;
+
+        // Comprobar si hay cambios en los datos
+        const previousData = previousResponses[index]?.data || [];
+        const newData = response.data;
+
+        // Comparar los datos anteriores con los nuevos
+        if (newData.length > previousData.length) {
+          newData.forEach((item) => {
+            if (!previousData.some((prevItem) => prevItem.id === item.id)) {
+              let message;
+              if (notificationType === "success") {
+                message = `With ID.${item.id}: ${item.name}, Cantidad: ${item.quantity} (Assembly ID.${item.assembly_id}/Project #${item.project_id}) `;
+              } else if (notificationType === "warning") {
+                message = `${item.name}, ID.${item.id}(Assembly ID.${item.assembly_id}/Project #${item.project_id})`;
+              } else if (notificationType === "info") {
+                message = `Assembly ID.${item.id}, Proyecto #${item.project_id}`;
+              } else if (notificationType === "completed") {
+                message = `Assembly ID.${item.id}, Identificación: ${item.identification_number}`;
+              }
+
+              addNotification(notificationType, message, { id: item.id });
             }
+          });
+        }
 
-            addNotification(notificationType, message, { id: item.id });
-          }
-        });
-      }
-      
-      // Actualizar el estado previo
-      previousResponses[index] = response;
-    });
-  } catch (error) {
-    console.error("Error fetching notifications:", error);
-  }
-};
-
+        // Actualizar el estado previo
+        previousResponses[index] = response;
+      });
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+    }
+  };
 
   useEffect(() => {
     const intervalId = setInterval(fetchNotifications, 10000);
@@ -226,7 +230,17 @@ const fetchNotifications = async () => {
           `}
       >
         <div className="justify-center">
-          <img src="src/assets/YaskawaLogo6.png" alt="YASKAWA" className="w-auto mt-8 h-auto" style={{ display: 'block', margin: '0 auto', textAlign: 'center', fontWeight: 'bold' }} />
+          <img
+            src="src/assets/YaskawaLogo6.png"
+            alt="YASKAWA"
+            className="w-auto mt-8 h-auto"
+            style={{
+              display: "block",
+              margin: "0 auto",
+              textAlign: "center",
+              fontWeight: "bold",
+            }}
+          />
           <p className="text-center login-line mb-8">
             <strong>MCM Controller</strong>
           </p>
@@ -234,53 +248,69 @@ const fetchNotifications = async () => {
 
         <nav className="flex flex-col h-full justify-between ">
           <ul className="flex flex-col space-y-1">
-            <button className="text-2x1 text-left py-2 px-2 hover:bg-pageSideMenuTextHover hover:rounded transition duration-300 text-lightWhiteLetter font-medium">
-              <Link to="/dashboard" onClick={() => setShowChildRoutes(false)}>
-                Dashboard
-              </Link>
-            </button>
+            <Link
+              to="/dashboard"
+              onClick={() => setShowChildRoutes(false)}
+              className="text-2x1 text-left py-2 px-2 hover:bg-pageSideMenuTextHover hover:rounded transition duration-300 text-lightWhiteLetter font-medium"
+            >
+              <button>Dashboard</button>
+            </Link>
             <li className="border-b border-lightBlueLetter"></li>
-            <button className="text-2x1 text-left py-2 px-2 hover:bg-pageSideMenuTextHover hover:rounded transition duration-300 text-lightWhiteLetter font-medium">
-              <Link to="/dashboard/Me" onClick={handleNavigate}>
-                Me
-              </Link>
-            </button>
+            <Link
+              to="/dashboard/Me"
+              onClick={handleNavigate}
+              className="text-2x1 text-left py-2 px-2 hover:bg-pageSideMenuTextHover hover:rounded transition duration-300 text-lightWhiteLetter font-medium"
+            >
+              <button>Me</button>
+            </Link>
             <li className="border-b border-lightBlueLetter"></li>
             <div className="text-2x1 text-left py-2 px-2 transition duration-300 text-lightWhiteLetter font-medium">
               Projects
             </div>
-            <button className="text-sm text-left py-2 px-4 hover:bg-pageSideMenuTextHover hover:rounded transition duration-300 text-lightWhiteLetter">
-              <Link to="/dashboard/projects" onClick={handleNavigate}>
-                In Development
-              </Link>
-            </button>
-            <button className="text-sm text-left py-2 px-4 hover:bg-pageSideMenuTextHover hover:rounded transition duration-300 text-lightWhiteLetter">
-              <Link to="/dashboard/projects-managment" onClick={handleNavigate}>
-                Projects Managment
-              </Link>
-            </button>
-            <button className="text-sm text-left py-2 px-4 hover:bg-pageSideMenuTextHover hover:rounded transition duration-300 text-lightWhiteLetter">
-              <Link to="/dashboard/history" onClick={handleNavigate}>
-                History
-              </Link>
-            </button>
+            <Link
+              to="/dashboard/projects"
+              onClick={handleNavigate}
+              className="text-sm text-left py-2 px-4 hover:bg-pageSideMenuTextHover hover:rounded transition duration-300 text-lightWhiteLetter"
+            >
+              <button>In Development</button>
+            </Link>
+            <Link
+              to="/dashboard/projects-managment"
+              onClick={handleNavigate}
+              className="text-sm text-left py-2 px-4 hover:bg-pageSideMenuTextHover hover:rounded transition duration-300 text-lightWhiteLetter"
+            >
+              <button>Projects Managment</button>
+            </Link>
+            <Link
+              to="/dashboard/history"
+              onClick={handleNavigate}
+              className="text-sm text-left py-2 px-4 hover:bg-pageSideMenuTextHover hover:rounded transition duration-300 text-lightWhiteLetter"
+            >
+              <button>History</button>
+            </Link>
             <li className="border-b border-lightBlueLetter"></li>
-            <button className="text-2x1 text-left py-2 px-2 hover:bg-pageSideMenuTextHover hover:rounded transition duration-300 text-lightWhiteLetter font-medium">
-              <Link to="/dashboard/stock" onClick={handleNavigate}>
-                Stock
-              </Link>
-            </button>
+            <Link
+              to="/dashboard/stock"
+              onClick={handleNavigate}
+              className="text-2x1 text-left py-2 px-2 hover:bg-pageSideMenuTextHover hover:rounded transition duration-300 text-lightWhiteLetter font-medium"
+            >
+              <button>Stock</button>
+            </Link>
             <li className="border-b border-lightBlueLetter"></li>
-            <button className="text-2x1 text-left py-2 px-2 hover:bg-pageSideMenuTextHover hover:rounded transition duration-300 text-lightWhiteLetter font-medium">
-              <Link to="/dashboard/usuarios" onClick={handleNavigate}>
-                Users
-              </Link>
-            </button>
-            <button className="text-sm text-left py-2 px-4 hover:bg-pageSideMenuTextHover hover:rounded transition duration-300 text-lightWhiteLetter">
-              <Link to="/dashboard/new-user-form" onClick={handleNavigate}>
-                Add User
-              </Link>
-            </button>
+            <Link
+              to="/dashboard/usuarios"
+              onClick={handleNavigate}
+              className="text-2x1 text-left py-2 px-2 hover:bg-pageSideMenuTextHover hover:rounded transition duration-300 text-lightWhiteLetter font-medium"
+            >
+              <button>Users</button>
+            </Link>
+            <Link
+              to="/dashboard/new-user-form"
+              onClick={handleNavigate}
+              className="text-sm text-left py-2 px-4 hover:bg-pageSideMenuTextHover hover:rounded transition duration-300 text-lightWhiteLetter"
+            >
+              <button>Add User</button>
+            </Link>
           </ul>
         </nav>
       </aside>
@@ -430,7 +460,6 @@ const fetchNotifications = async () => {
                     className="relative bg-gray-700 p-3 rounded-lg shadow shadow-shadowBlueColor shadow-xl text-sm cursor-pointer hover:bg-gray-600 transition duration-200"
                     onClick={() =>
                       alert(`Detalles del Proyecto ID: ${project.id}`)
-                      
                     }
                   >
                     {/*<h2 className="font-bold text-lg">ID: {project.id}</h2>*/}

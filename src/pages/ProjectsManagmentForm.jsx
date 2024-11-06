@@ -400,17 +400,17 @@ const ProjectsManagmentForm = () => {
               Cost Material <span className="text-red-500">*</span>
             </label>
             <div>
-              $<span className="pr-2"></span>
+              $
               <input
                 type="text"
                 name="cost_material"
                 placeholder="ex. 30000"
-                className="p-2 rounded bg-gray-700 text-white"
+                className="p-2 rounded bg-gray-700 text-white mx-2"
                 value={newProject.cost_material}
                 onChange={handleChange}
                 required
               />
-              <span className="pr-2"></span>MXN
+              MXN
             </div>
           </div>
           <div>
@@ -451,60 +451,68 @@ const ProjectsManagmentForm = () => {
           <hr className="border border-1 border-gray-500" />
         </div>
 
-        <div className="col-span-full pt-3">
-          <div className="mb-5">
-            <h2 className="text-xl text-gray-200 font-bold">
-              Project Manager <span className="text-red-500">*</span>
-            </h2>
-          </div>
+        <div className="flex col-span-full pt-3">
           <div>
-            {userSelections.map((userSelection) => (
-              <div key={userSelection.id} className="mb-2 flex items-center">
-                <select
-                  name={`identification_number_${userSelection.id}`}
-                  className="p-2 rounded bg-gray-700 text-white w-1/2 cursor-pointer"
-                  value={userSelection.value}
-                  onChange={(e) =>
-                    handleUserChange(userSelection.id, e.target.value)
-                  }
-                >
-                  <option value="" disabled>
-                    N/A
-                  </option>
-                  {adminUsers
-                    .filter(
-                      (user) =>
-                        !selectedUsers.includes(user.id) ||
-                        user.id === userSelection.value
-                    )
-                    .map((user) => (
-                      <option key={user.id} value={user.id}>
-                        {user.user_number}
-                      </option>
-                    ))}
-                </select>
-                <button
-                  type="button"
-                  onClick={() => removeUserSelection(userSelection.id)}
-                  className="ml-2 px-2 py-1 border border-red-500 bg-red-900 text-red-300 rounded hover:border-red-400 hover:bg-red-700 hover:text-red-200"
-                >
-                  <strong>X</strong>
-                </button>
-              </div>
-            ))}
-            <button
-              type="button"
-              onClick={addUserSelection}
-              className="px-2 border border-blue-500 bg-blue-900 text-blue-300 rounded"
-            >
-              <strong>+</strong>
-            </button>
-          </div>
-          <div className="col-span-full py-5">
-            <hr className="border border-1 border-gray-500" />
+            <div className="mb-5">
+              <h2 className="text-xl text-gray-200 font-bold">
+                Project Manager <span className="text-red-500">*</span>
+              </h2>
+              <h5 className="text-sm text-gray-200">
+                Selects the project manager who will be responsible for the
+                project.
+              </h5>
+            </div>
+
+            <div>
+              {userSelections.map((userSelection) => (
+                <div key={userSelection.id} className="mb-2 flex items-center">
+                  <select
+                    name={`identification_number_${userSelection.id}`}
+                    className="p-2 rounded bg-gray-700 text-white cursor-pointer w-3/4"
+                    value={userSelection.value}
+                    onChange={(e) =>
+                      handleUserChange(userSelection.id, e.target.value)
+                    }
+                  >
+                    <option value="" disabled>
+                      N/A
+                    </option>
+                    {adminUsers
+                      .filter(
+                        (user) =>
+                          !selectedUsers.includes(user.id) ||
+                          user.id === userSelection.value
+                      )
+                      .map((user) => (
+                        <option key={user.id} value={user.id}>
+                          {user.user_number}
+                        </option>
+                      ))}
+                  </select>
+                  <button
+                    type="button"
+                    onClick={() => removeUserSelection(userSelection.id)}
+                    className="ml-2 px-2 py-1 border border-red-500 bg-red-900 text-red-300 rounded hover:border-red-400 hover:bg-red-700 hover:text-red-200"
+                  >
+                    <strong>X</strong>
+                  </button>
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={addUserSelection}
+                className="px-2 border border-blue-500 bg-blue-900 text-blue-300 rounded"
+              >
+                <strong>+</strong>
+              </button>
+            </div>
           </div>
 
-          <div className="col-span-full pt-3">
+          <div className="col-span-full px-5 flex justify-center">
+            <div className="border-l border-gray-500 h-full"></div>
+          </div>
+
+          <div className="col-span-full">
             <div className="mb-5">
               <h2 className="text-xl text-gray-200 font-bold">
                 Personnel with reception authorization{" "}
@@ -522,7 +530,7 @@ const ProjectsManagmentForm = () => {
                 >
                   <select
                     name={`identification_number_${userOperSelection.id}`}
-                    className="p-2 rounded bg-gray-700 text-white w-1/2 cursor-pointer"
+                    className="p-2 rounded bg-gray-700 text-white w-3/4 cursor-pointer"
                     value={userOperSelection.value}
                     onChange={(e) =>
                       handleUserOperChange(userOperSelection.id, e.target.value)
@@ -568,6 +576,7 @@ const ProjectsManagmentForm = () => {
         <div className="col-span-full py-5">
           <hr className="border border-1 border-gray-500" />
         </div>
+        
         <div className="col-span-full pt-3">
           <div className="mb-5">
             <h2 className="text-xl text-gray-200 font-bold">
@@ -715,7 +724,7 @@ const ProjectsManagmentForm = () => {
                 <select
                   value={addItemsForm}
                   onChange={handleAddItemsForm}
-                  className="w-full mb-4 p-2 border border-gray-500 rounded bg-gray-800 text-white cursor-pointer"
+                  className="mb-4 p-2 border border-gray-500 rounded bg-gray-800 text-white cursor-pointer"
                 >
                   <option value="" disabled>
                     Select an option
@@ -800,7 +809,7 @@ const ProjectsManagmentForm = () => {
                     </div>
                   </div>
                 ) : addItemsForm === "option3" ? (
-                  <div className="px-3">
+                  <div className="">
                     <h5 className="text-sm pt-5 pb-3 text-gray-200">
                       Register the subassemblies. You may use a maximum of 255
                       characters within the description of each subassembly.
@@ -998,9 +1007,7 @@ const ProjectsManagmentForm = () => {
                     )}
                   </div>
                 ) : (
-                  <div>
-                    <p>Seleccione una opción para ver el contenido</p>
-                  </div>
+                  <></>
                 )}
               </div>
             </div>
