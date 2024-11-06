@@ -446,6 +446,9 @@ const ProjectsManagmentForm = () => {
             value={newProject.description}
             onChange={handleChange}
           ></textarea>
+           <div className="m-1 text-gray-400">
+                    {newProject.description.length}/255 characters
+                  </div>
         </div>
         <div className="col-span-full py-5">
           <hr className="border border-1 border-gray-500" />

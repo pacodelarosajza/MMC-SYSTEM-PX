@@ -8,7 +8,7 @@ import PrivateRoute from './pages/PrivateRoute'; // Asegúrate de la ruta correc
 
 import Dashboard from './pages/Dashboard';
 import History from './pages/History';
-import Projects from './pages/Projects';   //Projects in development
+import Projects from './pages/ProjectsManagmentFormTEST';   //Projects in development
 import Stock from './pages/Stock';
 import Me from './pages/Me';
 import Users from './pages/Users';

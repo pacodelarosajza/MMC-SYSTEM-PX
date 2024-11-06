@@ -18,7 +18,7 @@ const ProjectsManagmentForm = () => {
       </button>
 
       {showCard && (
-        <div className="bg-gray-800 px-5 rounded-lg shadow-lg mb-5">
+        <div className="w-full bg-gray-800 px-5 rounded-lg shadow-lg mb-5">
           <div className="pt-5 pb-3 text-sm text-gray-200">
             <h5 className=" pb-1 ">
               Complete the following information to register a project. Remember

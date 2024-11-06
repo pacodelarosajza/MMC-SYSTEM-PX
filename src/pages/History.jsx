@@ -40,7 +40,7 @@ const History = ({ setShowChildRoutes }) => {
     setCurrentPage((prevPage) => Math.max(prevPage - 1, 0));
   };
   
-  // Navigation handler
+  // Navigation hadescrindler
   const handleNavigate = async () => {
     setLoading(true);
     setError(null);
@@ -224,7 +224,7 @@ const History = ({ setShowChildRoutes }) => {
                     onClick={() => handleMoreInfo(project.id)}
                   >
                     <td className="px-8 py-1 border border-gray-700">
-                      <strong># </strong>
+                      #
                       {project.identification_number}
                     </td>
                     <td className="px-8 py-1 border border-gray-700">

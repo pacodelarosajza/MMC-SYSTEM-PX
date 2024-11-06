@@ -38,6 +38,9 @@ const ProjectsManagmentTable = () => {
     setIsModalDeleteAceptOpen(true); // Mostramos el modal de confirmación
   };
 
+  const [isModalCanselEditionOpen, setIsModalCanselEditionOpen] = useState(false);
+  const [isModalCanselEditionSuccessOpen, setIsModalCanselEditionSuccessOpen] = useState(false);
+
   const confirmDeleteProject = async () => {
     try {
       if (projectToDelete) {
@@ -72,8 +75,7 @@ const ProjectsManagmentTable = () => {
     setIsModalOpen(true);
   };
   const closeModal = () => {
-    // Close the modal
-    setIsModalOpen(false);
+    setIsModalCanselEditionSuccessOpen(false);
   };
 
   // PAGINATION OPERATIONS
@@ -217,7 +219,9 @@ const ProjectsManagmentTable = () => {
             <AppForm />
             <div className="flex justify-end pr-2">
               <button
-                onClick={closeModal}
+                onClick={
+                  () => setIsModalCanselEditionOpen(true)
+                }
                 className="px-12 py-2 mx-1 bg-orange-900 text-sm text-yellow-300 bg-pageBackground border border-yellow-500 rounded hover:bg-yellow-700"
               >
                 Cancel
@@ -226,6 +230,28 @@ const ProjectsManagmentTable = () => {
           </div>
         </div>
       )}
+
+      {/* MODAL SECTION FOR CANCEL EDITING PROJECTS */}
+      <ModalAcept
+        isOpen={isModalCanselEditionOpen}
+        onClose={() => setIsModalCanselEditionOpen(false)}
+        onContinue={() => {
+          setIsModalCanselEditionOpen(false),
+          setIsModalOpen(false),
+          setIsModalCanselEditionSuccessOpen(true)
+          }}
+        title="Cancel Editing"
+      >
+        <p>Are you sure you want to cancel editing this project?</p>
+      </ModalAcept>
+
+      <Modal
+        isOpen={isModalCanselEditionSuccessOpen}
+        onClose={closeModal}
+        title="Cancel Editing Successful"
+      >
+        <p>The project editing has been successfully canceled.</p>
+      </Modal>
     </>
   );
 };
