@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate, Outlet } from "react-router-dom";
 import axios from "axios";
 import Calendar from "react-calendar";
+import Notifications from "./Notifications";
 
 import { FaBell } from "react-icons/fa"; // Importa el icono de notificaciones
 import "../index.css";
@@ -32,44 +33,31 @@ const Dashboard = ({ onLogout }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [showChildRoutes, setShowChildRoutes] = useState(false);
   const [assemblies, setAssemblies] = useState([]);
- 
-  const itemsPerPage = 5;
+
   const [items, setItems] = useState([]);
   // Estado para la página actual
-const [currentPage, setCurrentPage] = useState(0);
-const projectsPerPage = 6;
-
+  const [currentPage, setCurrentPage] = useState(0);
+  const projectsPerPage = 6;
 
   const [progresses, setProgresses] = useState({});
 
-  const fetchAssemblies = async () => {
-    try {
-      const assembliesResponse = await axios.get(
-        `${apiIpAddress}/api/getAssembly/arrived`
-      );
-      console.log("Assemblies response:", assembliesResponse.data);
-      setAssemblies(assembliesResponse.data);
-    } catch (error) {
-      console.error("Error fetching assemblies:", error);
-    }
-  };
-  const navigate = useNavigate();
-
-
   // Función para obtener el progreso de un proyecto
   const getProjectProgress = async (projectId) => {
-    const response = await fetch(`http://10.12.6.181:3001/api/getItems/project/${projectId}`);
+    const response = await fetch(
+      `${apiIpAddress}/api/getItems/project/${projectId}`
+    );
     const items = await response.json();
 
     // Filtrar los items que han llegado (in_subassembly === 1)
-    const arrivedItems = items.filter(item => item.in_subassembly === 1);
+    const arrivedItems = items.filter((item) => item.in_subassembly === 1);
     const totalItems = items.length;
 
     // Calcular el porcentaje de progreso
-    const progressPercentage = totalItems === 0 ? 0 : (arrivedItems.length / totalItems) * 100;
+    const progressPercentage =
+      totalItems === 0 ? 0 : (arrivedItems.length / totalItems) * 100;
 
     // Guardar el progreso de ese proyecto en el estado
-    setProgresses(prevState => ({
+    setProgresses((prevState) => ({
       ...prevState,
       [projectId]: progressPercentage,
     }));
@@ -77,38 +65,33 @@ const projectsPerPage = 6;
 
   // Ejecutar la función para cada proyecto al cargar los datos
   useEffect(() => {
-    projects.forEach(project => {
+    projects.forEach((project) => {
       getProjectProgress(project.id);
     });
   }, [projects]);
 
+  // Total de páginas
+  const totalPages = Math.ceil(projects.length / projectsPerPage);
 
+  // Función para ir a la página anterior
+  const handlePrevious = () => {
+    if (currentPage > 0) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
 
+  // Función para ir a la página siguiente
+  const handleNext = () => {
+    if (currentPage < totalPages - 1) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
 
-// Total de páginas
-const totalPages = Math.ceil(projects.length / projectsPerPage);
-
-// Función para ir a la página anterior
-const handlePrevious = () => {
-  if (currentPage > 0) {
-    setCurrentPage(currentPage - 1);
-  }
-};
-
-// Función para ir a la página siguiente
-const handleNext = () => {
-  if (currentPage < totalPages - 1) {
-    setCurrentPage(currentPage + 1);
-  }
-};
-
-// Obtén los proyectos para la página actual
-const currentProjects = projects.slice(
-  currentPage * projectsPerPage,
-  (currentPage + 1) * projectsPerPage
-);
-
-
+  // Obtén los proyectos para la página actual
+  const currentProjects = projects.slice(
+    currentPage * projectsPerPage,
+    (currentPage + 1) * projectsPerPage
+  );
 
   useEffect(() => {
     const fetchData = async () => {
@@ -121,140 +104,23 @@ const currentProjects = projects.slice(
 
         // Llama a la función para obtener los administradores después de cargar proyectos
         fetchAdminsForProjects(loadedProjects);
-      } catch (error) {
-        console.error("Error fetching projects:", error);
-      }
+      } catch (error) { }
     };
 
     fetchData();
   }, []);
 
-  // Cargar administradores por cada proyecto
-  const fetchAdminsForProjects = async (projects) => {
-    const updatedProjectsWithAdmins = {};
-
-    for (const project of projects) {
-      try {
-        const response = await axios.get(
-          `${apiIpAddress}/api/projects/${project.id}/admins`
-        );
-        updatedProjectsWithAdmins[project.id] = response.data;
-      } catch (error) {
-        console.error(
-          `Error fetching admins for project ${project.id}:`,
-          error
-        );
-        updatedProjectsWithAdmins[project.id] = [];
-      }
-    }
-
-    setProjectsWithAdmins(updatedProjectsWithAdmins);
-  };
-
-
-  // Función para agregar una notificación
-  const addNotification = (type, message, details) => {
-    const notification = { id: Date.now(), type, message, details };
-
-    // Actualiza el estado con la nueva notificación
-    setNotifications((prevNotifications) => [
-      ...prevNotifications,
-      notification,
-    ]);
-
-    // Configura un temporizador para eliminar la notificación después de 10 segundos
-    setTimeout(() => {
-      removeNotification(notification.id);
-    }, 10000);
-  };
-
   // Calcular el progreso en función de los ítems entregados
   useEffect(() => {
     if (items.length > 0) {
       const totalItems = items.length;
-      const deliveredItems = items.filter(item => item.in_subassembly === 1).length;
+      const deliveredItems = items.filter(
+        (item) => item.in_subassembly === 1
+      ).length;
       const progressPercentage = (deliveredItems / totalItems) * 100;
       setProgress(progressPercentage);
     }
   }, [items]);
-
-  // Función para eliminar una notificación por ID
-  const removeNotification = (id) => {
-    setNotifications((prevNotifications) =>
-      prevNotifications.filter((notification) => notification.id !== id)
-    );
-  };
-
-  // Función para generar mensajes basados en el tipo de notificación
-  const generateMessage = (notificationType, item) => {
-    const messages = {
-      success: `With ID.${item.id}: ${item.name}, Cantidad: ${item.quantity} (Assembly ID.${item.assembly_id}/Project #${item.project_id})`,
-      warning: `${item.name}, ID.${item.id} (Assembly ID.${item.assembly_id}/Project #${item.project_id})`,
-      info: `Assembly ID.${item.id}, Proyecto #${item.project_id}`,
-      completed: `Assembly ID.${item.id}, Identificación: ${item.identification_number}`,
-    };
-
-    return messages[notificationType] || "";
-  };
-
-  // Función para obtener notificaciones de múltiples endpoints
-  const fetchNotifications = async () => {
-    const endpoints = [
-      { url: "/api/getItems/arrived", type: "success" },
-      { url: "/api/getItems/missing", type: "warning" },
-      { url: "/api/getAssemblyByDeliveryDate", type: "info" },
-      { url: "/api/getAssemblyByCompletedDate", type: "completed" },
-    ];
-
-    try {
-      const responses = await Promise.all(
-        endpoints.map((endpoint) => axios.get(`${apiIpAddress}${endpoint.url}`))
-      );
-
-      responses.forEach((response, index) => {
-        const notificationType = endpoints[index].type;
-
-        // Comprobar si hay cambios en los datos
-        const previousData = previousResponses[index]?.data || [];
-        const newData = response.data;
-
-        // Comparar los datos anteriores con los nuevos
-        if (newData.length > previousData.length) {
-          newData.forEach((item) => {
-            if (!previousData.some((prevItem) => prevItem.id === item.id)) {
-              let message;
-              if (notificationType === "success") {
-                message = `With ID.${item.id}: ${item.name}, Cantidad: ${item.quantity} (Assembly ID.${item.assembly_id}/Project #${item.project_id}) `;
-              } else if (notificationType === "warning") {
-                message = `${item.name}, ID.${item.id}(Assembly ID.${item.assembly_id}/Project #${item.project_id})`;
-              } else if (notificationType === "info") {
-                message = `Assembly ID.${item.id}, Proyecto #${item.project_id}`;
-              } else if (notificationType === "completed") {
-                message = `Assembly ID.${item.id}, Identificación: ${item.identification_number}`;
-              }
-
-              addNotification(notificationType, message, { id: item.id });
-            }
-          });
-        }
-
-        // Actualizar el estado previo
-        previousResponses[index] = response;
-      });
-    } catch (error) {
-      console.error("Error fetching notifications:", error);
-    }
-  };
-
-  useEffect(() => {
-    const intervalId = setInterval(fetchNotifications, 10000);
-    return () => clearInterval(intervalId);
-  }, []);
-
-  const handleNotificationClick = (details) => {
-    console.log("Detalles de la notificación:", details);
-    navigate(`/details/${details.id}`);
-  };
 
   const handleNavigate = () => {
     setShowChildRoutes(true);
@@ -417,110 +283,138 @@ const currentProjects = projects.slice(
         {!showChildRoutes ? (
           <>
             <div>
-                {/* Barra de progreso para proyectos visibles */}
-  <div className="py-6 flex flex-col justify-left px-4 space-y-1">
-    <div className="bg-contentCards p-5 rounded-lg shadow shadow-shadowBlueColor shadow-xl">
-      <h1 className="text-2xl text-left font-extrabold text-gradient bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-blue-500 mb-8">
-        Project progress
-      </h1>
-      
-      {/* Barra de progreso horizontal con círculos de progreso */}
-      <div className="flex flex-wrap justify-start gap-6">
-        {currentProjects.map((project) => (
-          <div key={project.id} className="flex flex-col items-center">
-            {/* Número de identificación del proyecto */}
-            <span className="font-semibold text-sm text-gray-400 mb-2">
-              <strong>#{project.identification_number}</strong>
-            </span>
+              {/* Barra de progreso para proyectos visibles */}
+              <div className="py-6 flex flex-col justify-left px-4 space-y-1">
+                <div className="bg-contentCards p-5 rounded-lg shadow shadow-shadowBlueColor shadow-xl">
+                  <h1 className="text-2xl text-left font-extrabold text-gradient bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-blue-500 mb-8">
+                    Project progress
+                  </h1>
 
-            {/* Contenedor del círculo */}
-            <div className="relative w-24 h-24 mb-2">
-              {/* Fondo gris del círculo */}
-              <svg className="absolute w-full h-full transform rotate-90" viewBox="0 0 36 36" width="100%" height="100%">
-                <path
-                  className="text-gray-600"
-                  fill="none"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeDasharray="100, 100"
-                  d="M18 2a16 16 0 1 1 0 32 16 16 0 1 1 0 -32"
-                />
-              </svg>
+                  {/* Barra de progreso horizontal con círculos de progreso */}
+                  <div className="flex flex-wrap justify-start gap-6">
+                    {currentProjects.map((project) => (
+                      <div
+                        key={project.id}
+                        className="flex flex-col items-center"
+                      >
+                        {/* Número de identificación del proyecto */}
+                        <span className="font-semibold text-sm text-gray-400 mb-2">
+                          <strong>#{project.identification_number}</strong>
+                        </span>
 
-              {/* Círculo de progreso */}
-              <svg className="absolute w-full h-full transform rotate-90" viewBox="0 0 36 36" width="100%" height="100%">
-                <path
-                  className={`progress-circle ${progresses[project.id] < 50 ? "stroke-red-600" : progresses[project.id] < 75 ? "stroke-blue-600" : "stroke-green-600"}`}
-                  fill="none"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeDasharray={`${progresses[project.id]}, 100`}
-                  d="M18 2a16 16 0 1 1 0 32 16 16 0 1 1 0 -32"
-                />
-              </svg>
+                        {/* Contenedor del círculo */}
+                        <div className="relative w-24 h-24 mb-2">
+                          {/* Fondo gris del círculo */}
+                          <svg
+                            className="absolute w-full h-full transform rotate-90"
+                            viewBox="0 0 36 36"
+                            width="100%"
+                            height="100%"
+                          >
+                            <path
+                              className="text-gray-600"
+                              fill="none"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeDasharray="100, 100"
+                              d="M18 2a16 16 0 1 1 0 32 16 16 0 1 1 0 -32"
+                            />
+                          </svg>
 
-              {/* Texto del porcentaje */}
-              <div className="absolute text-xl font-semibold text-white">
-                {Math.round(progresses[project.id] || 0)}%
-              </div>
-            </div>
+                          {/* Círculo de progreso */}
+                          <svg
+                            className="absolute w-full h-full transform rotate-90"
+                            viewBox="0 0 36 36"
+                            width="100%"
+                            height="100%"
+                          >
+                            <path
+                              className={`progress-circle ${progresses[project.id] < 50
+                                ? "stroke-red-600"
+                                : progresses[project.id] < 75
+                                  ? "stroke-blue-600"
+                                  : "stroke-green-600"
+                                }`}
+                              fill="none"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeDasharray={`${progresses[project.id]}, 100`}
+                              d="M18 2a16 16 0 1 1 0 32 16 16 0 1 1 0 -32"
+                            />
+                          </svg>
 
-            {/* Texto adicional para indicar estado */}
-            <div className="text-center text-xs text-gray-300">
-              <span className="font-semibold">{progresses[project.id] >= 100 ? "Completado" : "In Progre"}</span>
-            </div>
-          </div>
-        ))}
-      </div>
+                          {/* Texto del porcentaje */}
+                          <div className="absolute text-xl font-semibold text-white">
+                            {Math.round(progresses[project.id] || 0)}%
+                          </div>
+                        </div>
 
-      {/* Controles de navegación con flechas y número de página */}
-      <div className="flex items-center justify-between mt-4">
-        <button
-          onClick={handlePrevious}
-          disabled={currentPage === 0}
-          className="p-2 bg-gray-600 text-white rounded-full disabled:opacity-50 transition duration-300 transform hover:scale-110 hover:bg-gray-500"
-        >
-          {/* Flecha hacia la izquierda */}
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth="2"
-            stroke="currentColor"
-            className="w-5 h-5 transition duration-300 transform hover:rotate-180"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
+                        {/* Texto adicional para indicar estado */}
+                        <div className="text-center text-xs text-gray-300">
+                          <span className="font-semibold">
+                            {progresses[project.id] >= 100
+                              ? "Completado"
+                              : "In Progress"}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
 
-        {/* Indicador de número de página */}
-        <span className="text-sm font-medium text-lightGrayLetter">
-          Página {currentPage + 1} de {totalPages}
-        </span>
+                  {/* Controles de navegación con flechas y número de página */}
+                  <div className="flex items-center justify-between mt-4">
+                    <button
+                      onClick={handlePrevious}
+                      disabled={currentPage === 0}
+                      className="p-2 bg-gray-600 text-white rounded-full disabled:opacity-50 transition duration-300 transform hover:scale-110 hover:bg-gray-500"
+                    >
+                      {/* Flecha hacia la izquierda */}
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth="2"
+                        stroke="currentColor"
+                        className="w-5 h-5 transition duration-300 transform hover:rotate-180"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M15 19l-7-7 7-7"
+                        />
+                      </svg>
+                    </button>
 
-        <button
-          onClick={handleNext}
-          disabled={currentPage >= totalPages - 1}
-          className="p-2 bg-gray-600 text-white rounded-full disabled:opacity-50 transition duration-300 transform hover:scale-110 hover:bg-gray-500"
-        >
-          {/* Flecha hacia la derecha */}
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth="2"
-            stroke="currentColor"
-            className="w-5 h-5 transition duration-300 transform hover:rotate-180"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-          </svg>
-        </button>
-      </div>
-    </div>
-  
+                    {/* Indicador de número de página */}
+                    <span className="text-sm font-medium text-lightGrayLetter">
+                      Página {currentPage + 1} de {totalPages}
+                    </span>
 
+                    <button
+                      onClick={handleNext}
+                      disabled={currentPage >= totalPages - 1}
+                      className="p-2 bg-gray-600 text-white rounded-full disabled:opacity-50 transition duration-300 transform hover:scale-110 hover:bg-gray-500"
+                    >
+                      {/* Flecha hacia la derecha */}
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth="2"
+                        stroke="currentColor"
+                        className="w-5 h-5 transition duration-300 transform hover:rotate-180"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M9 5l7 7-7 7"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
               </div>
               {/* Assemblies Section */}
               <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 mb-4">
@@ -586,8 +480,6 @@ const currentProjects = projects.slice(
                         {new Date(project.delivery_date).toLocaleDateString()}
                       </p>
                     </div>
-
-
                   </div>
                 ))}
               </section>
@@ -602,68 +494,9 @@ const currentProjects = projects.slice(
         <aside className="bg-calendarNotifiBackground w-64 p-4 fixed inset-y-0 right-0 overflow-y-auto ">
           {/*<h2 className="text-xl font-bold mb-4">Calendario</h2>*/}
           <CalendarComponent />
-          <div className="flex justify-center items-center text-sm text-lightWhiteLetter font-bold mb-4 mt-6">
-            <FaBell className="mr-2" />
-            <h2>Notifications</h2>
+          <div className="flex justify-center items-center text-sm text-lightWhiteLetter font-bold mb-4 mt-1">
+            <Notifications />
           </div>
-          <ul className="space-y-1">
-            {notifications.map((notification, index) => (
-              <li
-                key={index}
-                className={`p-2 rounded text-xs text-left notifiGrayLetter ${notification.type === "success"
-                  ? "border-l-4 border border-blue-800"
-                  : notification.type === "warning"
-                    ? "border-l-4 border border-yellow-800"
-                    : notification.type === "info"
-                      ? "border-l-4 border border-cyan-800"
-                      : notification.type === "completed"
-                        ? "border-l-4 border border-green-800"
-                        : "border-l-4 border border-red-800"
-                  }`}
-              >
-                <span className="font-medium">
-                  {notification.type === "success" && (
-                    <span className="text-blue-500 font-bold">
-                      ¡Un material a llegado.!
-                      <br />
-                    </span>
-                  )}
-                  {notification.type === "warning" && (
-                    <span className="text-yellow-500 font-bold">
-                      ¡Falta un material!
-                      <br />
-                    </span>
-                  )}
-                  {notification.type === "info" && (
-                    <span className="text-cyan-500 font-bold">
-                      ¡Ensamblaje completado!
-                      <br />
-                    </span>
-                  )}
-                  {notification.type === "completed" && (
-                    <span className="text-green-500 font-bold">
-                      ¡Ensamblaje completado!
-                      <br />
-                    </span>
-                  )}
-                  {notification.type === "error" && (
-                    <span className="text-red-500 font-bold">
-                      Error:
-                      <br />
-                    </span>
-                  )}
-                  {notification.message}
-                </span>
-                <br />
-                <button
-                  className="mt-2 text-xs text-gray-300"
-                  onClick={() => handleNotificationClick(notification.details)}
-                >
-                  Details
-                </button>
-              </li>
-            ))}
-          </ul>
         </aside>
       )}
     </div>

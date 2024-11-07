@@ -223,17 +223,17 @@ const History = ({ setShowChildRoutes }) => {
                     className="hover:bg-gray-700 border border-gray-700 text-sm"
                     onClick={() => handleMoreInfo(project.id)}
                   >
-                    <td className="px-8 py-1 border border-gray-700">
+                    <td className="px-4 py-1 border border-gray-700">
                       #
                       {project.identification_number}
                     </td>
-                    <td className="px-8 py-1 border border-gray-700">
+                    <td className="px-4 py-1 border border-gray-700">
                       {getProjectManager(project.id)}
                     </td>
-                    <td className="px-8 py-1 border border-gray-700">
+                    <td className="px-4 py-1 border border-gray-700">
                       {truncateDescription(project.description, 80)}
                     </td>
-                    <td className="px-8 py-1 border border-gray-700">
+                    <td className="px-4 py-1 border border-gray-700">
                       <div className="flex justify-end">
                         {loading && <p>Cargando...</p>}
                         {error && <p style={{ color: "red" }}>{error}</p>}
@@ -267,17 +267,17 @@ const History = ({ setShowChildRoutes }) => {
                   className="hover:bg-gray-700 border border-gray-700 text-sm"
                   onClick={() => handleMoreInfo(project.id)}
                 >
-                  <td className="px-8 py-1 border border-gray-700">
-                    <strong># </strong>
+                  <td className="px-4 py-1 border border-gray-700">
+                    #
                     {project.identification_number}
                   </td>
-                  <td className="px-8 py-1 border border-gray-700">
+                  <td className="px-4 py-1 border border-gray-700">
                     {getProjectManager(project.id)}
                   </td>
-                  <td className="px-8 py-1 border border-gray-700">
+                  <td className="px-4 py-1 border border-gray-700">
                     {truncateDescription(project.description, 80)}
                   </td>
-                  <td className="px-8 py-1 border border-gray-700">
+                  <td className="px-4 py-1 border border-gray-700">
                     <div className="flex justify-end">
                       {loading && <p>Cargando...</p>}
                       {error && <p style={{ color: "red" }}>{error}</p>}
