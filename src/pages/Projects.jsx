@@ -23,6 +23,7 @@ const Projects = ({ setShowChildRoutes }) => {
   const [userOperProjects, setUserOperProjects] = useState({});
   const [assemblies, setAssemblies] = useState({});
   const [items, setItems] = useState({});
+  const [progresses, setProgresses] = useState({});
   const [selectedProject, setSelectedProject] = useState(null);
   const [isOpen, setIsOpen] = useState({});
   const [currentPage, setCurrentPage] = useState(0);
@@ -137,6 +138,11 @@ const Projects = ({ setShowChildRoutes }) => {
         setAssemblies(assembliesData);
         setItems(itemsData);
 
+        // Calcula el progreso para cada proyecto al cargar los datos
+        projects.forEach((project) => {
+          getProjectProgress(project.id);
+        });
+
         //setTextToCopy(itemsText); // Guardar el texto de los items en textToCopy
       } catch (error) {
         console.error(
@@ -148,6 +154,30 @@ const Projects = ({ setShowChildRoutes }) => {
 
     fetchActiveProjects();
   }, [apiIpAddress]);
+
+  const getProjectProgress = async (projectId) => {
+    try {
+      const response = await axios.get(
+        `${apiIpAddress}/api/getItems/project/${projectId}`
+      );
+      const items = response.data;
+
+      const arrivedItems = items.filter((item) => item.in_subassembly === 1);
+      const totalItems = items.length;
+      const progressPercentage =
+        totalItems === 0 ? 0 : (arrivedItems.length / totalItems) * 100;
+
+      setProgresses((prevProgresses) => ({
+        ...prevProgresses,
+        [projectId]: progressPercentage,
+      }));
+    } catch (error) {
+      console.error(
+        `Error fetching project progress for project ${projectId}:`,
+        error
+      );
+    }
+  };
 
   // Function to get project manager
   const getProjectManager = (projectId) => {
@@ -329,7 +359,12 @@ const Projects = ({ setShowChildRoutes }) => {
     }
   };
 
-
+  /*const data = [
+    { name: 'Manager', value: 80 },
+    { name: 'Developer', value: 60 },
+    { name: 'Designer', value: 40 },
+    { name: 'Tester', value: 20 },
+  ];*/
   
   return (
     <>
@@ -457,23 +492,39 @@ const Projects = ({ setShowChildRoutes }) => {
                 </thead>
                 <tbody className="bg-gray-800 shadow-lg">
                   {currentProjects.map((project) => (
-                    <tr
-                      key={project.id}
-                      className="hover:bg-pageSideMenuTextHover cursor-pointer transition duration-200"
-                      onClick={() => handleMoreInfo(project.id)}
-                    >
-                      <td className="px-4 py-2 border border-gray-500">
-                        <strong># </strong>
-                        {project.identification_number}
-                      </td>
-                      <td className="px-4 py-2 border border-gray-500">
-                        {getProjectManager(project.id)}
-                      </td>
-                      <td className="px-4 py-2 border border-gray-500">
-                        {project.delivery_date}
-                      </td>
-                      <td className="px-4 py-2 border border-gray-500">45%</td>
-                    </tr>
+                    <>
+                      <tr
+                        key={project.id}
+                        className="hover:bg-pageSideMenuTextHover cursor-pointer transition duration-200"
+                        onClick={() => handleMoreInfo(project.id)}
+                      >
+                        <td className="px-4 py-2 border border-gray-500">
+                          <strong># </strong>
+                          {project.identification_number}
+                        </td>
+                        <td className="px-4 py-2 border border-gray-500">
+                          {getProjectManager(project.id)}
+                        </td>
+                        <td className="px-4 py-2 border border-gray-500">
+                          {project.delivery_date}
+                        </td>
+                        <td className="px-4 py-2 border border-gray-500">
+                          <div
+                            className={` font-bold opacity-70 ${
+                              (progresses[project.id] || 0) < 25
+                                ? "text-red-500"
+                                : (progresses[project.id] || 0) < 50
+                                ? "text-orange-500"
+                                : (progresses[project.id] || 0) < 75
+                                ? "text-yellow-500"
+                                : "text-green-500"
+                            }`}
+                          >
+                            {Math.round(progresses[project.id] || 0)}%
+                          </div>
+                        </td>
+                      </tr>
+                    </>
                   ))}
                 </tbody>
               </table>
@@ -492,7 +543,7 @@ const Projects = ({ setShowChildRoutes }) => {
                 </span>
                 {endIndex < activeProjects.length && (
                   <button
-                    className="px-4 py-2 bg-gray-500 text-sm text-gray-300 bg-pageBackground rounded hover:bg-gray-700"
+                    className="px-4 pt-2 bg-gray-500 text-sm text-gray-300 bg-pageBackground rounded hover:bg-gray-700"
                     onClick={handleNextPage}
                     disabled={endIndex >= activeProjects.length}
                   >
@@ -505,27 +556,116 @@ const Projects = ({ setShowChildRoutes }) => {
         </div>
 
         {/* 2. SECOND PART */}
-        <div className="col-span-12 pt-10">
+        <div className="col-span-12">
           <div className="card" id="pj-info-projects">
-            <div className="text-sm text-white m-4 text-lightWhiteLetter">
-              {selectedProject ? (
-                <div>
+            <div className="text-sm text-white text-lightWhiteLetter">
+              {selectedProject && (
+                <div key={selectedProject.id}>
                   <div>
-                    {/* 2.1. Project details */}
-                    <div className="flex pb-2 text-2xl">
-                      <div className="pr-2 font-medium ">
-                        IDENTIFICATION NUMBER
-                      </div>
-                      <div>
-                        <h2 className="font-bold italic">
-                          #{selectedProject.identification_number}
-                        </h2>
+                    <div className="flex justify-center items-center">
+                      <div className="relative w-64 h-64 transform scale-150">
+                        <svg
+                          className="absolute w-full h-full"
+                          viewBox="0 0 36 36"
+                        >
+                          <path
+                            className="text-gray-600"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth=".5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeDasharray="50, 100"
+                            d="M2 18 C 9 5, 27 5, 34 18"
+                          />
+                        </svg>
+
+                        <svg
+                          className="absolute w-full h-full"
+                          viewBox="0 0 36 36"
+                        >
+                          <path
+                            fill="none"
+                            stroke={
+                              (progresses[selectedProject.id] || 0) < 25
+                                ? "red"
+                                : (progresses[selectedProject.id] || 0) < 50
+                                ? "orange"
+                                : (progresses[selectedProject.id] || 0) < 75
+                                ? "yellow"
+                                : "green"
+                            }
+                            strokeWidth=".5"
+                            strokeDasharray={`${
+                              (progresses[selectedProject.id] || 0) * 0.5
+                            }, 50`}
+                            d="M2 18 C 9 5, 27 5, 34 18"
+                          />
+                        </svg>
+                        <div className="absolute inset-0 flex flex-col items-center justify-center font-bold ">
+                          <div className="text-4xl">
+                            <div
+                              className={`text-4xl ${
+                                (progresses[selectedProject.id] || 0) < 25
+                                  ? "text-red-500"
+                                  : (progresses[selectedProject.id] || 0) < 50
+                                  ? "text-orange-500"
+                                  : (progresses[selectedProject.id] || 0) < 75
+                                  ? "text-yellow-500"
+                                  : "text-green-500"
+                              }`}
+                            >
+                              {Math.round(progresses[selectedProject.id] || 0)}%
+                            </div>
+                          </div>
+                          <div className="mt-2 text-xs text-gray-400 font-medium">
+                            IDENTIFICATION NUMBER
+                          </div>
+                          <div className="">
+                            <h2 className="font-bold text-gray-300 text-base">
+                              {selectedProject.identification_number}
+                            </h2>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                    <hr className="mb-5 border-b border-gray-700" />
-                    <div className="flex mx-5 grid-cols-12 text-sm">
-                      <div className="col-span-4">
-                        <div className="grid grid-cols-12 w-full gap-4">
+                    {/* Gráfica de barras 
+      <div className="w-full max-w-md mt-8">
+        <div className="flex items-end h-48 space-x-2">
+          <div className="w-1/4 bg-blue-500" style={{ height: `${progress}%` }}></div>
+          <div className="w-1/4 bg-green-500" style={{ height: `${progress * 0.8}%` }}></div>
+          <div className="w-1/4 bg-yellow-500" style={{ height: `${progress * 0.6}%` }}></div>
+          <div className="w-1/4 bg-red-500" style={{ height: `${progress * 0.4}%` }}></div>
+        </div>
+        <div className="flex justify-between mt-2 text-xs text-gray-500">
+          <span>Q1</span>
+          <span>Q2</span>
+          <span>Q3</span>
+          <span>Q4</span>
+        </div>
+      </div>*/}
+
+     {/* Gráfica de barras 
+     <div className="mb-20 px-20">
+        <div className="flex items-end h-48 space-x-3">
+          {data.map((item, index) => (
+            <div
+              key={index}
+              className={`w-1/4 bg-${index % 2 === 0 ? 'blue' : 'green'}-500`}
+              style={{ height: `${item.value}%` }}
+            ></div>
+          ))}
+        </div>
+        <div className="flex justify-between mt-2 text-xs text-gray-500">
+          {data.map((item, index) => (
+            <span key={index}>{item.name}</span>
+          ))}
+        </div>
+      </div>*/}
+
+                    <div className="flex justify-center mx-5 grid-cols-12 text-sm">
+                      <div className="col-span-6">
+                        <div className="grid grid-cols-12  gap-4">
                           <div className="col-span-5">
                             <strong>Project manager: </strong>
                           </div>
@@ -536,8 +676,8 @@ const Projects = ({ setShowChildRoutes }) => {
                           </div>
                         </div>
                       </div>
-                      <div className="col-span-4">
-                        <div className="grid grid-cols-12 w-full gap-4">
+                      <div className="col-span-6">
+                        <div className="grid grid-cols-12  gap-4">
                           <div className="col-span-5">
                             <strong>Operational users:</strong>
                           </div>
@@ -551,15 +691,6 @@ const Projects = ({ setShowChildRoutes }) => {
                             </ul>
                           </div>
                         </div>
-                      </div>
-                      <div className="col-span-4">
-
-
-
-
-
-
-
                       </div>
                     </div>
 
@@ -576,7 +707,7 @@ const Projects = ({ setShowChildRoutes }) => {
                       </div>
                       <div className="col-span-6">
                         Cost Material.{" "}
-                        <strong>${selectedProject.cost_material} USD</strong>
+                        <strong>${selectedProject.cost_material} MXN</strong>
                       </div>
                     </div>
                   </div>
@@ -735,47 +866,16 @@ const Projects = ({ setShowChildRoutes }) => {
                                                 </div>
                                                 <div className="px-2">
                                                   <div className="flex">
-                                                    {/*<div className="px-4 mx-2 text-sm text-gray-400 hover:text-gray-200">
-                                                    {isEditing ? (
-                                                      <div>
-                                                        <input
-                                                          type="date"
-                                                          value={date}
-                                                          onChange={
-                                                            handleDateChange
-                                                          }
-                                                          onBlur={handleBlur}
-                                                          className="px-4 mx-2 text-sm text-gray-400"
-                                                        />
-                                                        <button
-                                                          onClick={
-                                                            handleConfirmClick
-                                                          }
-                                                          className="px-4 mx-2 text-sm text-gray-400 hover:text-gray-200"
-                                                        >
-                                                          Confirmar
-                                                        </button>
-                                                      </div>
-                                                    ) : (
-                                                      <div
-                                                        className="px-4 mx-2 text-sm text-gray-400 hover:text-gray-200"
-                                                        onClick={handleDivClick}
-                                                      >
-                                                        {date
-                                                          ? date
-                                                          : "Add date order"}
-                                                      </div>
-                                                    )}
-                                                  </div>*/}
                                                     <div>
-                                                      {/**TODO */}
                                                       <input
                                                         type="checkbox"
                                                         onChange={
                                                           handleCheckboxChange
-                                                          
                                                         }
-                                                        defaultChecked={item.in_subassembly === 1}
+                                                        defaultChecked={
+                                                          item.in_subassembly ===
+                                                          1
+                                                        }
                                                       />
                                                       <ModalAcept
                                                         isOpen={isModalOpen}
@@ -809,8 +909,6 @@ const Projects = ({ setShowChildRoutes }) => {
                     )}
                   </div>
                 </div>
-              ) : (
-                "Select a project to see the details ..."
               )}
             </div>
           </div>
