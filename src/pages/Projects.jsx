@@ -356,9 +356,12 @@ const handleClick = () => {
       <div className="px-4 py-5 min-h-screen">
         {/* 1. FIRST PART */}
         <div className="flex justify-between items-center pt-4 pb-4 mb-5">
-          <h1 className="text-2xl font-bold mb-4">
+          <div>
+          <h1 className="text-3xl font-extrabold text-gray-500">
             Projects Under Development
           </h1>
+          </div>
+          
           <div className="flex items-center">
             <input
               type="text"
@@ -366,7 +369,7 @@ const handleClick = () => {
               onChange={(e) => setSearchQuery(e.target.value)}
               onBlur={handleContentBlur}
               placeholder="project id. 000351 ..."
-              className="w-80 p-2 rounded-l focus:bg-gray-800 hover:bg-gray-800 text-sm text-gray-200 bg-pageBackground border border-gray-500 focus:outline-none focus:border-gray-400"
+              className="w-80 p-2 rounded-l focus:bg-gray-800 hover:bg-gray-800 text-sm text-gray-200 bg-pageBackground border border-blue-500 focus:outline-none focus:border-blue-400"
             />{" "}
             {/*onKeyDown={(e) => {
             if (e.key === 'Enter') {
@@ -375,7 +378,7 @@ const handleClick = () => {
           }}*/}
             <button
               onClick={handleButtonClickBySearch}
-              className="px-4 py-2 ml-1 bg-gray-700 text-sm text-gray-300 border border-gray-500 rounded-r hover:bg-gray-600"
+              className="px-4 py-2 ml-1 bg-blue-900 text-sm text-gray-300 border border-blue-500 rounded-r hover:bg-blue-700 haver:border-blue-300"
             >
               <strong>Search</strong>
             </button>
@@ -386,15 +389,15 @@ const handleClick = () => {
           {isFocusedContent ? (
             <table className="text-sm table-auto w-full border text-lightWhiteLetter">
               <thead>
-                <tr className="w-full bg-gray-700 text-left">
-                  <th className="px-4 py-2 border border-gray-500">Proj. ID</th>
-                  <th className="px-4 py-2 border border-gray-500">
+                <tr className="w-full bg-blue-900 text-left">
+                  <th className="px-4 py-2 border bg-blue-700 border-blue-400">Proj. ID</th>
+                  <th className="px-4 py-2 border border-blue-500">
                     Description
                   </th>
-                  <th className="px-4 py-2 border border-gray-500">Status</th>
+                  <th className="px-4 py-2 border border-blue-500">Status</th>
                 </tr>
               </thead>
-              <tbody className="bg-gray-800 shadow-lg">
+              <tbody className="shadow-lg">
                 {Array.isArray(searchResults) && searchResults.length > 0 ? (
                   searchResults.map((project) => (
                     <tr
@@ -402,7 +405,7 @@ const handleClick = () => {
                       className="cursor-pointer hover:bg-pageSideMenuTextHover transition duration-200"
                       onClick={() => handleSelectProject(project.id)}
                     >
-                      <td className="px-4 py-2 border border-gray-500">
+                      <td className="px-4 py-2 font-medium border border-gray-500">
                         {project.identification_number}
                       </td>
                       <td className="px-4 py-2 border border-gray-500">
@@ -466,22 +469,22 @@ const handleClick = () => {
             <div>
               <table className="text-sm table-auto w-full border text-lightWhiteLetter">
                 <thead>
-                  <tr className="w-full bg-gray-700 text-left">
-                    <th className="px-4 py-2 border border-gray-500">
+                  <tr className="w-full bg-blue-900 text-left">
+                    <th className="px-4 py-2 border bg-blue-700 border-blue-400">
                       Proj. ID
                     </th>
-                    <th className="px-4 py-2 border border-gray-500">
+                    <th className="px-4 py-2 border border-blue-500">
                       Project Manager
                     </th>
-                    <th className="px-4 py-2 border border-gray-500">
+                    <th className="px-4 py-2 border border-blue-500">
                       Delivery Date
                     </th>
-                    <th className="px-4 py-2 border border-gray-500">
+                    <th className="px-4 py-2 border border-blue-500">
                       Progress
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-gray-800 shadow-lg">
+                <tbody className="shadow-lg">
                   {currentProjects.map((project) => (
                     <>
                       <tr
@@ -490,16 +493,16 @@ const handleClick = () => {
                         onClick={() => handleSelectProject(project.id)}
                         disabled={loading}
                       >
-                        <td className="px-4 py-2 border border-gray-500">
+                        <td className="px-4 font-medium  py-2 border border-gray-400">
                           {project.identification_number}
                         </td>
-                        <td className="px-4 py-2 border border-gray-500">
+                        <td className="px-4 py-2 border border-gray-400">
                           {getProjectManager(project.id)}
                         </td>
-                        <td className="px-4 py-2 border border-gray-500">
+                        <td className="px-4 py-2 border border-gray-400">
                           {project.delivery_date}
                         </td>
-                        <td className="px-4 py-2 border border-gray-500">
+                        <td className="px-4 py-2 border border-gray-400">
                           <div
                             className={` font-bold  ${
                               (progresses[project.id] || 0) < 25

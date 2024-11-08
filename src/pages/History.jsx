@@ -174,7 +174,7 @@ const History = ({ setShowChildRoutes }) => {
     <div className="min-h-screen p-8">
       <div className="flex flex-col items-center justify-center p-[5rem]">
         <div>
-          <h1 className="text-2xl font-bold mb-4">
+          <h1 className="text-3xl font-extrabold text-gray-400 mb-4">
             Search by project identifier
           </h1>
         </div>
@@ -185,11 +185,11 @@ const History = ({ setShowChildRoutes }) => {
             onChange={(e) => setSearchQuery(e.target.value)}
             onBlur={handleContentBlur}
             placeholder="project id. 000351 ..."
-            className="w-96 p-2 mb-4 rounded-l focus:bg-gray-800 hover:bg-gray-800 text-sm text-gray-200 bg-pageBackground border border-gray-500 focus:outline-none focus:border-blue-500"
+            className="w-96 p-2 rounded-l focus:bg-gray-800 hover:bg-gray-800 text-sm text-gray-200 bg-pageBackground border border-blue-500 focus:outline-none focus:border-blue-400"
           />{" "}
           <button
             onClick={handleButtonClickBySearch}
-            className="px-4 py-2 ml-1 bg-gray-500 text-sm text-gray-300 bg-gray-700 border border-gray-500 rounded-r hover:bg-blue-700 hover:border-blue-500 hover:text-blue-300"
+            className="px-4 py-2 ml-1 bg-blue-900 text-sm text-gray-300 border border-blue-500 rounded-r hover:bg-blue-700 haver:border-blue-300"
           >
             <strong>Search</strong>
           </button>
@@ -197,24 +197,24 @@ const History = ({ setShowChildRoutes }) => {
       </div>
       <br />
       <div className="card" id="pj-list-projects">
-        <table className="min-w-full px-5 border-t-2 border-b-2 border-gray-600">
+        <table className="min-w-full px-5 border-t-2 border-b-2 border-blue-400">
           <thead>
-            <tr>
-              <th className="bg-gray-800 font-semibold text-gray-300 text-left px-4 py-2 border border-gray-700">
+            <tr className="w-full bg-blue-900 text-left">
+              <th className="bg-gray-900 font-semibold text-gray-300 text-left px-4 py-2 border border-blue-500">
                 Proj. ID
               </th>
-              <th className="font-semibold text-gray-300 text-left px-4 py-2 border border-gray-700">
+              <th className="font-semibold text-gray-300 text-left px-4 py-2 border border-blue-500">
                 Manager ID
               </th>
               <th
-                className="font-semibold text-gray-300 text-left px-4 py-2 border border-gray-700"
+                className="font-semibold text-gray-300 text-left px-4 py-2 border border-blue-500"
                 colSpan="2"
               >
                 Description
               </th>
             </tr>
           </thead>
-          <tbody className="bg-gray-800 shadow-lg">
+          <tbody className="shadow-lg">
             {isFocusedContent ? (
               Array.isArray(searchResults) && searchResults.length > 0 ? (
                 searchResults.map((project) => (
@@ -230,10 +230,10 @@ const History = ({ setShowChildRoutes }) => {
                     <td className="px-4 py-1 border border-gray-700">
                       {getProjectManager(project.id)}
                     </td>
-                    <td className="px-4 py-1 border border-gray-700">
+                    <td className="px-4 py-1 border-t border-b border-l border-gray-700">
                       {truncateDescription(project.description, 80)}
                     </td>
-                    <td className="px-4 py-1 border border-gray-700">
+                    <td className="px-4 py-1 border-t border-b border-r border-gray-700">
                       <div className="flex justify-end">
                         {loading && <p>Cargando...</p>}
                         {error && <p style={{ color: "red" }}>{error}</p>}
@@ -274,10 +274,10 @@ const History = ({ setShowChildRoutes }) => {
                   <td className="px-4 py-1 border border-gray-700">
                     {getProjectManager(project.id)}
                   </td>
-                  <td className="px-4 py-1 border border-gray-700">
+                  <td className="px-4 py-1 border-t border-b border-l border-gray-700">
                     {truncateDescription(project.description, 80)}
                   </td>
-                  <td className="px-4 py-1 border border-gray-700">
+                  <td className="px-4 py-1 border-t border-b border-r border-gray-700">
                     <div className="flex justify-end">
                       {loading && <p>Cargando...</p>}
                       {error && <p style={{ color: "red" }}>{error}</p>}

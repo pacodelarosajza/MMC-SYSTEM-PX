@@ -98,7 +98,7 @@ const ProjectsManagmentTable = () => {
       {/* PROJECTS MANAGEMENT TABLE */}
       <div className="px-10">
         <div className="flex items-center justify-between py-1 mt-5">
-          <h2 className="text-xl text-gray-300 font-bold">Projects Actives</h2>
+          <h2 className="text-xl text-blue-400 font-bold">Projects In Development</h2>
           <button
             onClick={fetchActiveProjects}
             className="p-2 mx-4 text-white rounded hover:bg-gray-800 transition duration-200"
@@ -113,14 +113,14 @@ const ProjectsManagmentTable = () => {
             id="projects-actions"
           >
             <thead>
-              <tr className="w-full bg-gray-700 text-left">
-                <th className="px-4 py-2 border border-gray-500">Proj. ID</th>
-                <th className="px-4 py-2 border border-gray-500" colSpan="2">
+              <tr className="w-full bg-blue-900 text-left">
+                <th className="px-4 py-2 border bg-blue-700 border-blue-400">Proj. ID</th>
+                <th className="px-4 py-2 border border-blue-500" colSpan="2">
                   Description
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-gray-800 shadow-lg">
+            <tbody className="shadow-lg">
               {currentProjects.map((project) => (
                 <tr
                   key={project.id}
