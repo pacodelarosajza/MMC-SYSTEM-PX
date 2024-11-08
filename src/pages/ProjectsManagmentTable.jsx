@@ -114,7 +114,7 @@ const ProjectsManagmentTable = () => {
           >
             <thead>
               <tr className="w-full bg-blue-900 text-left">
-                <th className="px-4 py-2 border bg-blue-700 border-blue-400">Proj. ID</th>
+                <th className="px-4 py-2 border border-blue-500">Identifier </th>
                 <th className="px-4 py-2 border border-blue-500" colSpan="2">
                   Description
                 </th>

@@ -468,7 +468,7 @@ const Dashboard = ({ onLogout }) => {
                       <strong>#{project.identification_number}</strong>
                     </p>
 
-                    <p className="text-lightWhiteLetter">
+                    <p className="text-lightWhiteLetter mb-2">
                       <strong>Description:</strong>
                       <br />
                       {project.description}

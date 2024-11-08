@@ -12,7 +12,7 @@ const ProjectsManagmentForm = () => {
     delivery_date: "",
     completed: 0,
     cost_material: "",
-    description: "",
+    description: "", 
   };
   const [newProject, setNewProject] = useState(initialProjectState);
 
@@ -996,12 +996,13 @@ const ProjectsManagmentForm = () => {
                               )}
                             </div>
                             <div>
+                              {/* SELECT FILE STYLE */}
                               <button
                                 type="button"
                                 onClick={handleFileClick}
                                 className="text-sm px-3 mt-6 py-1 border border-purple-500 bg-purple-900 text-purple-300 hover:border-purple-400 hover:bg-purple-700 hover:text-purple-200 rounded"
                               >
-                                Seleccionar archivo
+                                Selecct 
                               </button>
                             </div>
                           </div>

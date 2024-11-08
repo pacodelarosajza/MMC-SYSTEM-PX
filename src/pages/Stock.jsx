@@ -107,7 +107,7 @@ const AddItemForm = () => {
     setSelectedItem(null);
   };
 
-  // Función para manejar la carga de archivos Excel
+  // 1. Función para manejar la carga de archivos Excel
   const handleFileUpload = async (event) => {
     const file = event.target.files[0];
     const reader = new FileReader();
@@ -158,6 +158,7 @@ const AddItemForm = () => {
     let successCount = 0;
     let errorCount = 0;
 
+    // 2. post
     for (const item of items) {
       try {
         await axios.post(`${apiIpAddress}/api/items-create`, item);
@@ -374,7 +375,7 @@ const AddItemForm = () => {
         </div>
       )}
 
-      {/* Formulario de carga de archivos Excel */}
+      {/* 3. Formulario de carga de archivos Excel */}
       <div className="mt-8 bg-gray-900 p-6 rounded-lg shadow-lg animate-fadeIn">
         <label className="text-lg font-semibold text-gradient bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-green-500 mb-2 block">
           Upload Excel File:

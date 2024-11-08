@@ -168,10 +168,16 @@ const getProjectProgress = async (projectId) => {
 
 // Get project manager
 const getProjectManager = (projectId) => {
-  return Array.isArray(adminProjects[projectId]) &&
+  if (
+    Array.isArray(adminProjects[projectId]) &&
     adminProjects[projectId].length > 0
-    ? adminProjects[projectId][0]?.["user.user_number"] || "Data N/A"
-    : "N/A";
+  ) {
+    return adminProjects[projectId].map(
+      (admin) => admin["user.user_number"] || "Data N/A"
+    );
+  } else {
+    return ["N/A"];
+  }
 };
 
 // Get operational users
@@ -425,7 +431,7 @@ const handleClick = () => {
                                   button below.
                                 </div>
                               </div>
-                              {project.identification_number}
+                              {/*{project.identification_number}*/}
 
                               <Link
                                 to={{
@@ -470,8 +476,8 @@ const handleClick = () => {
               <table className="text-sm table-auto w-full border text-lightWhiteLetter">
                 <thead>
                   <tr className="w-full bg-blue-900 text-left">
-                    <th className="px-4 py-2 border bg-blue-700 border-blue-400">
-                      Proj. ID
+                    <th className="px-4 py-2 border border-blue-500">
+                    Identifier 
                     </th>
                     <th className="px-4 py-2 border border-blue-500">
                       Project Manager
@@ -497,7 +503,11 @@ const handleClick = () => {
                           {project.identification_number}
                         </td>
                         <td className="px-4 py-2 border border-gray-400">
-                          {getProjectManager(project.id)}
+                        {getProjectManager(project.id).map(
+                                (userNumber, index) => (
+                                  <div key={index}>{userNumber}</div>
+                                )
+                              )}
                         </td>
                         <td className="px-4 py-2 border border-gray-400">
                           {project.delivery_date}
@@ -623,17 +633,7 @@ const handleClick = () => {
                         </div>
                       </div>
                     </div>
-
-
-
-
-
-
-
-
-
-
-
+{/*  USERS OPER AND ADMIN
 
 
                     <div className="flex justify-center mx-5 grid-cols-12 text-sm">
@@ -670,22 +670,17 @@ const handleClick = () => {
 
 
 
-
-
-
-
-
-
-
-
+*/}
                     <AppProjectDetails
                       identificationNumber={
                         selectedProject.identification_number
                       }
                     />
                   </div>
-
-                  {/* Gráfica de barras 
+{/* GRAPHICS
+                  
+                  
+                  Gráfica de barras 
       <div className="w-full max-w-md mt-8">
         <div className="flex items-end h-48 space-x-2">
           <div className="w-1/4 bg-blue-500" style={{ height: `${progress}%` }}></div>
@@ -699,9 +694,9 @@ const handleClick = () => {
           <span>Q3</span>
           <span>Q4</span>
         </div>
-      </div>*/}
+      </div>
 
-                  {/* Gráfica de barras 
+                 Gráfica de barras 
      <div className="mb-20 px-20">
         <div className="flex items-end h-48 space-x-3">
           {data.map((item, index) => (
@@ -717,18 +712,38 @@ const handleClick = () => {
             <span key={index}>{item.name}</span>
           ))}
         </div>
-      </div>*/}
+      </div>
+*/}
                 </>
               ) : (
-                <div className="mx-3 my-10 flex items-center text-gray-500">
+                <div className="mx-3 my-10 flex items-center text-gray-500"> {/* HERE */}
                   <span>Click on a project to see more details ...</span>
                 </div>
               )}
+ {/*}
 
-              {/*<div key={selectedProject.id}>
-              
+
+
+<strong>Items:</strong>
+                      <ul>
+                        {Array.isArray(itemsData[assembly.id]) &&
+                          itemsData[assembly.id].length > 0 &&
+                          itemsData[assembly.id].map((item, index) => (
+                            <li key={index}>
+                              {item.name} - {item.quantity} units
+                            </li>
+                          ))}
+                      </ul>
+                    </div>
+
+
+
+
+                    
+              <div key={selectedProject.id}>
+             
                   <div className="pt-5">
-                    {/* 2.2. Assemblies *
+               
                     {getAssemblyMaterials(selectedProject.id) && (
                       <div className="pt-10 pb-20 px-4">
                         <h2 className="text-2xl font-semibold mb-3">
@@ -924,12 +939,18 @@ const handleClick = () => {
                       </div>
                     )}
                   </div>
+
+
+
+
+
+
                 </div>*/}
             </div>
           </div>
         </div>
       </div>
-      {/* MODALS */}
+   
       <Modal
         isOpen={isModalReceivedSuccess}
         onClose={() => setIsModalReceivedSuccess(false)}
