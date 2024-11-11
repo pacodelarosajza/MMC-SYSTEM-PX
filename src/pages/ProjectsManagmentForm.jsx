@@ -12,7 +12,7 @@ const ProjectsManagmentForm = () => {
     delivery_date: "",
     completed: 0,
     cost_material: "",
-    description: "", 
+    description: "",
   };
   const [newProject, setNewProject] = useState(initialProjectState);
 
@@ -69,26 +69,49 @@ const ProjectsManagmentForm = () => {
     isModalErrorSubassemblyFieldOpen,
     setIsModalErrorSubassemblyFieldOpen,
   ] = useState(false);
+  const [isModalErrorProjectExistsOpen, setIsModalErrorProjectExistsOpen] =
+    useState(false);
 
   // STATES FOR MODAL SUCCESS FORM WINDOW
   const [isModalSuccessProjectOpen, setIsModalSuccessProjectOpen] =
     useState(false);
 
+  const checkIfProjectExists = async (identificationNumber) => {
+    try {
+      const response = await axios.get(
+        `${apiIpAddress}/api/getProjects/identification_number/${identificationNumber}`
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error checking if project exists:", error);
+      return false;
+    }
+  };
+
   // TODO: HANDLE CREATE PROJECT
   const handleCreateProject = async (event) => {
     event.preventDefault();
 
-    // Validar campos requeridos
-    if (
-      !newProject.identification_number ||
-      !newProject.cost_material ||
-      !newProject.delivery_date
-    ) {
-      setIsModalErrorProjectFieldsOpen(true);
-      return;
-    }
-
     try {
+      const projectExists = await checkIfProjectExists(
+        newProject.identification_number
+      );
+
+      if (projectExists) {
+        setIsModalErrorProjectExistsOpen(true);
+        return;
+      }
+
+      // Validate required fields
+      if (
+        !newProject.identification_number ||
+        !newProject.cost_material ||
+        !newProject.delivery_date
+      ) {
+        setIsModalErrorProjectFieldsOpen(true);
+        return;
+      }
+
       if (
         userSelections.length === 0 ||
         userSelections.some((selection) => !selection.value)
@@ -96,6 +119,7 @@ const ProjectsManagmentForm = () => {
         setIsModalErrorUserAdminFieldOpen(true);
         return;
       }
+
       if (
         userOperSelections.length === 0 ||
         userOperSelections.some((selection) => !selection.value)
@@ -103,14 +127,11 @@ const ProjectsManagmentForm = () => {
         setIsModalErrorUserOperFieldOpen(true);
         return;
       }
+
       if (InTable.length === 0) {
         setIsModalErrorAssemblyFieldOpen(true);
         return;
       }
-      /*if (InTableSubass.length === 0) {
-        setIsModalErrorSubassemblyFieldOpen(true);
-        return;
-      }*/
 
       // Post the new project
       const projectResponse = await axios.post(
@@ -119,27 +140,29 @@ const ProjectsManagmentForm = () => {
       );
       const projectId = projectResponse.data.id;
 
-      // Post each user-project relationship
-      const userProjectPromises = userSelections.map((userSelection) =>
-        axios.post(`${apiIpAddress}/api/user_assign_project`, {
-          users_id: userSelection.value,
-          project_id: projectId, // Use `project_id` as expected by the API
-        })
-      );
-      const userOperProjectPromises = userOperSelections.map(
-        (userOperSelection) =>
+      // Post user-project relationships
+      const userProjectPromises = [
+        ...userSelections.map((userSelection) =>
+          axios.post(`${apiIpAddress}/api/user_assign_project`, {
+            users_id: userSelection.value,
+            project_id: projectId,
+          })
+        ),
+        ...userOperSelections.map((userOperSelection) =>
           axios.post(`${apiIpAddress}/api/user_assign_project`, {
             users_id: userOperSelection.value,
-            project_id: projectId, // Use `project_id` as expected by the API
+            project_id: projectId,
           })
-      );
-      await Promise.all([...userProjectPromises, ...userOperProjectPromises]);
+        ),
+      ];
+      await Promise.all(userProjectPromises);
 
+      // Post assemblies
       const assemblyPromises = InTable.map((row) =>
         axios.post(`${apiIpAddress}/api/postAssembly`, {
           project_id: projectId,
           identification_number: row.identification_number,
-          description: row.description, // || null,
+          description: row.description,
           delivery_date: row.delivery_date,
           completed_date: null,
           price: row.price,
@@ -147,48 +170,28 @@ const ProjectsManagmentForm = () => {
           completed: 0,
         })
       );
-      const assemblyResponses = await Promise.all(assemblyPromises);
-      const assemblyIds = assemblyResponses.map((response) => response.data.id);
-
-      /*post each subassembly
-      const subassemblyPromises = InTableSubass.map((rowSubass) =>
-        axios.post(`${apiIpAddress}/api/postSubassembly`, {
-          assembly_id: rowSubass.assemblyIds,
-          identification_number: rowSubass.identification_number,
-          description: rowSubass.description || null,
-          delivery_date: rowSubass.delivery_date,
-          completed_date: null,
-          price: rowSubass.price,
-          currency: "MXN",
-          completed: 0,
-        })
-      );
-      const subassemblyResponses = await Promise.all(subassemblyPromises);
-      const subassemblyIds = subassemblyResponses.map(
-        (response) => response.data.id
-      );*/
+      await Promise.all(assemblyPromises);
 
       // Reset form state after successful submission
       setNewProject(initialProjectState);
       setUserSelections([{ id: Date.now(), value: "" }]);
       setUserOperSelections([{ id: Date.now(), value: "" }]);
       setInTable([]);
-      //setInTableSubass([]);
-      /*alert(`Project registration successful. Project ID: ${projectId}`);
-      alert(
-        `Assembly registration successful. Assembly IDs: ${assemblyIds.join(
-          ", "
-        )}`
-      );*/
       setIsModalSuccessProjectOpen(true);
-      /*alert(
-        `Subassembly registration successful. Subassembly IDs: ${subassemblyIds.join(
-          ", "
-        )}`
-      );*/
+
+      return;
     } catch (error) {
-      console.error("Error creating project:", error);
-      alert("Project registration failed: " + error.message);
+      if (error.response) {
+        console.error(`Error ${error.response.status}: ${error.response.data}`);
+        if (error.response.status === 404) {
+          alert("Error 404: Resource not found.");
+        } else {
+          alert(`Error ${error.response.status}: ${error.response.data}`);
+        }
+      } else {
+        console.error("Error creating project:", error);
+        alert("Project registration failed: " + error.message);
+      }
     }
   };
 
@@ -446,9 +449,9 @@ const ProjectsManagmentForm = () => {
             value={newProject.description}
             onChange={handleChange}
           ></textarea>
-           <div className="m-1 text-gray-400">
-                    {newProject.description.length}/255 characters
-                  </div>
+          <div className="m-1 text-gray-400">
+            {newProject.description.length}/255 characters
+          </div>
         </div>
         <div className="col-span-full py-5">
           <hr className="border border-1 border-gray-500" />
@@ -579,7 +582,7 @@ const ProjectsManagmentForm = () => {
         <div className="col-span-full py-5">
           <hr className="border border-1 border-gray-500" />
         </div>
-        
+
         <div className="col-span-full pt-3">
           <div className="mb-5">
             <h2 className="text-xl text-gray-200 font-bold">
@@ -805,7 +808,7 @@ const ProjectsManagmentForm = () => {
                             onClick={handleFileClick}
                             className="text-sm px-3 mt-6 py-1 border border-purple-500 bg-purple-900 text-purple-300 hover:border-purple-400 hover:bg-purple-700 hover:text-purple-200 rounded"
                           >
-                            Seleccionar archivo
+                            Select
                           </button>
                         </div>
                       </div>
@@ -1002,7 +1005,7 @@ const ProjectsManagmentForm = () => {
                                 onClick={handleFileClick}
                                 className="text-sm px-3 mt-6 py-1 border border-purple-500 bg-purple-900 text-purple-300 hover:border-purple-400 hover:bg-purple-700 hover:text-purple-200 rounded"
                               >
-                                Selecct 
+                                Select
                               </button>
                             </div>
                           </div>
@@ -1080,6 +1083,17 @@ const ProjectsManagmentForm = () => {
         title="Project registration successful"
       >
         <p>The project has been registered successfully.</p>
+      </Modal>
+
+      <Modal
+        isOpen={isModalErrorProjectExistsOpen}
+        onClose={() => setIsModalErrorProjectExistsOpen(false)}
+        title="Project already exists"
+      >
+        <p>
+          The project with the identification number already exists in the
+          system.
+        </p>
       </Modal>
     </div>
   );
