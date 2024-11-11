@@ -100,6 +100,12 @@ const ProjectsManagmentTable = () => {
     return activeProjects.slice(startIndex, endIndex);
   }, [activeProjects, currentPage, recordsPerPage]);
 
+  const endIndex = (currentPage + 1) * recordsPerPage;
+
+  const truncateDescription = (description) => {
+    return description.length > 145 ? description.substring(0, 145) + "  . . ." : description;
+  };
+
   return (
     <>
       {/* PROJECTS MANAGEMENT TABLE */}
@@ -139,8 +145,8 @@ const ProjectsManagmentTable = () => {
                     <td className="px-4 border-t border-r border-b border-gray-500">
                       #{project.identification_number}
                     </td>
-                    <td className="px-4 border-t border-b border-gray-500">
-                      {project.description}
+                    <td className="px-4 py-2 border-t border-b border-gray-500">
+                      {truncateDescription(project.description)}
                     </td>
                     <td className="px-4 border-t border-b border-gray-500">
                       <div className="flex justify-end items-center">

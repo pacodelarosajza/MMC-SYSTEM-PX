@@ -6,7 +6,7 @@ import AppProjectDetails from "./ProjectDetails";
 const OldProject = () => {
   const apiIpAddress = import.meta.env.VITE_API_IP_ADDRESS;
   const location = useLocation();
-  const { identificationNumber } = location.state || {};
+  const { projectId } = location.state || {};
 
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -14,8 +14,14 @@ const OldProject = () => {
 
   useEffect(() => {
     const fetchProject = async () => {
+      if (!projectId) {
+        setError('No project ID provided.');
+        setLoading(false);
+        return;
+      }
+
       try {
-        const response = await axios.get(`${apiIpAddress}/api/getProjects/identification_number/${identificationNumber}`);
+        const response = await axios.get(`${apiIpAddress}/api/getProjects/${projectId}`);
         setProject(response.data);
         setLoading(false);
       } catch (err) {
@@ -24,13 +30,8 @@ const OldProject = () => {
       }
     };
 
-    if (identificationNumber) {
-      fetchProject();
-    } else {
-      setError('No identification number provided.');
-      setLoading(false);
-    }
-  }, [identificationNumber]);
+    fetchProject();
+  }, [projectId]);
 
   return (
     <div className="px-4 py-5 min-h-screen">
@@ -40,7 +41,7 @@ const OldProject = () => {
       {project && (
         <>
           <h1>Old Project Details</h1>
-          <p>Identification Number: {identificationNumber}</p>
+          <p>Project ID: {projectId}</p>
           <AppProjectDetails project={project} />
         </>
       )}

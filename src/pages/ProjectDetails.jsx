@@ -367,13 +367,13 @@ const ProjectDetails = ({ identificationNumber }) => {
                                 </button>
                                 <button
                                   onClick={() => handleButtonClick(assembly.id)}
-                                  className="rounded text-xs bg-gray-900 text-gray-500 font-bold shadow-lg px-5 py-2 hover:bg-blue-800 hover:text-blue-200"
+                                  className="rounded text-xs bg-gray-900 text-gray-500 border border-transparent hover:border-blue-800 font-bold shadow-lg px-5 py-2 hover:bg-blue-900 hover:text-blue-200 transition duration-300 ease-in-out"
                                 >
                                   Assembly File
                                 </button>
                                 <button
                                   onClick={() => toggleList(i)}
-                                  className="px-4 bg-gray-500 text-gray-300 bg-pageBackground rounded"
+                                  className="px-4 text-gray-300 bg-pageBackground rounded"
                                 >
                                   <FontAwesomeIcon
                                     icon={
@@ -382,7 +382,7 @@ const ProjectDetails = ({ identificationNumber }) => {
                                         : faChevronCircleDown
                                     }
                                     size="1x"
-                                    className="text-pageBackground bg-gray-500 p-2 rounded"
+                                    className="text-pageBackground bg-gray-500 p-2 rounded hover:bg-pageBackground hover:text-gray-500 transition duration-300 ease-in-out"
                                   />
                                 </button>
                               </div>

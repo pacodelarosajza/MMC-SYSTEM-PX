@@ -3,11 +3,28 @@ import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import AppProjectDetails from "./ProjectDetails";
 import { FaArrowLeft, FaArrowRight, FaShare } from "react-icons/fa";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faSync } from "@fortawesome/free-solid-svg-icons";
 import Modal from "./Modal";
-import { Bar } from 'react-chartjs-2';
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
+import { Bar } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+} from "chart.js";
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 const Projects = ({ setShowChildRoutes }) => {
   const apiIpAddress = import.meta.env.VITE_API_IP_ADDRESS;
@@ -18,13 +35,15 @@ const Projects = ({ setShowChildRoutes }) => {
   const [items, setItems] = useState({});
   const [progresses, setProgresses] = useState({});
   const [assemblyProgresses, setAssemblyProgresses] = useState({});
+  const [materialProgresses, setMaterialProgresses] = useState({});
   const [currentPage, setCurrentPage] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [selectedProject, setSelectedProject] = useState(null);
   const [loading, setLoading] = useState(false);
   const [isModalReceivedSuccess, setIsModalReceivedSuccess] = useState(false);
-  const [isModalNotReceivedSuccess, setIsModalNotReceivedSuccess] = useState(false);
+  const [isModalNotReceivedSuccess, setIsModalNotReceivedSuccess] =
+    useState(false);
   const [isFocusedContent, setIsFocusedContent] = useState(false);
   const [reload, setReload] = useState(false);
 
@@ -32,7 +51,8 @@ const Projects = ({ setShowChildRoutes }) => {
   const navigate = useNavigate();
 
   const handleNextPage = () => setCurrentPage((prevPage) => prevPage + 1);
-  const handlePreviousPage = () => setCurrentPage((prevPage) => Math.max(prevPage - 1, 0));
+  const handlePreviousPage = () =>
+    setCurrentPage((prevPage) => Math.max(prevPage - 1, 0));
 
   const startIndex = currentPage * recordsPerPage;
   const endIndex = startIndex + recordsPerPage;
@@ -50,7 +70,9 @@ const Projects = ({ setShowChildRoutes }) => {
     const fetchActiveProjects = async () => {
       setLoading(true);
       try {
-        const activeProjectsResponse = await axios.get(`${apiIpAddress}/api/getProjectsActives`);
+        const activeProjectsResponse = await axios.get(
+          `${apiIpAddress}/api/getProjectsActives`
+        );
         const projects = activeProjectsResponse.data;
         setActiveProjects(projects);
 
@@ -61,26 +83,34 @@ const Projects = ({ setShowChildRoutes }) => {
 
         for (const project of projects) {
           try {
-            const adminProjectResponse = await axios.get(`${apiIpAddress}/api/projects/${project.id}/admins`);
+            const adminProjectResponse = await axios.get(
+              `${apiIpAddress}/api/projects/${project.id}/admins`
+            );
             adminProjectsData[project.id] = adminProjectResponse.data;
           } catch {
             adminProjectsData[project.id] = null;
           }
 
           try {
-            const userOperProjectResponse = await axios.get(`${apiIpAddress}/api/projects/${project.id}/users`);
+            const userOperProjectResponse = await axios.get(
+              `${apiIpAddress}/api/projects/${project.id}/users`
+            );
             userOperProjectsData[project.id] = userOperProjectResponse.data;
           } catch {
             userOperProjectsData[project.id] = null;
           }
 
           try {
-            const assembliesResponse = await axios.get(`${apiIpAddress}/api/assembly/project/${project.id}`);
+            const assembliesResponse = await axios.get(
+              `${apiIpAddress}/api/assembly/project/${project.id}`
+            );
             assembliesData[project.id] = assembliesResponse.data;
 
             for (const assembly of assembliesResponse.data) {
               try {
-                const itemsResponse = await axios.get(`${apiIpAddress}/api/getItems/project/assembly/${project.id}/${assembly.id}`);
+                const itemsResponse = await axios.get(
+                  `${apiIpAddress}/api/getItems/project/assembly/${project.id}/${assembly.id}`
+                );
                 itemsData[assembly.id] = itemsResponse.data;
               } catch {
                 itemsData[assembly.id] = null;
@@ -98,7 +128,10 @@ const Projects = ({ setShowChildRoutes }) => {
 
         projects.forEach((project) => getProjectProgress(project.id));
       } catch (error) {
-        console.error("Error fetching active projects or admin projects:", error);
+        console.error(
+          "Error fetching active projects or admin projects:",
+          error
+        );
       } finally {
         setLoading(false);
       }
@@ -109,33 +142,44 @@ const Projects = ({ setShowChildRoutes }) => {
 
   const getProjectProgress = async (projectId) => {
     try {
-      const response = await axios.get(`${apiIpAddress}/api/getItems/project/${projectId}`);
+      const response = await axios.get(
+        `${apiIpAddress}/api/getItems/project/${projectId}`
+      );
       const items = response.data;
       const arrivedItems = items.filter((item) => item.in_subassembly === 1);
       const totalItems = items.length;
-      const progressPercentage = totalItems === 0 ? 0 : (arrivedItems.length / totalItems) * 100;
+      const progressPercentage =
+        totalItems === 0 ? 0 : (arrivedItems.length / totalItems) * 100;
 
       setProgresses((prevProgresses) => ({
         ...prevProgresses,
         [projectId]: progressPercentage,
       }));
     } catch (error) {
-      console.error(`Error fetching project progress for project ${projectId}:`, error);
+      console.error(
+        `Error fetching project progress for project ${projectId}:`,
+        error
+      );
     }
   };
 
   const getAssemblyProgress = async (projectId) => {
     try {
-      const assembliesResponse = await axios.get(`${apiIpAddress}/api/assembly/project/${projectId}`);
+      const assembliesResponse = await axios.get(
+        `${apiIpAddress}/api/assembly/project/${projectId}`
+      );
       const assemblies = assembliesResponse.data;
       const assemblyProgressData = {};
 
       for (const assembly of assemblies) {
-        const response = await axios.get(`${apiIpAddress}/api/getItems/project/assembly/${projectId}/${assembly.id}`);
+        const response = await axios.get(
+          `${apiIpAddress}/api/getItems/project/assembly/${projectId}/${assembly.id}`
+        );
         const items = response.data;
         const arrivedItems = items.filter((item) => item.in_subassembly === 1);
         const totalItems = items.length;
-        const progressPercentage = totalItems === 0 ? 0 : (arrivedItems.length / totalItems) * 100;
+        const progressPercentage =
+          totalItems === 0 ? 0 : (arrivedItems.length / totalItems) * 100;
 
         assemblyProgressData[assembly.id] = progressPercentage;
       }
@@ -145,19 +189,55 @@ const Projects = ({ setShowChildRoutes }) => {
         [projectId]: assemblyProgressData,
       }));
     } catch (error) {
-      console.error(`Error fetching assembly progress for project ${projectId}:`, error);
+      console.error(
+        `Error fetching assembly progress for project ${projectId}:`,
+        error
+      );
+    }
+  };
+
+  const getMaterialProgress = async (projectId, assemblyId) => {
+    try {
+      const response = await axios.get(
+        `${apiIpAddress}/api/getItems/project/assembly/${projectId}/${assemblyId}`
+      );
+      const items = response.data;
+      const arrivedItems = items.filter((item) => item.in_subassembly === 1);
+      const totalItems = items.length;
+      const progressPercentage =
+        totalItems === 0 ? 0 : (arrivedItems.length / totalItems) * 100;
+
+      setMaterialProgresses((prevProgresses) => ({
+        ...prevProgresses,
+        [assemblyId]: progressPercentage,
+      }));
+    } catch (error) {
+      console.error(
+        `Error fetching material progress for assembly ${assemblyId}:`,
+        error
+      );
     }
   };
 
   useEffect(() => {
     if (selectedProject) {
       getAssemblyProgress(selectedProject.id);
+      if (assemblies[selectedProject.id]) {
+        assemblies[selectedProject.id].forEach((assembly) => {
+          getMaterialProgress(selectedProject.id, assembly.id);
+        });
+      }
     }
-  }, [selectedProject]);
+  }, [selectedProject, assemblies]);
 
   const getProjectManager = (projectId) => {
-    if (Array.isArray(adminProjects[projectId]) && adminProjects[projectId].length > 0) {
-      return adminProjects[projectId].map((admin) => admin["user.user_number"] || "Data N/A");
+    if (
+      Array.isArray(adminProjects[projectId]) &&
+      adminProjects[projectId].length > 0
+    ) {
+      return adminProjects[projectId].map(
+        (admin) => admin["user.user_number"] || "Data N/A"
+      );
     } else {
       return ["N/A"];
     }
@@ -175,7 +255,9 @@ const Projects = ({ setShowChildRoutes }) => {
       const response = await fetch(`${apiIpAddress}/api/getProjects`);
       const data = await response.json();
       const projects = Array.isArray(data) ? data : [data];
-      const filteredProjects = projects.filter((project) => project.identification_number.toString().includes(searchQuery));
+      const filteredProjects = projects.filter((project) =>
+        project.identification_number.toString().includes(searchQuery)
+      );
       setSearchResults(filteredProjects);
     } catch (error) {
       console.error("Error fetching search results:", error);
@@ -197,40 +279,68 @@ const Projects = ({ setShowChildRoutes }) => {
   };
 
   const chartData = {
-    labels: activeProjects.map(project => project.identification_number),
+    labels: activeProjects.map((project) => project.identification_number),
     datasets: [
       {
-        label: 'Progress (%)',
-        data: activeProjects.map(project => progresses[project.id] || 0),
-        backgroundColor: activeProjects.map(project => {
+        label: "Progress (%)",
+        data: activeProjects.map((project) => progresses[project.id] || 0),
+        backgroundColor: activeProjects.map((project) => {
           const progress = progresses[project.id] || 0;
-          if (progress < 25) return 'rgba(255, 99, 132, 0.2)'; // red
-          if (progress < 50) return 'rgba(255, 159, 64, 0.2)'; // orange
-          if (progress < 75) return 'rgba(255, 205, 86, 0.2)'; // yellow
-          return 'rgba(75, 192, 192, 0.2)'; // green
+          if (progress < 25) return "rgba(255, 99, 132, 0.2)"; // red
+          if (progress < 50) return "rgba(54, 162, 235, 0.2)"; // blue
+          return "rgba(75, 192, 192, 0.2)"; // green
         }),
-        borderColor: activeProjects.map(project => {
+        borderColor: activeProjects.map((project) => {
           const progress = progresses[project.id] || 0;
-          if (progress < 25) return 'rgba(255, 99, 132, 1)'; // red
-          if (progress < 50) return 'rgba(255, 159, 64, 1)'; // orange
-          if (progress < 75) return 'rgba(255, 205, 86, 1)'; // yellow
-          return 'rgba(75, 192, 192, 1)'; // green
+          if (progress < 25) return "rgba(255, 99, 132, 1)"; // red
+          if (progress < 50) return "rgba(54, 162, 235, 1)"; // blue
+          return "rgba(75, 192, 192, 1)"; // green
         }),
         borderWidth: 1,
       },
     ],
   };
+
+  const materialChartData = selectedProject
+    ? {
+        labels: Object.keys(materialProgresses).map(
+          (assemblyId) =>
+            assemblies[selectedProject.id].find(
+              (assembly) => assembly.id === parseInt(assemblyId)
+            ).identification_number
+        ),
+        datasets: [
+          {
+            label: `Material Progress in Project ${selectedProject.identification_number}`,
+            data: Object.values(materialProgresses),
+            backgroundColor: Object.values(materialProgresses).map(
+              (progress) => {
+                if (progress < 25) return "rgba(255, 99, 132, 0.2)"; // red
+                if (progress < 50) return "rgba(54, 162, 235, 0.2)"; // blue
+                return "rgba(75, 192, 192, 0.2)"; // green
+              }
+            ),
+            borderColor: Object.values(materialProgresses).map((progress) => {
+              if (progress < 25) return "rgba(255, 99, 132, 1)"; // red
+              if (progress < 50) return "rgba(54, 162, 235, 1)"; // blue
+              return "rgba(75, 192, 192, 1)"; // green
+            }),
+            borderWidth: 1,
+          },
+        ],
+      }
+    : {};
 
   const chartOptions = {
     responsive: true,
-    maintainAspectRatio: false, // Add this line
+    maintainAspectRatio: false,
     plugins: {
       legend: {
-        position: 'top',
+        display: false, // Hide the legend
       },
       title: {
         display: true,
-        text: 'Project Progress',
+        text: "Project Progress",
       },
     },
     scales: {
@@ -240,29 +350,20 @@ const Projects = ({ setShowChildRoutes }) => {
       },
     },
   };
-/*
-  const assemblyChartData = selectedProject ? {
-    labels: Object.keys(assemblyProgresses[selectedProject.id] || {}).map(assemblyId => `Assembly ${assemblyId}`),
-    datasets: [
-      {
-        label: `Assembly Progress in Project ${selectedProject.identification_number}`,
-        data: Object.values(assemblyProgresses[selectedProject.id] || {}),
-        backgroundColor: 'rgba(153, 102, 255, 0.2)',
-        borderColor: 'rgba(153, 102, 255, 1)',
-        borderWidth: 1,
-      },
-    ],
-  } : {};
 
-  const assemblyChartOptions = {
+  const materialChartOptions = {
     responsive: true,
+    maintainAspectRatio: false,
     plugins: {
       legend: {
-        position: 'top',
+        display: false, // Hide the legend
       },
       title: {
         display: true,
-        text: selectedProject ? `Average Item Progress for Assemblies in Project ${selectedProject.identification_number}` : 'Assembly Progress',
+        text: "Material Progress",
+        font: {
+          size: 24, // Adjust size as needed
+        },
       },
     },
     scales: {
@@ -271,14 +372,41 @@ const Projects = ({ setShowChildRoutes }) => {
         max: 100,
       },
     },
-  };*/
+  };
+
+  const handleReloadData = () => {
+    setReload((prev) => !prev);
+  };
+
+  const handleDeselectProject = () => {
+    setSelectedProject(null);
+  };
+
+  const handleShareProject = (projectId) => {
+    if (projectId) {
+      navigate("/dashboard/old-project", { state: { projectId } });
+    } else {
+      console.error("Project ID is not defined");
+    }
+  };
 
   return (
     <>
       <div className="px-4 py-5 min-h-screen">
         <>
           <div className="flex justify-between items-center pt-4 pb-4 mb-5">
-            <h1 className="text-3xl font-extrabold text-gray-500">Projects Under Development</h1>
+          <div className="flex justify-center items-center">
+            <h1 className="text-3xl font-extrabold text-gray-500">
+              Projects Under Development
+            </h1>
+            <button
+              onClick={handleReloadData}
+              className="p-2 my-4 mx-4 text-white rounded hover:bg-gray-800 transition duration-200"
+              title="Refresh data"
+            >
+              <FontAwesomeIcon icon={faSync} color="gray" size="lg" />
+            </button>
+          </div>
             <div className="flex items-center">
               <input
                 type="text"
@@ -296,14 +424,17 @@ const Projects = ({ setShowChildRoutes }) => {
               </button>
             </div>
           </div>
-          <br />
           <div className="text-gray-500">
             {isFocusedContent ? (
               <table className="text-sm table-auto w-full border text-lightWhiteLetter">
                 <thead>
                   <tr className="w-full bg-blue-900 text-left">
-                    <th className="px-4 py-2 border bg-blue-700 border-blue-400">Proj. ID</th>
-                    <th className="px-4 py-2 border border-blue-500">Description</th>
+                    <th className="px-4 py-2 border bg-blue-700 border-blue-400">
+                      Proj. ID
+                    </th>
+                    <th className="px-4 py-2 border border-blue-500">
+                      Description
+                    </th>
                     <th className="px-4 py-2 border border-blue-500">Status</th>
                   </tr>
                 </thead>
@@ -325,33 +456,41 @@ const Projects = ({ setShowChildRoutes }) => {
                           {project.completed ? (
                             <div className="flex items-center space-between">
                               <div className="text-gray-400 italic">
-                                <span className="text-green-500 italic">Completed.</span>
+                                <span className="text-green-500 italic">
+                                  Completed.
+                                </span>
                                 <br />
-                                If you want to share this project, click the button below.
+                                If you want to share this project, click the
+                                button below.
                               </div>
+                              <div className="px-5">
                               <Link
-                                to={{
-                                  pathname: "/dashboard/old-project",
-                                  state: { identificationNumber: project.identification_number },
-                                }}
+                                to="/dashboard/old-project"
+                                onClick={() => handleShareProject(project.id)}
                               >
                                 <button
-                                  className="px-4 py-2 text-sm text-gray-300 bg-gray-800 rounded hover:bg-gray-500 hover:text-gray-800"
+                                  id="oldP" className="px-4 py-2 text-sm text-gray-300 bg-gray-800 rounded hover:bg-gray-500 hover:text-gray-800"
                                   disabled={loading}
                                 >
                                   <FaShare />
                                 </button>
                               </Link>
+                              </div>
                             </div>
                           ) : (
-                            <span className="text-yellow-500 italic">In Progress</span>
+                            <span className="text-yellow-500 italic">
+                              In Progress
+                            </span>
                           )}
                         </td>
                       </tr>
                     ))
                   ) : (
                     <tr>
-                      <td colSpan="3" className="px-4 py-2 border border-gray-500 text-center">
+                      <td
+                        colSpan="3"
+                        className="px-4 py-2 border border-gray-500 text-center"
+                      >
                         No projects found
                       </td>
                     </tr>
@@ -360,16 +499,26 @@ const Projects = ({ setShowChildRoutes }) => {
               </table>
             ) : (
               <div>
-                <div className="" style={{ height: '300px' }}> {/* Add inline style for height */}
+                <div className="" style={{ height: "200px" }}>
+                  {" "}
+                  {/* Adjusted height */}
                   <Bar data={chartData} options={chartOptions} />
                 </div>
                 <table className="text-sm my-5 table-auto w-full border text-lightWhiteLetter">
                   <thead>
                     <tr className="w-full bg-blue-900 text-left">
-                      <th className="px-4 py-2 border border-blue-500">Identifier</th>
-                      <th className="px-4 py-2 border border-blue-500">Project Manager</th>
-                      <th className="px-4 py-2 border border-blue-500">Delivery Date</th>
-                      <th className="px-4 py-2 border border-blue-500">Progress</th>
+                      <th className="px-4 py-2 border border-blue-500">
+                        Identifier
+                      </th>
+                      <th className="px-4 py-2 border border-blue-500">
+                        Project Manager
+                      </th>
+                      <th className="px-4 py-2 border border-blue-500">
+                        Delivery Date
+                      </th>
+                      <th className="px-4 py-2 border border-blue-500">
+                        Progress
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="shadow-lg">
@@ -384,11 +533,15 @@ const Projects = ({ setShowChildRoutes }) => {
                           {project.identification_number}
                         </td>
                         <td className="px-4 py-2 border border-gray-400">
-                          {getProjectManager(project.id).map((userNumber, index) => (
-                            <div key={index}>{userNumber}</div>
-                          ))}
+                          {getProjectManager(project.id).map(
+                            (userNumber, index) => (
+                              <div key={index}>{userNumber}</div>
+                            )
+                          )}
                         </td>
-                        <td className="px-4 py-2 border border-gray-400">{project.delivery_date}</td>
+                        <td className="px-4 py-2 border border-gray-400">
+                          {project.delivery_date}
+                        </td>
                         <td className="px-4 py-2 border border-gray-400">
                           <div
                             className={`font-bold ${
@@ -418,7 +571,8 @@ const Projects = ({ setShowChildRoutes }) => {
                     </button>
                   )}
                   <span className="text-sm text-gray-300">
-                    Page {currentPage + 1} of {Math.ceil(activeProjects.length / recordsPerPage)}
+                    Page {currentPage + 1} of{" "}
+                    {Math.ceil(activeProjects.length / recordsPerPage)}
                   </span>
                   {endIndex < activeProjects.length && (
                     <button
@@ -429,7 +583,7 @@ const Projects = ({ setShowChildRoutes }) => {
                       <FaArrowRight />
                     </button>
                   )}
-                </div>                
+                </div>
               </div>
             )}
           </div>
@@ -438,9 +592,21 @@ const Projects = ({ setShowChildRoutes }) => {
               <div className="text-sm text-white text-lightWhiteLetter">
                 {selectedProject ? (
                   <div key={selectedProject.id}>
+                    <div className="flex justify-end mt-4">
+                      <button
+                        onClick={handleDeselectProject}
+                        className="px-4 py-2 ml-1 bg-orange-900 text-sm text-orange-300 border border-orange-500 rounded hover:bg-orange-700 haver:border-orange-300"
+                        title="Close details"
+                      >
+                        <strong>X</strong>
+                      </button>
+                    </div>
                     <div className="flex justify-center items-center">
                       <div className="relative w-64 h-64 transform scale-150">
-                        <svg className="absolute w-full h-full" viewBox="0 0 36 36">
+                        <svg
+                          className="absolute w-full h-full"
+                          viewBox="0 0 36 36"
+                        >
                           <path
                             className="text-gray-600"
                             fill="none"
@@ -452,7 +618,10 @@ const Projects = ({ setShowChildRoutes }) => {
                             d="M2 18 C 9 5, 27 5, 34 18"
                           />
                         </svg>
-                        <svg className="absolute w-full h-full" viewBox="0 0 36 36">
+                        <svg
+                          className="absolute w-full h-full"
+                          viewBox="0 0 36 36"
+                        >
                           <path
                             fill="none"
                             stroke={
@@ -465,7 +634,9 @@ const Projects = ({ setShowChildRoutes }) => {
                                 : "green"
                             }
                             strokeWidth=".5"
-                            strokeDasharray={`${(progresses[selectedProject.id] || 0) * 0.5}, 50`}
+                            strokeDasharray={`${
+                              (progresses[selectedProject.id] || 0) * 0.5
+                            }, 50`}
                             d="M2 18 C 9 5, 27 5, 34 18"
                           />
                         </svg>
@@ -485,31 +656,43 @@ const Projects = ({ setShowChildRoutes }) => {
                               {Math.round(progresses[selectedProject.id] || 0)}%
                             </div>
                           </div>
-                          <div className="mt-2 text-xs text-gray-400 font-medium">IDENTIFICATION NUMBER</div>
+                          <div className="mt-2 text-xs text-gray-400 font-medium">
+                            IDENTIFICATION NUMBER
+                          </div>
                           <h2 className="font-bold text-gray-300 text-base">
                             {selectedProject.identification_number}
                           </h2>
                         </div>
                       </div>
                     </div>
+
                     <div className="flex justify-center grid grid-cols-12 gap-4">
                       <div className="col-span-12 md:col-span-6 flex justify-center">
                         <div className="text-lg text-center text-gray-500">
+                          <hr className="my-2 border-b border-gray-500 shadow-md opacity-50" />
                           Delivery Date.
                           <strong>{selectedProject.delivery_date}</strong>
                         </div>
                       </div>
                       <div className="col-span-12 md:col-span-6 flex justify-center">
                         <div className="text-lg text-center text-gray-500">
+                          <hr className="my-2 border-b border-gray-500 shadow-md opacity-50" />
                           Cost Material.
                           <strong>${selectedProject.cost_material} MXN</strong>
                         </div>
                       </div>
                     </div>
-                    {/*<div className="my-5" style={{ height: '300px' }}> {/* Add inline style for height 
-                      <Bar data={assemblyChartData} options={assemblyChartOptions} />
-                    </div>*/}
-                    <AppProjectDetails identificationNumber={selectedProject.identification_number} />
+                    <div className="my-5" style={{ height: "300px" }}>
+                      <Bar
+                        data={materialChartData}
+                        options={materialChartOptions}
+                      />
+                    </div>
+                    <AppProjectDetails
+                      identificationNumber={
+                        selectedProject.identification_number
+                      }
+                    />
                   </div>
                 ) : (
                   <div className="mx-3 my-10 flex items-center text-gray-500">

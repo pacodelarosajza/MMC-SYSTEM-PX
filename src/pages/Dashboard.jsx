@@ -37,7 +37,7 @@ const Dashboard = ({ onLogout }) => {
   const [items, setItems] = useState([]);
   // Estado para la página actual
   const [currentPage, setCurrentPage] = useState(0);
-  const projectsPerPage = 6;
+  const projectsPerPage = 5;
 
   const [progresses, setProgresses] = useState({});
 
