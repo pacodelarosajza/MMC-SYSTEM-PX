@@ -46,6 +46,7 @@ const Projects = ({ setShowChildRoutes }) => {
     useState(false);
   const [isFocusedContent, setIsFocusedContent] = useState(false);
   const [reload, setReload] = useState(false);
+  const [isProjectCompleted, setIsProjectCompleted] = useState(false);
 
   const recordsPerPage = 5;
   const navigate = useNavigate();
@@ -155,6 +156,14 @@ const Projects = ({ setShowChildRoutes }) => {
         ...prevProgresses,
         [projectId]: progressPercentage,
       }));
+
+      // Check if project progress is 100%
+      if (progressPercentage === 100) {
+        await axios.patch(`${apiIpAddress}/api/patchProject/${projectId}`, {
+          completed: 1,
+        });
+        setIsProjectCompleted(true);
+      }
     } catch (error) {
       console.error(
         `Error fetching project progress for project ${projectId}:`,
@@ -211,6 +220,34 @@ const Projects = ({ setShowChildRoutes }) => {
         ...prevProgresses,
         [assemblyId]: progressPercentage,
       }));
+
+      // Check if all materials are received
+      if (progressPercentage === 100) {
+        const allAssembliesCompleted = Object.values({
+          ...materialProgresses,
+          [assemblyId]: progressPercentage,
+        }).every((progress) => progress === 100);
+
+        if (allAssembliesCompleted) {
+          const allProjectsCompleted = Object.values(assemblyProgresses).every(
+            (assemblyProgress) =>
+              Object.values(assemblyProgress).every(
+                (progress) => progress === 100
+              )
+          );
+
+          if (allProjectsCompleted) {
+            const overallProjectProgress = progresses[projectId] || 0;
+            if (overallProjectProgress === 100) {
+              setIsProjectCompleted(true);
+              await axios.patch(`${apiIpAddress}/api/patchProject/${projectId}`, {
+                completed: 1,
+              });
+              window.location.reload();
+            }
+          }
+        }
+      }
     } catch (error) {
       console.error(
         `Error fetching material progress for assembly ${assemblyId}:`,
@@ -220,13 +257,11 @@ const Projects = ({ setShowChildRoutes }) => {
   };
 
   useEffect(() => {
-    if (selectedProject) {
+    if (selectedProject && assemblies[selectedProject.id]) {
       getAssemblyProgress(selectedProject.id);
-      if (assemblies[selectedProject.id]) {
-        assemblies[selectedProject.id].forEach((assembly) => {
-          getMaterialProgress(selectedProject.id, assembly.id);
-        });
-      }
+      assemblies[selectedProject.id].forEach((assembly) => {
+        getMaterialProgress(selectedProject.id, assembly.id);
+      });
     }
   }, [selectedProject, assemblies]);
 
@@ -237,6 +272,19 @@ const Projects = ({ setShowChildRoutes }) => {
     ) {
       return adminProjects[projectId].map(
         (admin) => admin["user.user_number"] || "Data N/A"
+      );
+    } else {
+      return ["N/A"];
+    }
+  };
+
+  const getUserOperational = (projectId) => {
+    if (
+      Array.isArray(userOperProjects[projectId]) &&
+      userOperProjects[projectId].length > 0
+    ) {
+      return userOperProjects[projectId].map(
+        (user) => user["user.user_number"] || "Data N/A"
       );
     } else {
       return ["N/A"];
@@ -301,26 +349,25 @@ const Projects = ({ setShowChildRoutes }) => {
     ],
   };
 
-  const materialChartData = selectedProject
+  const materialChartData = selectedProject && assemblies[selectedProject.id]
     ? {
-        labels: Object.keys(materialProgresses).map(
-          (assemblyId) =>
-            assemblies[selectedProject.id].find(
-              (assembly) => assembly.id === parseInt(assemblyId)
-            ).identification_number
+        labels: assemblies[selectedProject.id].map(
+          (assembly) => assembly.identification_number
         ),
         datasets: [
           {
             label: `Material Progress in Project ${selectedProject.identification_number}`,
-            data: Object.values(materialProgresses),
-            backgroundColor: Object.values(materialProgresses).map(
-              (progress) => {
-                if (progress < 25) return "rgba(255, 99, 132, 0.2)"; // red
-                if (progress < 50) return "rgba(54, 162, 235, 0.2)"; // blue
-                return "rgba(75, 192, 192, 0.2)"; // green
-              }
+            data: assemblies[selectedProject.id].map(
+              (assembly) => materialProgresses[assembly.id] || 0
             ),
-            borderColor: Object.values(materialProgresses).map((progress) => {
+            backgroundColor: assemblies[selectedProject.id].map((assembly) => {
+              const progress = materialProgresses[assembly.id] || 0;
+              if (progress < 25) return "rgba(255, 99, 132, 0.2)"; // red
+              if (progress < 50) return "rgba(54, 162, 235, 0.2)"; // blue
+              return "rgba(75, 192, 192, 0.2)"; // green
+            }),
+            borderColor: assemblies[selectedProject.id].map((assembly) => {
+              const progress = materialProgresses[assembly.id] || 0;
               if (progress < 25) return "rgba(255, 99, 132, 1)"; // red
               if (progress < 50) return "rgba(54, 162, 235, 1)"; // blue
               return "rgba(75, 192, 192, 1)"; // green
@@ -390,23 +437,28 @@ const Projects = ({ setShowChildRoutes }) => {
     }
   };
 
+  const handleModalClose = () => {
+    setIsProjectCompleted(false);
+    window.location.reload();
+  };
+
   return (
     <>
       <div className="px-4 py-5 min-h-screen">
         <>
           <div className="flex justify-between items-center pt-4 pb-4 mb-5">
-          <div className="flex justify-center items-center">
-            <h1 className="text-3xl font-extrabold text-gray-500">
-              Projects Under Development
-            </h1>
-            <button
-              onClick={handleReloadData}
-              className="p-2 my-4 mx-4 text-white rounded hover:bg-gray-800 transition duration-200"
-              title="Refresh data"
-            >
-              <FontAwesomeIcon icon={faSync} color="gray" size="lg" />
-            </button>
-          </div>
+            <div className="flex justify-center items-center">
+              <h1 className="text-3xl font-extrabold text-gray-500">
+                Projects Under Development
+              </h1>
+              <button
+                onClick={handleReloadData}
+                className="p-2 my-4 mx-4 text-white rounded hover:bg-gray-800 transition duration-200"
+                title="Refresh data"
+              >
+                <FontAwesomeIcon icon={faSync} color="gray" size="lg" />
+              </button>
+            </div>
             <div className="flex items-center">
               <input
                 type="text"
@@ -414,7 +466,7 @@ const Projects = ({ setShowChildRoutes }) => {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onBlur={handleContentBlur}
                 placeholder="project id. 000351 ..."
-                className="w-80 p-2 rounded-l focus:bg-gray-800 hover:bg-gray-800 text-sm text-gray-200 bg-pageBackground border border-blue-500 focus:outline-none focus:border-blue-400"
+                className="w-80 p-2 rounded-l focus:bg-gray-700 hover:bg-gray-700 text-sm text-gray-200 bg-gray-800 border border-blue-500 focus:outline-none focus:border-blue-400"
               />
               <button
                 onClick={handleButtonClickBySearch}
@@ -464,17 +516,18 @@ const Projects = ({ setShowChildRoutes }) => {
                                 button below.
                               </div>
                               <div className="px-5">
-                              <Link
-                                to="/dashboard/old-project"
-                                onClick={() => handleShareProject(project.id)}
-                              >
-                                <button
-                                  id="oldP" className="px-4 py-2 text-sm text-gray-300 bg-gray-800 rounded hover:bg-gray-500 hover:text-gray-800"
-                                  disabled={loading}
+                                <Link
+                                  to="/dashboard/old-project"
+                                  onClick={() => handleShareProject(project.id)}
                                 >
-                                  <FaShare />
-                                </button>
-                              </Link>
+                                  <button
+                                    id="oldP"
+                                    className="px-4 py-2 text-sm text-gray-300 bg-gray-800 rounded hover:bg-gray-500 hover:text-gray-800"
+                                    disabled={loading}
+                                  >
+                                    <FaShare />
+                                  </button>
+                                </Link>
                               </div>
                             </div>
                           ) : (
@@ -688,6 +741,57 @@ const Projects = ({ setShowChildRoutes }) => {
                         options={materialChartOptions}
                       />
                     </div>
+                    <div className="px-10 flex justify-center grid grid-cols-12 gap-4">
+                      <div className="col-span-12 md:col-span-3 flex">
+                        <div className="p-4 rounded-lg shadow-lg transition duration-300 transform hover:translate-y-1 flex-grow border border-gray-700 hover:bg-gray-800">
+                          <div className="flex items-center mb-2">
+                            <strong className="text-lg font-extrabold text-blue-400 pb-2">
+                              Project manager
+                            </strong>
+                          </div>
+                          <ul className="text-white">
+                            {getProjectManager(selectedProject.id).map(
+                              (userNumber, index) => (
+                                <li key={index}>
+                                  {index + 1}. {userNumber}
+                                </li>
+                              )
+                            )}
+                          </ul>
+                        </div>
+                      </div>
+                      <div className="col-span-12 md:col-span-6 flex">
+                        <div className="p-4 rounded-lg shadow-lg transition duration-300 transform hover:translate-y-1 flex-grow border border-gray-700 hover:bg-gray-800">
+                          <div className="flex items-center mb-2">
+                            <strong className="text-lg font-extrabold text-blue-400 pb-2">
+                              Description
+                            </strong>
+                          </div>
+                          <div className="text-white text-justify">
+                            {selectedProject.description}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="col-span-12 md:col-span-3 flex">
+                        <div className="p-4 rounded-lg shadow-lg transition duration-300 transform hover:translate-y-1 flex-grow border border-gray-700 hover:bg-gray-800">
+                          <div className="flex items-center mb-2">
+                            <strong className="text-lg font-extrabold text-blue-400 pb-2">
+                              Operational users
+                            </strong>
+                          </div>
+                          <ul className="text-white">
+                            {getUserOperational(selectedProject.id).map(
+                              (userNumber, index) => (
+                                <li key={index}>
+                                  {index + 1}. {userNumber}
+                                </li>
+                              )
+                            )}
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                    <hr className="mt-5 border-b border-gray-800" />
                     <AppProjectDetails
                       identificationNumber={
                         selectedProject.identification_number
@@ -717,6 +821,13 @@ const Projects = ({ setShowChildRoutes }) => {
         title="Material not received"
       >
         <p>Material has been marked as not received.</p>
+      </Modal>
+      <Modal
+        isOpen={isProjectCompleted}
+        onClose={handleModalClose}
+        title="Project Completed"
+      >
+        <p>Congratulations! You have completed the project.</p>
       </Modal>
     </>
   );

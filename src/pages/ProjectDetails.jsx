@@ -136,6 +136,25 @@ const ProjectDetails = ({ identificationNumber }) => {
               })
             );
           }
+
+          // Check if all items in the assembly and its subassemblies are completed
+          const allItemsCompleted =
+            itemsResponse &&
+            itemsResponse.data.every((item) => item.in_subassembly === 1);
+
+          const allSubassemblyItemsCompleted = subassembliesResponse
+            ? subassembliesResponse.data.every((subassembly) =>
+                subassembliesItemsData[subassembly.id]
+                  ? subassembliesItemsData[subassembly.id].every(
+                      (item) => item.in_subassembly === 1
+                    )
+                  : true
+              )
+            : true;
+
+          if (allItemsCompleted && allSubassemblyItemsCompleted) {
+            assembly.completed = 1;
+          }
         })
       );
 
@@ -229,7 +248,16 @@ const ProjectDetails = ({ identificationNumber }) => {
   // OTHER FUNCTIONS
   // Handle copy assembly materials
   const handleCopyAssemblyMaterials = (projectId, assemblyId) => {
-    // Implement your copy logic here
+    const assemblyItems = itemsData[assemblyId] || [];
+    const subassemblies = subassembliesData[assemblyId] || [];
+    const subassemblyItems = subassemblies.flatMap(subassembly => subassembliesItemsData[subassembly.id] || []);
+    const allItems = [...assemblyItems, ...subassemblyItems];
+  
+    const materialsList = allItems
+      .map(item => `${item.number_material}, ${item.name}, ${item.description}, ${item.price} MXN`)
+      .join('\n');
+  
+    setTextToCopy(materialsList);
   };
   // Get assembly status
   const getAssemblyStatus = (completed) => {
@@ -281,7 +309,7 @@ const ProjectDetails = ({ identificationNumber }) => {
     <>
       {/* PROJECT DETAILS */}
       <div className="pt-20">
-        <h2 className="text-2xl pb-3 font-medium text-gray-300 text-center">
+        <h2 className="text-2xl pb-3 font-bold text-gray-500 text-center">
           List of Assemblies
         </h2>{" "}
         {isLoading ? (
@@ -297,7 +325,7 @@ const ProjectDetails = ({ identificationNumber }) => {
         ) : (
           project && (
             <div>
-              <div className="">
+              <div className="pb-20">
                 {/* LIST OF ASSEMBLIES */}
                 {Array.isArray(assembliesData[project.id]) &&
                   assembliesData[project.id].length > 0 && (
