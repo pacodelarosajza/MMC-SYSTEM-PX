@@ -40,6 +40,7 @@ const NewUserForm = () => {
   const handleUserTypeChange = (e) => {
     const userType = e.target.value;
     let userTypeId;
+    
     switch (userType) {
       case 'Admin':
         userTypeId = 1;
@@ -51,11 +52,12 @@ const NewUserForm = () => {
         userTypeId = 3;
         break;
       default:
-        userTypeId = '';
+        userTypeId = 3;  // Asegúrate de que sea un número, no un string
     }
+  
     setFormData({ ...formData, user_type_id: userTypeId });
   };
-
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);

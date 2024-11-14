@@ -11,25 +11,25 @@ const Login = () => {
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
-    const apiIpAddress = import.meta.env.VITE_API_IP_ADDRESS;
-
     e.preventDefault();
+    setError(null); // Reset error state when user starts a new login attempt
+    const apiIpAddress = import.meta.env.VITE_API_IP_ADDRESS;
+  
     try {
       const response = await fetch(
         `${apiIpAddress}/api/users/userNum/${userNum}`
       );
-
+  
       if (!response.ok) {
         throw new Error("User not found");
       }
-
+  
       const user = await response.json();
-
+  
       if (user && user.password === password) {
-        // Guardar los datos del usuario en localStorage
+        // Save user to localStorage
         localStorage.setItem("loggedInUser", JSON.stringify(user));
-        //alert("Login successful!");
-        navigate("/dashboard"); // Redirige al Dashboard.jsx
+        navigate("/dashboard"); // Redirect to dashboard
       } else {
         setError("Incorrect user number or password");
       }
@@ -37,6 +37,7 @@ const Login = () => {
       setError("Server error. Please try again later.");
     }
   };
+  
 
   return (
     <div className="bg-pageBackground">

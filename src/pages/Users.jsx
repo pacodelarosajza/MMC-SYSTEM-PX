@@ -137,25 +137,26 @@ const UsersPage = () => {
       </h2>
 
       {/* Campo de búsqueda general */}
-      <div className="relative mb-6">
-        <label className="block text-gray-300 mb-2 text-lg font-semibold">
-          Search Users
-        </label>
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="Search by Email, User Number, or User Type (e.g., 'admin')"
-            className="w-full p-3 pl-10 border border-gray-700 rounded-lg bg-gray-900 text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600 transition duration-200"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          <span className="absolute left-3 top-3 text-gray-400">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zm-5.707 8.293a1 1 0 011.414 0l1.586 1.586a7 7 0 109.192 0l1.586-1.586a1 1 0 011.414 1.414l-1.586 1.586a7 7 0 11-9.192 0l-1.586-1.586a1 1 0 010-1.414z" clipRule="evenodd" />
-            </svg>
-          </span>
-        </div>
-      </div>
+<div className="relative mb-6">
+  <label className="block text-gray-300 mb-2 text-lg font-semibold">
+    Buscar Usuarios
+  </label>
+  <div className="relative flex items-center">
+    <input
+      type="text"
+      placeholder="Buscar por correo electrónico, número de usuario o tipo (ej. 'admin')"
+      className="w-full p-4 pl-12 pr-4 border border-gray-700 rounded-lg bg-gray-900 text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600 transition duration-300 ease-in-out"
+      value={searchTerm}
+      onChange={(e) => setSearchTerm(e.target.value)}
+    />
+    <span className="absolute left-4 text-gray-400">
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+        <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zm-5.707 8.293a1 1 0 011.414 0l1.586 1.586a7 7 0 109.192 0l1.586-1.586a1 1 0 011.414 1.414l-1.586 1.586a7 7 0 11-9.192 0l-1.586-1.586a1 1 0 010-1.414z" clipRule="evenodd" />
+      </svg>
+    </span>
+  </div>
+</div>
+
 
       {/* Tabla de usuarios */}
       <table className="min-w-full bg-gray-900 border border-gray-800 rounded-lg shadow-lg">

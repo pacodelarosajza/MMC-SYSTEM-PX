@@ -188,6 +188,13 @@ const Dashboard = ({ onLogout }) => {
             >
               <button>Dashboard</button>
             </Link>
+            <Link
+              to="/dashboard/news"
+              onClick={handleNavigate}
+              className="text-2x1 text-left py-2 px-2 hover:bg-pageSideMenuTextHover hover:rounded transition duration-300 text-lightWhiteLetter font-medium"
+            >
+              <button>News</button>
+            </Link>
             <li className="border-b border-lightBlueLetter"></li>
             <Link
               to="/dashboard/Me"
@@ -244,6 +251,7 @@ const Dashboard = ({ onLogout }) => {
             >
               <button>Add User</button>
             </Link>
+            
           </ul>
         </nav>
       </aside>
