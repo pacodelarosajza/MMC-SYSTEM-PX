@@ -201,7 +201,7 @@ const History = ({ setShowChildRoutes }) => {
           <thead>
             <tr className="w-full bg-blue-900 text-left">
               <th className="bg-gray-900 font-semibold text-gray-300 text-left px-4 py-2 border border-blue-500">
-                Proj. ID
+                Identifier
               </th>
               <th className="font-semibold text-gray-300 text-left px-4 py-2 border border-blue-500">
                 Manager ID
