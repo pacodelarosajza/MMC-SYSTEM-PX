@@ -1,17 +1,21 @@
-import React from 'react';
-import { Navigate } from 'react-router-dom';
+import React from "react";
+import { Navigate } from "react-router-dom";
 import { useAuth } from './AuthContext';
 
-// Componente de ruta protegida
-const PrivateRoute = ({ children }) => {
-  const { user } = useAuth();
+const PrivateRoute = ({ children, requiredRole }) => {
+  const { userType } = useAuth();
 
-  if (!user) {
-    // Si no está logueado, redirige al login
-    return <Navigate to="/" replace />;
+  // Check if user is logged in
+  if (!userType) {
+    return <Navigate to="/" />;
   }
 
-  return children; // Si está logueado, muestra los componentes hijos
+  // If a requiredRole is provided, check if the user has the right role
+  if (requiredRole && requiredRole !== userType) {
+    return <Navigate to="/not-authorized" />;
+  }
+
+  return children;
 };
 
 export default PrivateRoute;
