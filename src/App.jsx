@@ -7,20 +7,13 @@ import { AuthProvider } from './pages/AuthContext'; // Asegúrate de la ruta cor
 import PrivateRoute from './pages/PrivateRoute'; // Asegúrate de la ruta correcta
 
 import Dashboard from './pages/Dashboard';
-<<<<<<< HEAD
-import Notifi from './pages/Notifications';
-=======
-import History from './pages/History';
-import Projects from './pages/ProjectDetails';   //Projects in development
-import ProjectDetails from './pages/ProjectDetails';   //Project Details in development
-import Stock from './pages/Stock';
->>>>>>> 09e90fd9ab92ba34d249d7bd27cb84a4b2224e66
+
 import Me from './pages/Me';
 import Stock from './pages/Stock';
 import Users from './pages/Users';
 import ForgotPass from './pages/ForgotPassword';
 import NewUserForm from './pages/NewUserForm';
-<<<<<<< HEAD
+
 
 import Projects from './pages/ProjectsSection/ProjectsInDevelopment/Projects';   //Projects in development
 import ProjectDetails from './pages/ProjectsSection/ProjectsInDevelopment/ProjectDetails';   //Project Details in development
@@ -28,15 +21,13 @@ import History from './pages/ProjectsSection/ProjectsHistory/History';
 import OldProject from './pages/ProjectsSection/ProjectsHistory/OldProject';
 import ProjectsManagment from './pages/ProjectsSection/RefactoringProjectsManagment/RefactoringProjectsManagment';   //Refactoring Projects Table(Edit and Delete) and Projects Form(Add new project)
 
-=======
-import OldProject from './pages/OldProject';
 import Notifi from './pages/Notifications';
 import NewProjects from './pages/News/NewProjects';
 import NewAssemblies from './pages/News/NewAssemblies';
 import NewItems from './pages/News/NewItems';
 import NewSubassemblies from './pages/News/NewSubassemblies';
 import News from './pages/News';
->>>>>>> 09e90fd9ab92ba34d249d7bd27cb84a4b2224e66
+
 
 const App = () => {
   return (
