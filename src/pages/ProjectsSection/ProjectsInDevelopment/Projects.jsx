@@ -5,7 +5,7 @@ import AppProjectDetails from "./ProjectDetails";
 import { FaArrowLeft, FaArrowRight, FaShare } from "react-icons/fa";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSync } from "@fortawesome/free-solid-svg-icons";
-import Modal from "./Modal";
+import Modal from "../../../components/Modal";
 import { Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -444,7 +444,7 @@ const Projects = ({ setShowChildRoutes }) => {
 
   return (
     <>
-      <div className="px-4 py-5 min-h-screen">
+      <div className="m-5 py-5 min-h-screen">
         <>
           <div className="flex justify-between items-center pt-4 pb-4 mb-5">
             <div className="flex justify-center items-center">
@@ -516,18 +516,14 @@ const Projects = ({ setShowChildRoutes }) => {
                                 button below.
                               </div>
                               <div className="px-5">
-                                <Link
-                                  to="/dashboard/old-project"
+                                <button
+                                  id="old-project-botton"
+                                  className="px-4 py-2 text-sm text-gray-300 bg-gray-800 rounded hover:bg-gray-500 hover:text-gray-800"
                                   onClick={() => handleShareProject(project.id)}
+                                  disabled={loading}
                                 >
-                                  <button
-                                    id="oldP"
-                                    className="px-4 py-2 text-sm text-gray-300 bg-gray-800 rounded hover:bg-gray-500 hover:text-gray-800"
-                                    disabled={loading}
-                                  >
-                                    <FaShare />
-                                  </button>
-                                </Link>
+                                  <FaShare />
+                                </button>
                               </div>
                             </div>
                           ) : (

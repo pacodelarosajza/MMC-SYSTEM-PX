@@ -2,8 +2,9 @@ import React, { useEffect, useState, useCallback, useMemo } from "react";
 import axios from "axios";
 import AppForm from "./ProjectsManagmentForm"; //Import projects form file
 import { FaArrowLeft, FaArrowRight, FaSync } from "react-icons/fa";
-import Modal from "./Modal";
-import ModalAcept from "./ModalAcept";
+import Modal from "../../../components/Modal";
+import ModalAcept from "../../../components/ModalAcept";
+import AppUpdate from "../RefactoringProjectsManagment/Update";
 
 const ProjectsManagmentTable = () => {
   const apiIpAddress = import.meta.env.VITE_API_IP_ADDRESS; // API IP address
@@ -109,7 +110,7 @@ const ProjectsManagmentTable = () => {
   return (
     <>
       {/* PROJECTS MANAGEMENT TABLE */}
-      <div className="px-10">
+      <div className="">
         <div className="flex items-center justify-between py-1 mt-5">
           <h2 className="text-xl text-blue-400 font-bold">Projects In Development</h2>
           <button
@@ -152,12 +153,11 @@ const ProjectsManagmentTable = () => {
                       <div className="flex justify-end items-center">
                         {/* EDIT BUTTON */}
                         <div className="p-2">
-                          <button
-                            onClick={openModal}
-                            className="w-15 px-2 py-1 text-gray-400 text-xs bg-pageBackground border border-pageBackground hover:border hover:bg-green-900 hover:border-green-500 hover:text-green-300 rounded"
-                          >
-                            Edit
-                          </button>
+                        <AppUpdate
+                      id={
+                        project.id
+                      }
+                    />
                         </div>
                         {/* DELETE BUTTON */}
                         <div className="p-2">

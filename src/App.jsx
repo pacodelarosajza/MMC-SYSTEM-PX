@@ -1,23 +1,24 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 
+
 import Login from './pages/Login';
 import { AuthProvider } from './pages/AuthContext'; // Asegúrate de la ruta correcta
 import PrivateRoute from './pages/PrivateRoute'; // Asegúrate de la ruta correcta
 
-
 import Dashboard from './pages/Dashboard';
-import History from './pages/History';
-import Projects from './pages/Projects';   //Projects in development
-import ProjectDetails from './pages/ProjectDetails';   //Project Details in development
-import Stock from './pages/Stock';
+import Notifi from './pages/Notifications';
 import Me from './pages/Me';
+import Stock from './pages/Stock';
 import Users from './pages/Users';
 import ForgotPass from './pages/ForgotPassword';
-import ProjectsManagment from './pages/RefactoringProjectsManagment';   //Refactoring Projects Table(Edit and Delete) and Projects Form(Add new project)
 import NewUserForm from './pages/NewUserForm';
-import OldProject from './pages/OldProject';
-import Notifi from './pages/Notifications';
+
+import Projects from './pages/ProjectsSection/ProjectsInDevelopment/Projects';   //Projects in development
+import ProjectDetails from './pages/ProjectsSection/ProjectsInDevelopment/ProjectDetails';   //Project Details in development
+import History from './pages/ProjectsSection/ProjectsHistory/History';
+import OldProject from './pages/ProjectsSection/ProjectsHistory/OldProject';
+import ProjectsManagment from './pages/ProjectsSection/RefactoringProjectsManagment/RefactoringProjectsManagment';   //Refactoring Projects Table(Edit and Delete) and Projects Form(Add new project)
 
 
 const App = () => {

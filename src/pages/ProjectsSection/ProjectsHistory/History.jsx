@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   FaChevronDown,
   FaChevronUp,
@@ -11,9 +11,9 @@ import {
 import { CopyToClipboard } from "react-copy-to-clipboard";
 
 const History = ({ setShowChildRoutes }) => {
-    // IP Address for the API
+  // IP Address for the API
   const apiIpAddress = import.meta.env.VITE_API_IP_ADDRESS;
-  
+
   // State hooks
   const [activeProjects, setActiveProjects] = useState([]);
   const [adminProjects, setAdminProjects] = useState({});
@@ -27,19 +27,19 @@ const History = ({ setShowChildRoutes }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [textToCopy, setTextToCopy] = useState(""); // Texto para copiar
-  
+
   // Constants
   const recordsPerPage = 25;
-  
+
   // Pagination handlers
   const handleNextPage = () => {
     setCurrentPage((prevPage) => prevPage + 1);
   };
-  
+
   const handlePreviousPage = () => {
     setCurrentPage((prevPage) => Math.max(prevPage - 1, 0));
   };
-  
+
   // Navigation hadescrindler
   const handleNavigate = async () => {
     setLoading(true);
@@ -58,22 +58,22 @@ const History = ({ setShowChildRoutes }) => {
       console.log("Loading state:", loading); // Debugging
     }
   };
-  
+
   // Pagination logic
   const startIndex = currentPage * recordsPerPage;
   const endIndex = startIndex + recordsPerPage;
   const currentProjects = activeProjects.slice(startIndex, endIndex);
-  
+
   // Fetch projects info on component mount or apiIpAddress change
   useEffect(() => {
     const fetchActiveProjects = async () => {
       try {
         const activeProjectsResponse = await axios.get(
-          `${apiIpAddress}/api/getProjectsActives`
+          `${apiIpAddress}/api/getProjectsInctives`
         );
         const projects = activeProjectsResponse.data;
         setActiveProjects(projects);
-  
+
         const adminProjectsData = {};
         for (const project of projects) {
           try {
@@ -85,7 +85,7 @@ const History = ({ setShowChildRoutes }) => {
             adminProjectsData[project.id] = null;
           }
         }
-  
+
         setAdminProjects(adminProjectsData);
       } catch (error) {
         console.error(
@@ -94,10 +94,10 @@ const History = ({ setShowChildRoutes }) => {
         );
       }
     };
-  
+
     fetchActiveProjects();
   }, [apiIpAddress]);
-  
+
   // Function to get project manager
   const getProjectManager = (projectId) => {
     return Array.isArray(adminProjects[projectId]) &&
@@ -105,20 +105,20 @@ const History = ({ setShowChildRoutes }) => {
       ? adminProjects[projectId][0]?.["user.user_number"] || "Data N/A"
       : "N/A";
   };
-  
+
   // Event handlers
   const handleDivClick = () => {
     setIsEditing(true);
   };
-  
+
   const handleDateChange = (event) => {
     setDate(event.target.value);
   };
-  
+
   const handleBlur = () => {
     setIsEditing(false);
   };
-  
+
   const handleConfirmClick = () => {
     const confirmChange = window.confirm(
       `¿Deseas añadir la fecha ${date} como fecha de llegada del material?`
@@ -127,47 +127,57 @@ const History = ({ setShowChildRoutes }) => {
       setIsEditing(false);
     }
   };
-  
+
   const handleSearch = async () => {
     try {
       const response = await fetch(`${apiIpAddress}/api/getProjects`);
       const data = await response.json();
-  
+
       // Asegúrate de que la respuesta sea un array o conviértela
       const projects = Array.isArray(data) ? data : [data];
-  
+
       // Filtra los proyectos que contienen el número de búsqueda
       const filteredProjects = projects.filter((project) =>
         project.identification_number.toString().includes(searchQuery)
       );
-  
+
       setSearchResults(filteredProjects);
-  
+
       console.log("Search results:", filteredProjects);
     } catch (error) {
       console.error("Error fetching search results:", error);
     }
   };
-  
+
   const handleContentFocus = () => {
     setIsFocusedContent(true);
   };
-  
+
   const handleContentBlur = () => {
     setIsFocusedContent(false);
   };
-  
+
   const handleButtonClickBySearch = () => {
     handleSearch();
     handleContentFocus();
   };
-  
+
   // Utility function
   const truncateDescription = (description, maxLength) => {
     if (description.length <= maxLength) {
       return description;
     }
     return description.substring(0, maxLength) + "...";
+  };
+
+  const navigate = useNavigate();
+
+  const handleShareProject = (projectId) => {
+    if (projectId) {
+      navigate("/dashboard/old-project", { state: { projectId } });
+    } else {
+      console.error("Project ID is not defined");
+    }
   };
 
   return (
@@ -224,8 +234,7 @@ const History = ({ setShowChildRoutes }) => {
                     onClick={() => handleMoreInfo(project.id)}
                   >
                     <td className="px-4 py-1 border border-gray-700">
-                      #
-                      {project.identification_number}
+                      #{project.identification_number}
                     </td>
                     <td className="px-4 py-1 border border-gray-700">
                       {getProjectManager(project.id)}
@@ -235,17 +244,14 @@ const History = ({ setShowChildRoutes }) => {
                     </td>
                     <td className="px-4 py-1 border-t border-b border-r border-gray-700">
                       <div className="flex justify-end">
-                        {loading && <p>Cargando...</p>}
-                        {error && <p style={{ color: "red" }}>{error}</p>}
-                        <Link to="/dashboard/old-project">
-                          <button
-                            className="px-4 py-2 text-sm text-gray-300 bg-gray-800 rounded hover:bg-gray-500 hover:text-gray-800"
-                            onClick={handleNavigate}
-                            disabled={loading}
-                          >
-                            <FaShare />
-                          </button>
-                        </Link>
+                        <button
+                          id="old-project-botton"
+                          className="px-4 py-2 text-sm text-gray-300 bg-gray-800 rounded hover:bg-gray-500 hover:text-gray-800"
+                          onClick={() => handleShareProject(project.id)}
+                          disabled={loading}
+                        >
+                          <FaShare />
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -268,8 +274,7 @@ const History = ({ setShowChildRoutes }) => {
                   onClick={() => handleMoreInfo(project.id)}
                 >
                   <td className="px-4 py-1 border border-gray-700">
-                    #
-                    {project.identification_number}
+                    #{project.identification_number}
                   </td>
                   <td className="px-4 py-1 border border-gray-700">
                     {getProjectManager(project.id)}
@@ -281,15 +286,14 @@ const History = ({ setShowChildRoutes }) => {
                     <div className="flex justify-end">
                       {loading && <p>Cargando...</p>}
                       {error && <p style={{ color: "red" }}>{error}</p>}
-                      <Link to="/dashboard/old-project">
-                        <button
-                          className="px-4 py-2 text-sm text-gray-300 bg-gray-800 rounded hover:bg-gray-500 hover:text-gray-800"
-                          onClick={handleNavigate}
-                          disabled={loading}
-                        >
-                          <FaShare />
-                        </button>
-                      </Link>
+                      <button
+                        id="old-project-button"
+                        className="px-4 py-2 text-sm text-gray-300 bg-gray-800 rounded hover:bg-gray-500 hover:text-gray-800"
+                        onClick={() => handleShareProject(project.id)}
+                        disabled={loading}
+                      >
+                        <FaShare />
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -321,7 +325,6 @@ const History = ({ setShowChildRoutes }) => {
           )}
         </div>
       </div>
-
     </div>
   );
 };

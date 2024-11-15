@@ -9,7 +9,7 @@ const ProjectsManagmentForm = () => {
   };
 
   return (
-    <div className=" py-10 pb-20">
+    <div className="py-5 px-5">
       <button
         onClick={handleButtonClick}
         className="w-full bg-gray-900 border border-blue-500 text-blue-400 font-bold shadow-lg px-5 py-2 my-2 hover:border hover:bg-blue-900 hover:border-blue-500 hover:text-blue-300 rounded"
