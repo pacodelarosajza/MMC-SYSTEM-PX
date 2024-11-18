@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import Modal from "../../../components/Modal";
+import ModalAcept from "../../../components/ModalAcept";
+import { FaSync } from "react-icons/fa"; // Import FaSync
 
 const Update = ({ id }) => {
   const apiIpAddress = import.meta.env.VITE_API_IP_ADDRESS;
@@ -8,6 +10,9 @@ const Update = ({ id }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isModalNoChangesOpen, setIsModalNoChangesOpen] = useState(false);
   const [isModalSuccessOpen, setIsModalSuccessOpen] = useState(false);
+  const [isModalUserRemovedOpen, setIsModalUserRemovedOpen] = useState(false);
+  const [isModalUserAddedOpen, setIsModalUserAddedOpen] = useState(false); // New state for user added modal
+  const [isModalConfirmSaveOpen, setIsModalConfirmSaveOpen] = useState(false); // New state for confirm save modal
   const [newProject, setNewProject] = useState({
     identification_number: "",
     delivery_date: "",
@@ -17,67 +22,145 @@ const Update = ({ id }) => {
   });
   const [originalProject, setOriginalProject] = useState({});
   const [charCount, setCharCount] = useState(0);
-  const [adminUsers, setAdminUsers] = useState([]);
-  const [operUsers, setOperUsers] = useState([]);
+  const [admins, setAdmins] = useState([]);
+  const [operators, setOperators] = useState([]);
   const [adminUserSelections, setAdminUserSelections] = useState([]);
   const [operUserSelections, setOperUserSelections] = useState([]);
+  const [adminUsers, setAdminUsers] = useState([]);
+  const [operUsers, setOperUsers] = useState([]);
 
-  useEffect(() => {
-    const fetchProjectData = async () => {
-      try {
-        const response = await axios.get(`${apiIpAddress}/api/getProjects/id/${id}`);
-        setNewProject(response.data);
-        setOriginalProject(response.data);
-        setCharCount(response.data.description.length);
-      } catch (error) {
-        console.error("Error fetching project data:", error);
-      }
-    };
-    fetchProjectData();
+  const fetchProjectData = useCallback(async () => {
+    try {
+      const response = await axios.get(
+        `${apiIpAddress}/api/getProjects/id/${id}`
+      );
+      setNewProject(response.data);
+      setOriginalProject(response.data);
+      setCharCount(response.data.description.length);
+    } catch (error) {
+      console.error("Error fetching project data:", error);
+    }
   }, [apiIpAddress, id]);
 
-  useEffect(() => {
-    const fetchAdminUsers = async () => {
-      try {
-        const response = await axios.get(`${apiIpAddress}/getUsersByUserType/1`);
-        setAdminUsers(response.data);
-      } catch (error) {
-        console.error("Error fetching admin users:", error);
-      }
-    };
-    const fetchOperUsers = async () => {
-      try {
-        const response = await axios.get(`${apiIpAddress}/getUsersByUserType/2`);
-        setOperUsers(response.data);
-      } catch (error) {
-        console.error("Error fetching operational users:", error);
-      }
-    };
-    fetchAdminUsers();
-    fetchOperUsers();
+  const fetchAdmins = useCallback(async () => {
+    try {
+      const response = await axios.get(
+        `${apiIpAddress}/api/projects/${id}/admins`
+      );
+      setAdmins(
+        response.data.length === 0
+          ? [{ "user.id": "N/A", "user.user_number": "No admins registered" }]
+          : response.data
+      );
+    } catch (error) {
+      console.error("Error fetching admins:", error);
+      setAdmins([
+        { "user.id": "N/A", "user.user_number": "No admins registered" },
+      ]);
+    }
+  }, [apiIpAddress, id]);
+
+  const fetchOperators = useCallback(async () => {
+    try {
+      const response = await axios.get(
+        `${apiIpAddress}/api/projects/${id}/operators`
+      );
+      setOperators(
+        response.data.length === 0
+          ? [
+              {
+                "user.id": "N/A",
+                "user.user_number": "No operators registered",
+              },
+            ]
+          : response.data
+      );
+    } catch (error) {
+      console.error("Error fetching operators:", error);
+      setOperators([
+        { "user.id": "N/A", "user.user_number": "No operators registered" },
+      ]);
+    }
+  }, [apiIpAddress, id]);
+
+  const fetchAdminUsers = useCallback(async () => {
+    try {
+      const response = await axios.get(`${apiIpAddress}/getUsersByUserType/1`);
+      setAdminUsers(response.data);
+    } catch (error) {
+      console.error("Error fetching admin users:", error);
+    }
+  }, [apiIpAddress]);
+
+  const fetchOperUsers = useCallback(async () => {
+    try {
+      const response = await axios.get(`${apiIpAddress}/getUsersByUserType/2`);
+      setOperUsers(response.data);
+    } catch (error) {
+      console.error("Error fetching operational users:", error);
+    }
   }, [apiIpAddress]);
 
   useEffect(() => {
-    const fetchProjectUsers = async (projectId) => {
-      try {
-        const response = await axios.get(`${apiIpAddress}/api/projects/${projectId}/users`);
-        const users = response.data;
-        const adminSelections = users.filter(user => user.type === 1).map(user => ({ id: user.id, value: user.id }));
-        const operSelections = users.filter(user => user.type === 2).map(user => ({ id: user.id, value: user.id }));
-        setAdminUserSelections(adminSelections);
-        setOperUserSelections(operSelections);
-      } catch (error) {
-        console.error("Error fetching project users:", error);
-      }
-    };
+    fetchProjectData();
+    fetchAdmins();
+    fetchOperators();
+    fetchAdminUsers();
+    fetchOperUsers();
+  }, [
+    fetchProjectData,
+    fetchAdmins,
+    fetchOperators,
+    fetchAdminUsers,
+    fetchOperUsers,
+  ]);
 
-    if (isModalOpen) {
-      const projectId = id; // Assuming id is the project ID
-      if (projectId) {
-        fetchProjectUsers(projectId);
-      }
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    if (name === "description" && value.length <= 255) {
+      setCharCount(value.length);
     }
-  }, [isModalOpen, apiIpAddress, id]);
+    setNewProject((prevProject) => ({
+      ...prevProject,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async () => {
+    if (JSON.stringify(newProject) === JSON.stringify(originalProject)) {
+      setIsModalOpen(false); // Close the modal if no changes
+      return;
+    }
+    try {
+      await axios.patch(`${apiIpAddress}/api/patchProject/${id}`, newProject);
+      setIsModalSuccessOpen(true);
+      setIsModalOpen(false); // Close the modal
+    } catch (error) {
+      console.error("Error updating project:", error);
+      setIsModalNoChangesOpen(true);
+    }
+  };
+
+  const handleDeleteUser = async (userId) => {
+    try {
+      await axios.delete(`${apiIpAddress}/usuarios/${userId}/proyectos/${id}`);
+      setAdmins((prevAdmins) => {
+        const updatedAdmins = prevAdmins.filter((admin) => admin["user.id"] !== userId);
+        return updatedAdmins.length === 0
+          ? [{ "user.id": "N/A", "user.user_number": "No admins registered" }]
+          : updatedAdmins;
+      });
+      setOperators((prevOperators) => {
+        const updatedOperators = prevOperators.filter((operator) => operator["user.id"] !== userId);
+        return updatedOperators.length === 0
+          ? [{ "user.id": "N/A", "user.user_number": "No operators registered" }]
+          : updatedOperators;
+      });
+      setIsModalSuccessOpen(true);
+    } catch (error) {
+      console.error("Error deleting user from project:", error);
+    }
+  };
 
   const handleAdminUserChange = (id, value) => {
     setAdminUserSelections(
@@ -121,35 +204,55 @@ const Update = ({ id }) => {
     );
   };
 
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-    if (name === "description" && value.length <= 255) {
-      setCharCount(value.length);
+  const handleAddAdminUser = async (selection) => {
+    try {
+      await axios.post(`${apiIpAddress}/api/user_assign_project`, {
+        users_id: selection.value,
+        project_id: id,
+      });
+      setAdminUserSelections((prevSelections) =>
+        prevSelections.filter((sel) => sel.id !== selection.id)
+      ); // Remove the selection
+      setIsModalUserAddedOpen(true); // Show user added modal
+    } catch (error) {
+      console.error("Error adding admin user to project:", error);
     }
-    setNewProject((prevProject) => ({
-      ...prevProject,
-      [name]: value,
-    }));
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    if (JSON.stringify(newProject) === JSON.stringify(originalProject)) {
-      setIsModalNoChangesOpen(true);
-      return;
-    }
+  const handleAddOperUser = async (selection) => {
     try {
-      await axios.patch(`${apiIpAddress}/api/patchProject/${id}`, newProject);
-      setIsModalSuccessOpen(true);
-      closeModal();
+      await axios.post(`${apiIpAddress}/api/user_assign_project`, {
+        users_id: selection.value,
+        project_id: id,
+      });
+      setOperUserSelections((prevSelections) =>
+        prevSelections.filter((sel) => sel.id !== selection.id)
+      ); // Remove the selection
+      setIsModalUserAddedOpen(true); // Show user added modal
     } catch (error) {
-      console.error("Error updating project:", error);
-      setIsModalNoChangesOpen(true);
+      console.error("Error adding operational user to project:", error);
     }
   };
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
+
+  const reloadAdmins = async () => {
+    await fetchAdmins();
+  };
+
+  const reloadOperators = async () => {
+    await fetchOperators();
+  };
+
+  const handleSave = () => {
+    setIsModalConfirmSaveOpen(true);
+  };
+
+  const handleConfirmSave = async () => {
+    setIsModalConfirmSaveOpen(false);
+    await handleSubmit();
+  };
 
   return (
     <>
@@ -170,10 +273,18 @@ const Update = ({ id }) => {
                 Update Project
               </h2>
 
-              <form onSubmit={handleSubmit} className="w-full max-h-96 overflow-y-auto p-5 scrollbar-thin scrollbar-thumb-blue-500 scrollbar-track-blue-200">
+              <form
+                onSubmit={(e) => e.preventDefault()} // Prevent form submission from reloading the page
+                className="w-full max-h-96 overflow-y-auto p-5 scrollbar-thin scrollbar-thumb-blue-500 scrollbar-track-blue-200"
+              >
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                   <div className="col-span-1">
-                    <label htmlFor="identification_number" className="pb-1 block text-lg font-medium text-gray-400">Identification Number</label>
+                    <label
+                      htmlFor="identification_number"
+                      className="pb-1 block text-lg font-medium text-gray-400"
+                    >
+                      Identification Number
+                    </label>
                     <input
                       type="text"
                       name="identification_number"
@@ -186,7 +297,12 @@ const Update = ({ id }) => {
                     />
                   </div>
                   <div className="col-span-1">
-                    <label htmlFor="cost_material" className="pb-1 block text-lg font-medium text-gray-400">Cost Material</label>
+                    <label
+                      htmlFor="cost_material"
+                      className="pb-1 block text-lg font-medium text-gray-400"
+                    >
+                      Cost Material
+                    </label>
                     <div className="flex items-center text-gray-400">
                       <span className="mr-2">$</span>
                       <input
@@ -203,7 +319,12 @@ const Update = ({ id }) => {
                     </div>
                   </div>
                   <div className="col-span-1">
-                    <label htmlFor="delivery_date" className="pb-1 block text-lg font-medium text-gray-400">Delivery Date</label>
+                    <label
+                      htmlFor="delivery_date"
+                      className="pb-1 block text-lg font-medium text-gray-400"
+                    >
+                      Delivery Date
+                    </label>
                     <input
                       type="date"
                       name="delivery_date"
@@ -215,7 +336,12 @@ const Update = ({ id }) => {
                     />
                   </div>
                   <div className="col-span-2">
-                    <label htmlFor="description" className="pb-1 block text-lg font-medium text-gray-400">Description</label>
+                    <label
+                      htmlFor="description"
+                      className="pb-1 block text-lg font-medium text-gray-400"
+                    >
+                      Description
+                    </label>
                     <textarea
                       id="description"
                       name="description"
@@ -226,91 +352,195 @@ const Update = ({ id }) => {
                       onChange={handleChange}
                       maxLength="255"
                     ></textarea>
-                    <div className="pl-5 pt-1 text-gray-400">Characters {charCount}/255</div>
+                    <div className="pl-5 pt-1 text-gray-400">
+                      Characters {charCount}/255
+                    </div>
                   </div>
-                  <div className="col-span-full pt-3">
-                    <label className="pb-1 block text-lg font-medium text-gray-400">Responsible</label>
-                    {adminUserSelections.map((selection) => (
-                      <div key={selection.id} className="mb-2 flex items-center">
-                        <select
-                          name={`admin_user_${selection.id}`}
-                          className="p-2 rounded bg-gray-100 dark:bg-gray-700 dark:text-white cursor-pointer w-3/4"
-                          value={selection.value}
-                          onChange={(e) =>
-                            handleAdminUserChange(selection.id, e.target.value)
-                          }
-                          required
+                </div>
+                <div className="pt-10 flex items-center justify-between">
+                  <label className="pb-1 block text-lg font-medium text-gray-400">
+                    Responsible
+                  </label>
+                  <button
+                    onClick={reloadAdmins}
+                    className="p-2 mx-4 text-white rounded hover:bg-gray-800 transition duration-200"
+                  >
+                    <FaSync color="gray" size={15} />
+                  </button>
+                </div>
+                <div
+                  id="responsible-card"
+                  className="min-w-full bg-white dark:bg-gray-800"
+                >
+                  <div className="bg-gray-700 rounded p-3 grid gap-2 text-lg">
+                    {admins.map((admin) => (
+                      <div
+                        key={admin["user.id"]}
+                        className="flex justify-between items-center"
+                      >
+                        <div
+                          className={`${
+                            admin["user.user_number"] === "No admins registered"
+                              ? "text-gray-400"
+                              : ""
+                          }`}
                         >
-                          <option value="" disabled>
-                            Select
-                          </option>
-                          {adminUsers.map((user) => (
-                            <option key={user.id} value={user.id}>
-                              {user.user_number}
-                            </option>
-                          ))}
-                        </select>
-                        <button
-                          type="button"
-                          onClick={() => removeAdminUserSelection(selection.id)}
-                          className="ml-2 px-2 border border-red-500 bg-red-900 text-red-300 rounded hover:border-red-400 hover:bg-red-700 hover:text-red-200"
-                        >
-                          <strong>x</strong>
-                        </button>
+                          {admin["user.user_number"]}
+                        </div>
+                        {admin["user.user_number"] !==
+                          "No admins registered" && (
+                          <button
+                            onClick={() => handleDeleteUser(admin["user.id"])}
+                            className="ml-2 px-2 bg-red-900 text-red-300 rounded hover:bg-red-700 hover:text-red-200 text-sm"
+                          >
+                            x
+                          </button>
+                        )}
                       </div>
                     ))}
-                    <button
-                      type="button"
-                      onClick={addAdminUserSelection}
-                      className="px-2 border border-blue-500 bg-blue-900 text-blue-300 rounded"
-                    >
-                      <strong>+</strong>
-                    </button>
                   </div>
-                  <hr className="my-4 border-gray-300 dark:border-gray-600 w-full" />
-                  <div className="col-span-full pt-3">
-                    <label className="pb-1 block text-lg font-medium text-gray-400">Operational Users</label>
-                    {operUserSelections.map((selection) => (
-                      <div key={selection.id} className="mb-2 flex items-center">
-                        <select
-                          name={`oper_user_${selection.id}`}
-                          className="p-2 rounded bg-gray-100 dark:bg-gray-700 dark:text-white cursor-pointer w-3/4"
-                          value={selection.value}
-                          onChange={(e) =>
-                            handleOperUserChange(selection.id, e.target.value)
-                          }
-                          required
-                        >
-                          <option value="" disabled>
-                            Select
+                </div>
+                <div className="col-span-full pt-3">
+                  {adminUserSelections.map((selection) => (
+                    <div key={selection.id} className="mb-2 flex items-center">
+                      <select
+                        name={`admin_user_${selection.id}`}
+                        className="p-2 rounded bg-gray-100 dark:bg-gray-700 dark:text-white cursor-pointer w-3/4"
+                        value={selection.value}
+                        onChange={(e) =>
+                          handleAdminUserChange(selection.id, e.target.value)
+                        }
+                        required
+                      >
+                        <option value="" disabled>
+                          Select
+                        </option>
+                        {adminUsers.map((user) => (
+                          <option key={user.id} value={user.id}>
+                            {user.user_number}
                           </option>
-                          {operUsers.map((user) => (
-                            <option key={user.id} value={user.id}>
-                              {user.user_number}
-                            </option>
-                          ))}
-                        </select>
-                        <button
-                          type="button"
-                          onClick={() => removeOperUserSelection(selection.id)}
-                          className="ml-2 px-2 border border-red-500 bg-red-900 text-red-300 rounded hover:border-red-400 hover:bg-red-700 hover:text-red-200"
+                        ))}
+                      </select>
+                      <button
+                        type="button"
+                        onClick={() => removeAdminUserSelection(selection.id)}
+                        className="ml-2 px-2 border border-red-500 bg-red-900 text-red-300 rounded hover:border-red-400 hover:bg-red-700 hover:text-red-200"
+                      >
+                        <strong>Cancel</strong>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleAddAdminUser(selection)}
+                        className="ml-2 px-2 border border-blue-500 bg-blue-900 text-blue-300 rounded hover:border-blue-400 hover:bg-blue-700 hover:text-blue-200"
+                      >
+                        <strong>Confirm</strong>
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={addAdminUserSelection}
+                    className="px-2 border border-blue-500 bg-blue-900 text-blue-300 rounded"
+                  >
+                    <strong>+</strong>
+                  </button>
+                </div>
+                <hr className="my-8 border-gray-300 dark:border-gray-600" />
+                <div className="flex items-center justify-between">
+                  <label className="pb-1 block text-lg font-medium text-gray-400">
+                    Operational Users
+                  </label>
+                  <button
+                    onClick={reloadOperators}
+                    className="p-2 mx-4 text-white rounded hover:bg-gray-800 transition duration-200"
+                  >
+                    <FaSync color="gray" size={15} />
+                  </button>
+                </div>
+                <div
+                  id="operational-card"
+                  className="min-w-full bg-white dark:bg-gray-800"
+                >
+                  <div className="bg-gray-700 rounded p-3 grid gap-2 text-lg">
+                    {operators.map((operator) => (
+                      <div
+                        key={operator["user.id"]}
+                        className="flex justify-between items-center"
+                      >
+                        <div
+                          className={`${
+                            operator["user.user_number"] ===
+                            "No operators registered"
+                              ? "text-gray-400"
+                              : ""
+                          }`}
                         >
-                          <strong>x</strong>
-                        </button>
+                          {operator["user.user_number"]}
+                        </div>
+                        {operator["user.user_number"] !==
+                          "No operators registered" && (
+                          <button
+                            onClick={() =>
+                              handleDeleteUser(operator["user.id"])
+                            }
+                            className="ml-2 px-2 bg-red-900 text-red-300 rounded hover:bg-red-700 hover:text-red-200 text-sm"
+                          >
+                            x
+                          </button>
+                        )}
                       </div>
                     ))}
-                    <button
-                      type="button"
-                      onClick={addOperUserSelection}
-                      className="px-2 border border-blue-500 bg-blue-900 text-blue-300 rounded"
-                    >
-                      <strong>+</strong>
-                    </button>
                   </div>
+                </div>
+                <div className="col-span-full pt-3">
+                  {operUserSelections.map((selection) => (
+                    <div key={selection.id} className="mb-2 flex items-center">
+                      <select
+                        name={`oper_user_${selection.id}`}
+                        className="p-2 rounded bg-gray-100 dark:bg-gray-700 dark:text-white cursor-pointer w-3/4"
+                        value={selection.value}
+                        onChange={(e) =>
+                          handleOperUserChange(selection.id, e.target.value)
+                        }
+                        required
+                      >
+                        <option value="" disabled>
+                          Select
+                        </option>
+                        {operUsers.map((user) => (
+                          <option key={user.id} value={user.id}>
+                            {user.user_number}
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        type="button"
+                        onClick={() => removeOperUserSelection(selection.id)}
+                        className="ml-2 px-2 border border-red-500 bg-red-900 text-red-300 rounded hover:border-red-400 hover:bg-red-700 hover:text-red-200"
+                      >
+                        <strong>Cancel</strong>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleAddOperUser(selection)}
+                        className="ml-2 px-2 border border-blue-500 bg-blue-900 text-blue-300 rounded hover:border-blue-400 hover:bg-blue-700 hover:text-blue-200"
+                      >
+                        <strong>Confirm</strong>
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={addOperUserSelection}
+                    className="px-2 border border-blue-500 bg-blue-900 text-blue-300 rounded"
+                  >
+                    <strong>+</strong>
+                  </button>
                 </div>
                 <div className="flex justify-end pt-10 items-center">
                   <button
-                    type="submit"
+                    type="button"
+                    onClick={handleSave}
                     className="px-10 py-1 text-gray-400 text-lg bg-pageBackground border border-pageBackground hover:border hover:bg-blue-900 hover:border-blue-500 hover:text-blue-300 rounded"
                   >
                     Save
@@ -322,16 +552,14 @@ const Update = ({ id }) => {
         </div>
       )}
 
-      <Modal
-        isOpen={isModalNoChangesOpen}
-        onClose={() => {
-          setIsModalNoChangesOpen(false);
-          closeModal();
-        }}
-        title="No Changes Detected"
+      <ModalAcept
+        isOpen={isModalConfirmSaveOpen}
+        onClose={() => setIsModalConfirmSaveOpen(false)}
+        onContinue={handleConfirmSave}
+        title="Confirm Save"
       >
-        <p>No modifications were made.</p>
-      </Modal>
+        <p>Are you sure you want to save the changes to this project?</p>
+      </ModalAcept>
 
       <Modal
         isOpen={isModalSuccessOpen}
@@ -339,6 +567,22 @@ const Update = ({ id }) => {
         title="Success"
       >
         <p>The project has been updated successfully.</p>
+      </Modal>
+
+      <Modal
+        isOpen={isModalUserRemovedOpen}
+        onClose={() => setIsModalUserRemovedOpen(false)}
+        title="User Removed"
+      >
+        <p>The user has been removed successfully.</p>
+      </Modal>
+
+      <Modal
+        isOpen={isModalUserAddedOpen} // New modal for user added
+        onClose={() => setIsModalUserAddedOpen(false)}
+        title="User Added"
+      >
+        <p>Reload the section to see the changes.</p>
       </Modal>
     </>
   );

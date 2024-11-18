@@ -222,6 +222,13 @@ const Dashboard = ({ onLogout }) => {
               <button>Projects Managment</button>
             </Link>
             <Link
+              to="/dashboard/materials-managment"
+              onClick={handleNavigate}
+              className="text-sm text-left py-2 px-4 hover:bg-pageSideMenuTextHover hover:rounded transition duration-300 text-lightWhiteLetter"
+            >
+              <button>Materials Managment</button>
+            </Link>
+            <Link
               to="/dashboard/history"
               onClick={handleNavigate}
               className="text-sm text-left py-2 px-4 hover:bg-pageSideMenuTextHover hover:rounded transition duration-300 text-lightWhiteLetter"

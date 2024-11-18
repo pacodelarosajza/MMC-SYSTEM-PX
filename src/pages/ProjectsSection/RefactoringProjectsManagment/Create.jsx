@@ -351,58 +351,60 @@ function Create() {
                   </button>
                 </div>
                 <hr className="my-4 border-gray-300 dark:border-gray-600" />
-                  <div className="col-span-full pt-3">
-                    <label className="pb-1 block text-lg font-medium text-gray-400">Operational Users</label>
-                    {operUserSelections.map((selection) => (
-                      <div key={selection.id} className="mb-2 flex items-center">
-                        <select
-                          name={`oper_user_${selection.id}`}
-                          className="p-2 rounded bg-gray-100 dark:bg-gray-700 dark:text-white cursor-pointer w-3/4"
-                          value={selection.value}
-                          onChange={(e) =>
-                            handleOperUserChange(selection.id, e.target.value)
-                          }
-                          required
-                        >
-                          <option value="" disabled>
-                            Select
+                <div className="col-span-full pt-3">
+                  <label className="pb-1 block text-lg font-medium text-gray-400">
+                    Operational Users
+                  </label>
+                  {operUserSelections.map((selection) => (
+                    <div key={selection.id} className="mb-2 flex items-center">
+                      <select
+                        name={`oper_user_${selection.id}`}
+                        className="p-2 rounded bg-gray-100 dark:bg-gray-700 dark:text-white cursor-pointer w-3/4"
+                        value={selection.value}
+                        onChange={(e) =>
+                          handleOperUserChange(selection.id, e.target.value)
+                        }
+                        required
+                      >
+                        <option value="" disabled>
+                          Select
+                        </option>
+                        {operUsers.map((user) => (
+                          <option key={user.id} value={user.id}>
+                            {user.user_number}
                           </option>
-                          {operUsers.map((user) => (
-                            <option key={user.id} value={user.id}>
-                              {user.user_number}
-                            </option>
-                          ))}
-                        </select>
-                        <button
-                          type="button"
-                          onClick={() => removeOperUserSelection(selection.id)}
-                          className="ml-2 px-2 border border-red-500 bg-red-900 text-red-300 rounded hover:border-red-400 hover:bg-red-700 hover:text-red-200"
-                        >
-                          <strong>x</strong>
-                        </button>
-                      </div>
-                    ))}
-                    <button
-                      type="button"
-                      onClick={addOperUserSelection}
-                      className="px-2 border border-blue-500 bg-blue-900 text-blue-300 rounded"
-                    >
-                      <strong>+</strong>
-                    </button>
-                  </div>
-                <div className="flex justify-end pt-10 items-center">
+                        ))}
+                      </select>
+                      <button
+                        type="button"
+                        onClick={() => removeOperUserSelection(selection.id)}
+                        className="ml-2 px-2 border border-red-500 bg-red-900 text-red-300 rounded hover:border-red-400 hover:bg-red-700 hover:text-red-200"
+                      >
+                        <strong>x</strong>
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={addOperUserSelection}
+                    className="px-2 border border-blue-500 bg-blue-900 text-blue-300 rounded"
+                  >
+                    <strong>+</strong>
+                  </button>
+                </div>
+                <div className="flex justify-end pt-10 items-center gap-4">
+                  <button
+                    type="button"
+                    onClick={handleCancel}
+                    className="px-10 py-1 text-gray-400 text-lg bg-pageBackground border border-pageBackground hover:border hover:bg-red-900 hover:border-red-500 hover:text-red-300 rounded"
+                  >
+                    Cancel
+                  </button>
                   <button
                     type="submit"
                     className="px-10 py-1 text-gray-400 text-lg bg-pageBackground border border-pageBackground hover:border hover:bg-blue-900 hover:border-blue-500 hover:text-blue-300 rounded"
                   >
                     Save
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleCancel}
-                    className="ml-4 px-10 py-1 text-gray-400 text-lg bg-pageBackground border border-pageBackground hover:border hover:bg-red-900 hover:border-red-500 hover:text-red-300 rounded"
-                  >
-                    Cancel
                   </button>
                 </div>
               </form>
