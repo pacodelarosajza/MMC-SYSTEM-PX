@@ -25,6 +25,7 @@ import NewUserForm from './pages/NewUserForm';
 import OldProject from './pages/ProjectsSection/ProjectsHistory/OldProject';
 import History from './pages/ProjectsSection/ProjectsHistory/History';
 import Stock from './pages/Stock';
+import StockUpdate from './pages/StockUpdate';
 
 import Projects from './pages/ProjectsSection/ProjectsInDevelopment/Projects';   //Projects in development
 import ProjectDetails from './pages/ProjectsSection/ProjectsInDevelopment/ProjectDetails';   //Project Details in development
@@ -48,6 +49,7 @@ const App = () => {
           <Route path="new-subassemblies" element={<PrivateRoute><NewSubassemblies /></PrivateRoute>} />
           <Route path="news" element={<PrivateRoute><News /></PrivateRoute>} />
           <Route path="me" element={<PrivateRoute><Me /></PrivateRoute>} />
+          <Route path="stock-update" element={<PrivateRoute><StockUpdate /></PrivateRoute>} />
           
           {/* Admin only */}
          
