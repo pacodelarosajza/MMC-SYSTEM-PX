@@ -47,6 +47,8 @@ const Projects = ({ setShowChildRoutes }) => {
   const [isFocusedContent, setIsFocusedContent] = useState(false);
   const [reload, setReload] = useState(false);
   const [isProjectCompleted, setIsProjectCompleted] = useState(false);
+  const [isNoAssembliesModalOpen, setIsNoAssembliesModalOpen] = useState(false);
+  const [noAssembliesProjectId, setNoAssembliesProjectId] = useState(null);
 
   const recordsPerPage = 5;
   const navigate = useNavigate();
@@ -294,7 +296,13 @@ const Projects = ({ setShowChildRoutes }) => {
   const handleSelectProject = (projectId) => {
     setLoading(true);
     const project = currentProjects.find((p) => p.id === projectId);
-    setSelectedProject(project);
+    if (assemblies[projectId] && assemblies[projectId].length > 0) {
+      setSelectedProject(project);
+    } else {
+      console.warn(`Project ${projectId} has no assemblies to display.`);
+      setNoAssembliesProjectId(project.identification_number);
+      setIsNoAssembliesModalOpen(true);
+    }
     setLoading(false);
   };
 
@@ -491,6 +499,7 @@ const Projects = ({ setShowChildRoutes }) => {
                   </tr>
                 </thead>
                 <tbody className="shadow-lg">
+                  {/* TABLA DE PROYECTOS */}
                   {Array.isArray(searchResults) && searchResults.length > 0 ? (
                     searchResults.map((project) => (
                       <tr
@@ -824,6 +833,13 @@ const Projects = ({ setShowChildRoutes }) => {
         title="Project Completed"
       >
         <p>Congratulations! You have completed the project.</p>
+      </Modal>
+      <Modal
+        isOpen={isNoAssembliesModalOpen}
+        onClose={() => setIsNoAssembliesModalOpen(false)}
+        title="No Assemblies"
+      >
+        <p>Project {noAssembliesProjectId} has no assemblies to display.</p>
       </Modal>
     </>
   );
