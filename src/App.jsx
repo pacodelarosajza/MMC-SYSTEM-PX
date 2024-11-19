@@ -25,6 +25,7 @@ import NewUserForm from './pages/NewUserForm';
 import OldProject from './pages/ProjectsSection/ProjectsHistory/OldProject';
 import History from './pages/ProjectsSection/ProjectsHistory/History';
 import Stock from './pages/Stock';
+import StockUpdate from './pages/StockUpdate';
 
 import Projects from './pages/ProjectsSection/ProjectsInDevelopment/Projects';   //Projects in development
 import ProjectDetails from './pages/ProjectsSection/ProjectsInDevelopment/ProjectDetails';   //Project Details in development
@@ -48,12 +49,13 @@ const App = () => {
           <Route path="new-subassemblies" element={<PrivateRoute><NewSubassemblies /></PrivateRoute>} />
           <Route path="news" element={<PrivateRoute><News /></PrivateRoute>} />
           <Route path="me" element={<PrivateRoute><Me /></PrivateRoute>} />
+          <Route path="stock-update" element={<PrivateRoute><StockUpdate /></PrivateRoute>} />
           
           {/* Admin only */}
-          <Route path="usuarios" element={<PrivateRoute><Users /></PrivateRoute>} /> 
-          {/*<Route path="usuarios" element={<PrivateRoute requiredRole={1}><Users /></PrivateRoute>} />  */}
-          <Route path="new-user-form" element={<PrivateRoute><NewUserForm /></PrivateRoute>} />
-          {/* <Route path="new-user-form" element={<PrivateRoute requiredRole={1}><NewUserForm /></PrivateRoute>} /> */}
+         
+          <Route path="usuarios" element={<PrivateRoute requiredRole={1}><Users /></PrivateRoute>} />  
+     
+          <Route path="new-user-form" element={<PrivateRoute requiredRole={1}><NewUserForm /></PrivateRoute>} />
 
           {/* Admin or Operational users */}
           <Route path="notifi" element={<PrivateRoute><Notifi /></PrivateRoute>} />

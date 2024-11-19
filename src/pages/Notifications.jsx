@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import io from 'socket.io-client';
 import { FaRegBell, FaTimes } from 'react-icons/fa';
 
@@ -7,30 +7,39 @@ const socket = io(`${apiIpAddress}`);
 
 function App() {
   const [notifications, setNotifications] = useState(() => {
-    // Obtener las notificaciones de localStorage al cargar la página
+    // Cargar las notificaciones guardadas
     const savedNotifications = JSON.parse(localStorage.getItem('notifications')) || [];
     return savedNotifications;
   });
 
+  const notificationsRef = useRef(notifications); // Referencia mutable a las notificaciones
+  notificationsRef.current = notifications; // Sincronizar con el estado
+
   useEffect(() => {
-    socket.on('dataUpdated', (data) => {
+    const handleDataUpdated = (data) => {
       const newNotification = {
         id: Date.now(),
         message: data.message,
       };
-      const updatedNotifications = [...notifications, newNotification];
+      const updatedNotifications = [...notificationsRef.current, newNotification];
+
+      // Actualizar el estado y localStorage
       setNotifications(updatedNotifications);
-      // Guardar las notificaciones en localStorage
       localStorage.setItem('notifications', JSON.stringify(updatedNotifications));
-    });
+    };
+
+    // Escuchar eventos del socket
+    socket.on('dataUpdated', handleDataUpdated);
 
     return () => {
-      socket.off('dataUpdated');
+      socket.off('dataUpdated', handleDataUpdated);
     };
-  }, [notifications]);
+  }, []);
 
   const handleClose = (id) => {
     const updatedNotifications = notifications.filter(notification => notification.id !== id);
+
+    // Actualizar estado y localStorage
     setNotifications(updatedNotifications);
     localStorage.setItem('notifications', JSON.stringify(updatedNotifications));
   };

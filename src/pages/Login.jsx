@@ -13,30 +13,50 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     setError(null); // Reset error state when user starts a new login attempt
+  
+    // Validar que los campos no estén vacíos
+    if (!userNum || !password) {
+      setError("Please enter your user number and password.");
+      return;
+    }
+  
     const apiIpAddress = import.meta.env.VITE_API_IP_ADDRESS;
   
     try {
-      const response = await fetch(
-        `${apiIpAddress}/api/users/userNum/${userNum}`
-      );
+      // Solicitar datos del usuario por número de usuario
+      const response = await fetch(`${apiIpAddress}/api/users/userNum/${userNum}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
   
       if (!response.ok) {
-        throw new Error("User not found");
+        if (response.status === 404) {
+          throw new Error("User not found. Please check your user number.");
+        }
+        throw new Error("Failed to fetch user data. Please try again later.");
       }
   
       const user = await response.json();
   
+      // Verificar si la contraseña coincide
       if (user && user.password === password) {
-        // Save user to localStorage
+        // Guardar el usuario en localStorage
         localStorage.setItem("loggedInUser", JSON.stringify(user));
-        navigate("/dashboard"); // Redirect to dashboard
+  
+        // Redirigir al dashboard
+        navigate("/dashboard");
+  
+        // Forzar refresh después de la redirección
+        window.location.reload();
       } else {
-        setError("Incorrect user number or password");
+        setError("Incorrect user number or password.");
       }
     } catch (err) {
-      setError("Server error. Please try again later.");
+      console.error("Login error:", err);
+      setError(err.message || "Server error. Please try again later.");
     }
   };
+  
   
 
   return (

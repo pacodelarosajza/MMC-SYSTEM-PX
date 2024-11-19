@@ -33,7 +33,7 @@ const Dashboard = ({ onLogout }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [showChildRoutes, setShowChildRoutes] = useState(false);
   const [assemblies, setAssemblies] = useState([]);
-
+  const { getUserId } = useState();  // Obtener el ID del usuario desde el contexto
   const [items, setItems] = useState([]);
   // Estado para la página actual
   const [currentPage, setCurrentPage] = useState(0);
@@ -94,21 +94,27 @@ const Dashboard = ({ onLogout }) => {
   );
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const projectsResponse = await axios.get(
-          `${apiIpAddress}/api/getProjectsActives`
-        );
-        const loadedProjects = projectsResponse.data;
-        setProjects(loadedProjects);
+    // Obtén el usuario desde el localStorage
+    const storedUser = localStorage.getItem('loggedInUser');
+    if (storedUser) {
+      const user = JSON.parse(storedUser);
+      const userId = user.id; // Accedemos a la ID del usuario
 
-        // Llama a la función para obtener los administradores después de cargar proyectos
-        fetchAdminsForProjects(loadedProjects);
-      } catch (error) { }
-    };
+      const fetchData = async () => {
+        try {
+          const projectsResponse = await axios.get(
+            `${apiIpAddress}/api/users/${userId}/projects` // Usa la ID para hacer la solicitud
+          );
+          const loadedProjects = projectsResponse.data;
+          setProjects(loadedProjects); // Almacenamos los proyectos en el estado
+        } catch (error) {
+          console.error('Error fetching projects:', error);
+        }
+      };
 
-    fetchData();
-  }, []);
+      fetchData();
+    }
+  }, []); // Solo se ejecuta una vez cuando el componente se monta
 
   // Calcular el progreso en función de los ítems entregados
   useEffect(() => {
@@ -466,38 +472,38 @@ const Dashboard = ({ onLogout }) => {
                 ))}
               </section>
               {/* Projects Overview Section */}
-              <h1 className="text-lg text-left font-extrabold text-gradient bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-blue-500 mb-8">
-                Project cards under development
-              </h1>
-              <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 mb-4">
-                {projects.map((project) => (
-                  <div
-                    key={project.id}
-                    className="relative bg-gray-700 p-3 rounded-lg shadow shadow-shadowBlueColor shadow-xl text-sm cursor-pointer hover:bg-gray-600 transition duration-200"
-                    onClick={() =>
-                      alert(`Detalles del Proyecto ID: ${project.id}`)
-                    }
-                  >
-                    {/*<h2 className="font-bold text-lg">ID: {project.id}</h2>*/}
-                    <p className="text-green-500 text-xl text-right">
-                      <strong>#{project.identification_number}</strong>
-                    </p>
+<h1 className="text-lg text-left font-extrabold text-gradient bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-blue-500 mb-8">
+  Project cards under development
+</h1>
+<section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 mb-4">
+  {projects.map((project) => (
+    <div
+      key={project.project.id} // Usamos project.project.id para acceder al ID real del proyecto
+      className="relative bg-gray-700 p-3 rounded-lg shadow shadow-shadowBlueColor shadow-xl text-sm cursor-pointer hover:bg-gray-600 transition duration-200"
+      onClick={() =>
+        alert(`Detalles del Proyecto ID: ${project.project.id}`) // Accedemos al ID del proyecto dentro de project.project
+      }
+    >
+      {/*<h2 className="font-bold text-lg">ID: {project.project.id}</h2>*/}
+      <p className="text-green-500 text-xl text-right">
+        <strong>#{project.project.identification_number}</strong> {/* Accedemos al número de identificación dentro de project.project */}
+      </p>
 
-                    <p className="text-lightWhiteLetter mb-2">
-                      <strong>Description:</strong>
-                      <br />
-                      {project.description}
-                    </p>
-                    <br />
-                    <div className="absolute bottom-5 w-full">
-                      <p className="text-lightGrayLetter text-xs">
-                        <strong>Delivery date:</strong>{" "}
-                        {new Date(project.delivery_date).toLocaleDateString()}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </section>
+      <p className="text-lightWhiteLetter mb-2">
+        <strong>Description:</strong>
+        <br />
+        {project.project.description} {/* Accedemos a la descripción dentro de project.project */}
+      </p>
+      <br />
+      <div className="absolute bottom-5 w-full">
+        <p className="text-lightGrayLetter text-xs">
+          <strong>Delivery date:</strong>{" "}
+          {new Date(project.project.delivery_date).toLocaleDateString()} {/* Accedemos a la fecha de entrega dentro de project.project */}
+        </p>
+      </div>
+    </div>
+  ))}
+</section>
             </div>
           </>
         ) : (
