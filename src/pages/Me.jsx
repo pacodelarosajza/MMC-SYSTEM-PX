@@ -66,10 +66,12 @@ const Me = () => {
   }, [navigate]);
 
   // Función para cerrar sesión
-  const handleLogout = () => {
-    localStorage.removeItem("loggedInUser");
-    navigate("/");
-  };
+const handleLogout = () => {
+  localStorage.removeItem("loggedInUser"); // Elimina la información del usuario
+  navigate("/"); // Redirige al usuario a la página de inicio
+  window.location.reload(); // Recarga la página
+};
+
 
   // Función para abrir el modal de cambiar contraseña
   const openModal = () => {

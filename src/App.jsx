@@ -50,10 +50,10 @@ const App = () => {
           <Route path="me" element={<PrivateRoute><Me /></PrivateRoute>} />
           
           {/* Admin only */}
-          <Route path="usuarios" element={<PrivateRoute><Users /></PrivateRoute>} /> 
-          {/*<Route path="usuarios" element={<PrivateRoute requiredRole={1}><Users /></PrivateRoute>} />  */}
-          <Route path="new-user-form" element={<PrivateRoute><NewUserForm /></PrivateRoute>} />
-          {/* <Route path="new-user-form" element={<PrivateRoute requiredRole={1}><NewUserForm /></PrivateRoute>} /> */}
+         
+          <Route path="usuarios" element={<PrivateRoute requiredRole={1}><Users /></PrivateRoute>} />  
+     
+          <Route path="new-user-form" element={<PrivateRoute requiredRole={1}><NewUserForm /></PrivateRoute>} />
 
           {/* Admin or Operational users */}
           <Route path="notifi" element={<PrivateRoute><Notifi /></PrivateRoute>} />

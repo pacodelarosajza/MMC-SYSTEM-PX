@@ -12,7 +12,7 @@ const PrivateRoute = ({ children, requiredRole }) => {
 
   // If a requiredRole is provided, check if the user has the right role
   if (requiredRole && requiredRole !== userType) {
-    return <Navigate to="/not-authorized" />;
+    return <Navigate to="" />;
   }
 
   return children;
