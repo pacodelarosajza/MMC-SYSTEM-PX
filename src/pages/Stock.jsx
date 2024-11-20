@@ -222,7 +222,7 @@ const AddItemForm = () => {
  const fetchSearchResults = async (query) => {
   if (!query.trim()) {
     setSearchResults([]);
-    setMessage('Por favor, ingresa un término de búsqueda.');
+    setMessage('Please enter a stock item.');
     return;
   }
 
@@ -270,11 +270,11 @@ useEffect(() => {
   // fin de seccion de excel ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   return (
-    <div className="relative max-w-screen-xl mx-auto mb-40 p-10 bg-gray-900 shadow-2xl rounded-lg animate-fadeIn">
+    <div className="relative max-w-screen-xl mx-auto mb-40 p-10 shadow-2xl ">
       {/* 3. Formulario de carga de archivos Excel */}
-      <div className="mt-8 bg-gray-900 p-6 rounded-lg shadow-lg animate-fadeIn">
+      <div className=" shadow-lg ">
         <div className="text-center mb-6">
-          <h2 className="text-2xl font-bold text-gradient bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-green-500">
+          <h2 className="text-4xl text-center font-extrabold text-white mb-6 tracking-tight">
             Upload Your Excel File
           </h2>
           <p className="text-gray-400 text-sm">
@@ -284,7 +284,7 @@ useEffect(() => {
 
         <div className="flex flex-col md:flex-row items-center justify-center">
           {/* Drag-and-drop area */}
-          <div className="w-full md:w-2/3 flex flex-col items-center justify-center bg-gray-800 border-2 border-dashed border-gray-600 rounded-lg p-4 hover:bg-gray-700 transition duration-300 ease-in-out cursor-pointer relative">
+          <div className="w-full md:w-2/3 flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-4 hover:bg-gray-700 transition duration-300 ease-in-out cursor-pointer relative">
             <input
               type="file"
               accept=".xlsx, .xls, .xlm"
