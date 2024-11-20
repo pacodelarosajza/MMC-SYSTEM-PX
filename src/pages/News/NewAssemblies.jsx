@@ -5,6 +5,9 @@ import axios from 'axios';
 
 const NotificationsComponent = () => {
   const [notifications, setNotifications] = useState([]);
+  const [filteredNotifications, setFilteredNotifications] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filter, setFilter] = useState('all'); // 'all', 'past', 'dueSoon', 'moreThan7Days'
   const navigate = useNavigate();
   const apiIpAddress = import.meta.env.VITE_API_IP_ADDRESS;
 
@@ -62,16 +65,45 @@ const NotificationsComponent = () => {
       });
 
       setNotifications(newNotifications);
+      setFilteredNotifications(newNotifications); // Inicialmente mostrar todas las notificaciones
     } catch (error) {
       console.error('Error al obtener los ensambles:', error);
     }
+  };
+
+  // Función para aplicar los filtros
+  const applyFilter = (filterType) => {
+    setFilter(filterType);
+    let filtered = [...notifications]; // Copiar el array original
+
+    switch (filterType) {
+      case 'past':
+        filtered = filtered.filter((notification) => notification.daysRemaining < 0);
+        break;
+      case 'dueSoon':
+        filtered = filtered.filter((notification) => notification.daysRemaining >= 0 && notification.daysRemaining <= 7);
+        break;
+      case 'moreThan7Days':
+        filtered = filtered.filter((notification) => notification.daysRemaining > 7);
+        break;
+      default:
+        filtered = notifications; // Sin filtro
+    }
+
+    // Filtrar por la búsqueda
+    if (searchQuery) {
+      filtered = filtered.filter((notification) =>
+        notification.message.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    setFilteredNotifications(filtered);
   };
 
   // Efecto para cargar las notificaciones al iniciar el componente
   useEffect(() => {
     fetchAssemblies();
   }, []);
-
 
   // Función para descartar notificaciones
   const dismissNotification = (id) => {
@@ -80,19 +112,64 @@ const NotificationsComponent = () => {
 
   return (
     <div className="min-h-screen p-6">
-      {/* --- BLOQUE DE ENCABEZADO: Mostrar el icono y el título --- */}
+      {/* --- ENCABEZADO --- */}
       <div className="flex items-center mb-8">
-        <FaBell size={0} className="text-indigo-400" />
+        <FaBell size={30} className="text-indigo-400" />
         <h1 className="ml-4 text-3xl font-semibold text-white">Assemblies</h1>
       </div>
 
-      {/* --- BLOQUE DE CARGA: Mostrar carga o notificaciones --- */}
-      {notifications.length === 0 ? (
-        <p className="text-lg text-gray-400">No tienes nuevas notificaciones</p>
+     {/* --- FILTERS --- */}
+<div className="mb-4 flex space-x-4">
+  <button
+    onClick={() => applyFilter('all')}
+    className={`px-4 py-2 ${filter === 'all' ? 'bg-indigo-500 text-white' : 'bg-gray-700 text-gray-300'} rounded-md`}
+  >
+    All
+  </button>
+  <button
+    onClick={() => applyFilter('past')}
+    className={`px-4 py-2 ${filter === 'past' ? 'bg-red-500 text-white' : 'bg-gray-700 text-gray-300'} rounded-md`}
+  >
+    Past
+  </button>
+  <button
+    onClick={() => applyFilter('dueSoon')}
+    className={`px-4 py-2 ${filter === 'dueSoon' ? 'bg-yellow-400 text-white' : 'bg-gray-700 text-gray-300'} rounded-md`}
+  >
+    Due Soon
+  </button>
+  <button
+    onClick={() => applyFilter('moreThan7Days')}
+    className={`px-4 py-2 ${filter === 'moreThan7Days' ? 'bg-blue-400 text-white' : 'bg-gray-700 text-gray-300'} rounded-md`}
+  >
+    More than 7 Days
+  </button>
+</div>
+
+
+      {/* --- BARRA DE BÚSQUEDA --- */}
+      <div className="mb-4 flex items-center space-x-4">
+        <input
+          type="text"
+          placeholder="Search notifications..."
+          value={searchQuery}
+          onChange={(e) => {
+            setSearchQuery(e.target.value);
+            applyFilter(filter); // Volver a aplicar el filtro después de la búsqueda
+          }}
+          className="w-full p-3 bg-gray-700 text-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+        />
+      </div>
+
+      
+
+      {/* --- NOTIFICACIONES --- */}
+      {filteredNotifications.length === 0 ? (
+        <p className="text-lg text-gray-400">You don't have notifications</p>
       ) : (
         <div className="space-y-6">
-          {/* --- BLOQUE DE NOTIFICACIÓN: Iterar sobre las notificaciones --- */}
-          {notifications.map((notification) => (
+          {/* --- NOTIFICACIÓN - MOSTRAR CADA NOTIFICACIÓN --- */}
+          {filteredNotifications.map((notification) => (
             <div
               key={notification.id}
               onClick={() => handleNotificationClick(notification.id)}

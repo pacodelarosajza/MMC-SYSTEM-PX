@@ -4,6 +4,9 @@ import axios from 'axios';
 
 const SubassemblyComponent = () => {
   const [subassemblies, setSubassemblies] = useState([]);
+  const [filteredSubassemblies, setFilteredSubassemblies] = useState([]);
+  const [filter, setFilter] = useState('all'); // 'all', 'past', 'dueSoon', 'moreThan7Days'
+  const [searchQuery, setSearchQuery] = useState('');
   const apiIpAddress = import.meta.env.VITE_API_IP_ADDRESS;
 
   // Función para calcular la diferencia de días entre hoy y la fecha de entrega
@@ -61,15 +64,53 @@ const SubassemblyComponent = () => {
       });
 
       setSubassemblies(newSubassemblies);
+      setFilteredSubassemblies(newSubassemblies); // Inicialmente mostrar todos los subensambles
     } catch (error) {
       console.error('Error al obtener los subensambles:', error);
     }
+  };
+
+  // Función para aplicar los filtros
+  const applyFilter = (filterType) => {
+    setFilter(filterType);
+    let filtered = [...subassemblies]; // Copiar el array original
+
+    // Filtro de fechas
+    switch (filterType) {
+      case 'past':
+        filtered = filtered.filter((subassembly) => subassembly.daysRemaining < 0);
+        break;
+      case 'dueSoon':
+        filtered = filtered.filter((subassembly) => subassembly.daysRemaining >= 0 && subassembly.daysRemaining <= 7);
+        break;
+      case 'moreThan7Days':
+        filtered = filtered.filter((subassembly) => subassembly.daysRemaining > 7);
+        break;
+      default:
+        filtered = subassemblies; // Sin filtro
+    }
+
+    // Filtro de búsqueda por texto
+    if (searchQuery) {
+      filtered = filtered.filter((subassembly) =>
+        subassembly.identificationNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        subassembly.description.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    setFilteredSubassemblies(filtered);
   };
 
   // Efecto para cargar los subensambles cuando el componente se monta
   useEffect(() => {
     fetchSubassemblies();
   }, []);
+
+  // Función para manejar el cambio en la barra de búsqueda
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+    applyFilter(filter); // Aplicar el filtro actual con la nueva búsqueda
+  };
 
   return (
     <div className="min-h-screen p-6">
@@ -79,13 +120,55 @@ const SubassemblyComponent = () => {
         <h1 className="ml-4 text-3xl font-semibold text-white">Subassemblies</h1>
       </div>
 
+      
+      {/* --- FILTROS --- */}
+      <div className="mb-4 flex space-x-4">
+        <button
+          onClick={() => applyFilter('all')}
+          className={`px-4 py-2 ${filter === 'all' ? 'bg-indigo-500 text-white' : 'bg-gray-700 text-gray-300'} rounded-md`}
+        >
+          Todos
+        </button>
+        <button
+          onClick={() => applyFilter('past')}
+          className={`px-4 py-2 ${filter === 'past' ? 'bg-red-500 text-white' : 'bg-gray-700 text-gray-300'} rounded-md`}
+        >
+          Ya pasados
+        </button>
+        <button
+          onClick={() => applyFilter('dueSoon')}
+          className={`px-4 py-2 ${filter === 'dueSoon' ? 'bg-yellow-400 text-white' : 'bg-gray-700 text-gray-300'} rounded-md`}
+        >
+          Entrega cercana
+        </button>
+        <button
+          onClick={() => applyFilter('moreThan7Days')}
+          className={`px-4 py-2 ${filter === 'moreThan7Days' ? 'bg-blue-400 text-white' : 'bg-gray-700 text-gray-300'} rounded-md`}
+        >
+          Más de 7 días
+        </button>
+      </div>
+
+
+      {/* --- BARRA DE BÚSQUEDA --- */}
+      <div className="mb-4">
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={handleSearchChange}
+          placeholder="Search projects by identification....."
+          className="w-full p-3 bg-gray-700 text-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+        />
+      </div>
+
+
       {/* --- LISTADO DE SUBENSAMBLES --- */}
-      {subassemblies.length === 0 ? (
-        <p className="text-lg text-gray-400">No tienes nuevos subensambles</p>
+      {filteredSubassemblies.length === 0 ? (
+        <p className="text-lg text-gray-400">You don't have notifications</p>
       ) : (
         <div className="space-y-6">
           {/* --- SUBENSAMBLE - MOSTRAR CADA SUBENSAMBLE --- */}
-          {subassemblies.map((subassembly) => (
+          {filteredSubassemblies.map((subassembly) => (
             <div
               key={subassembly.id}
               className="flex justify-between items-center p-5 bg-gray-800 rounded-lg shadow-md hover:shadow-lg cursor-pointer transition-all duration-300 ease-in-out"

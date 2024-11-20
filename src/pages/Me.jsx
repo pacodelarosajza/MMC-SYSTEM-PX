@@ -37,10 +37,7 @@ const Me = () => {
     }
   };
 
-  // Función para alternar entre modo claro/oscuro
-  const toggleDarkMode = () => {
-    setDarkMode(!darkMode);
-  };
+  
 
   // Obtener saludo personalizado basado en la hora del día
   const getGreeting = () => {
@@ -126,9 +123,6 @@ const handleLogout = () => {
           <h1 className="text-2xl font-semibold">
             {getGreeting()} {user.name}!
           </h1>
-          <button onClick={toggleDarkMode} className="text-xl">
-            {darkMode ? <FaSun /> : <FaMoon />}
-          </button>
         </div>
 
         <div className="grid grid-cols-2 gap-6">

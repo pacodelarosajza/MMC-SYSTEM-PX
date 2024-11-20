@@ -264,7 +264,7 @@ const Dashboard = ({ onLogout }) => {
             >
               <button>Add User</button>
             </Link>
-            
+
           </ul>
         </nav>
       </aside>
@@ -472,38 +472,36 @@ const Dashboard = ({ onLogout }) => {
                 ))}
               </section>
               {/* Projects Overview Section */}
-<h1 className="text-lg text-left font-extrabold text-gradient bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-blue-500 mb-8">
-  Project cards under development
-</h1>
-<section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 mb-4">
-  {projects.map((project) => (
-    <div
-      key={project.project.id} // Usamos project.project.id para acceder al ID real del proyecto
-      className="relative bg-gray-700 p-3 rounded-lg shadow shadow-shadowBlueColor shadow-xl text-sm cursor-pointer hover:bg-gray-600 transition duration-200"
-      onClick={() =>
-        alert(`Detalles del Proyecto ID: ${project.project.id}`) // Accedemos al ID del proyecto dentro de project.project
-      }
-    >
-      {/*<h2 className="font-bold text-lg">ID: {project.project.id}</h2>*/}
-      <p className="text-green-500 text-xl text-right">
-        <strong>#{project.project.identification_number}</strong> {/* Accedemos al número de identificación dentro de project.project */}
-      </p>
+              <h1 className="text-lg text-left font-extrabold text-gradient bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-blue-500 mb-8">
+                Project cards under development
+              </h1>
+              <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 mb-4">
+                {projects.map((project) => (
+                  <div
+                    key={project.project.id} // Usamos project.project.id para acceder al ID real del proyecto
+                    className="relative bg-gray-700 p-3 rounded-lg shadow shadow-shadowBlueColor shadow-xl text-sm cursor-pointer hover:bg-gray-600 transition duration-200"
+                    
+                  >
+                    {/*<h2 className="font-bold text-lg">ID: {project.project.id}</h2>*/}
+                    <p className="text-green-500 text-xl text-right">
+                      <strong>#{project.project.identification_number}</strong> {/* Accedemos al número de identificación dentro de project.project */}
+                    </p>
 
-      <p className="text-lightWhiteLetter mb-2">
-        <strong>Description:</strong>
-        <br />
-        {project.project.description} {/* Accedemos a la descripción dentro de project.project */}
-      </p>
-      <br />
-      <div className="absolute bottom-5 w-full">
-        <p className="text-lightGrayLetter text-xs">
-          <strong>Delivery date:</strong>{" "}
-          {new Date(project.project.delivery_date).toLocaleDateString()} {/* Accedemos a la fecha de entrega dentro de project.project */}
-        </p>
-      </div>
-    </div>
-  ))}
-</section>
+                    <p className="text-lightWhiteLetter mb-2">
+                      <strong>Description:</strong>
+                      <br />
+                      {project.project.description} {/* Accedemos a la descripción dentro de project.project */}
+                    </p>
+                    <br />
+                    <div className="absolute bottom-5 w-full">
+                      <p className="text-lightGrayLetter text-xs">
+                        <strong>Delivery date:</strong>{" "}
+                        {new Date(project.project.delivery_date).toLocaleDateString()} {/* Accedemos a la fecha de entrega dentro de project.project */}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </section>
             </div>
           </>
         ) : (
