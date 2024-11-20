@@ -214,13 +214,6 @@ const Dashboard = ({ onLogout }) => {
               Projects
             </div>
             <Link
-              to="/dashboard/projects"
-              onClick={handleNavigate}
-              className="text-sm text-left py-2 px-4 hover:bg-pageSideMenuTextHover hover:rounded transition duration-300 text-lightWhiteLetter"
-            >
-              <button>In Development</button>
-            </Link>
-            <Link
               to="/dashboard/projects-managment"
               onClick={handleNavigate}
               className="text-sm text-left py-2 px-4 hover:bg-pageSideMenuTextHover hover:rounded transition duration-300 text-lightWhiteLetter"
@@ -233,6 +226,13 @@ const Dashboard = ({ onLogout }) => {
               className="text-sm text-left py-2 px-4 hover:bg-pageSideMenuTextHover hover:rounded transition duration-300 text-lightWhiteLetter"
             >
               <button>Materials Managment</button>
+            </Link>
+            <Link
+              to="/dashboard/projects"
+              onClick={handleNavigate}
+              className="text-sm text-left py-2 px-4 hover:bg-pageSideMenuTextHover hover:rounded transition duration-300 text-lightWhiteLetter"
+            >
+              <button>In Development</button>
             </Link>
             <Link
               to="/dashboard/history"

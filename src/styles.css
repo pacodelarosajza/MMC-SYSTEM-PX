@@ -3,3 +3,7 @@
   color: #000000; /* Color del texto seleccionado */
   text-decoration: underline 3px; /* Subrayado más grueso */
 }
+
+.transition-max-height {
+  transition: max-height 3s ease-in-out;
+}

@@ -153,11 +153,7 @@ const ProjectsManagmentTable = () => {
                       <div className="flex justify-end items-center">
                         {/* EDIT BUTTON */}
                         <div className="p-2">
-                        <AppUpdate
-                      id={
-                        project.id
-                      }
-                    />
+                        <AppUpdate id={ project.id}/>
                         </div>
                         {/* DELETE BUTTON */}
                         <div className="p-2">

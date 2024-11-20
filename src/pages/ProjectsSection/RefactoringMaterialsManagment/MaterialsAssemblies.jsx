@@ -140,16 +140,16 @@ const MaterialsAssemblies = ({ id }) => {
       <div className="p-4">
         <button
           onClick={openModal}
-          className="w-15 px-2 py-1 text-gray-400 text-xs bg-pageBackground border border-pageBackground hover:bg-yellow-900 hover:border-yellow-500 hover:text-yellow-300 rounded"
+          className="w-20 px-2 py-1 text-gray-400 text-xs bg-pageBackground border border-pageBackground hover:bg-yellow-900 hover:border-yellow-500 hover:text-yellow-300 rounded"
         >
-          Materials
+          Add Mtl
         </button>
 
         {isModalOpen && (
           <div className="fixed z-10 inset-0 flex items-center justify-center bg-black bg-opacity-60 transition-opacity duration-300">
-            <div className="py-12 px-10 bg-white dark:bg-gray-800 rounded-lg shadow-2xl transform scale-100 hover:scale-105 transition-transform duration-200 w-full max-w-6xl max-h-[80vh] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-500 scrollbar-track-blue-200">
-              <div className="px-2 flex flex-col justify-center items-center">
-                <h1 className="text-1xl font-extrabold text-gray-500 text-right">
+          <div className="py-12 px-10 bg-white dark:bg-gray-800 rounded-lg shadow-2xl transform scale-100 hover:scale-105 transition-transform duration-200 w-full max-w-6xl max-h-[80vh] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-500 scrollbar-track-blue-200">
+            <div className="px-2 flex flex-col justify-center items-center">
+              <h1 className="text-1xl font-extrabold text-gray-500 text-right">
                   Materials management
                 </h1>
                 <h2 className="text-3xl font-bold mb-10 text-blue-600">
@@ -277,7 +277,7 @@ const MaterialsAssemblies = ({ id }) => {
                       type="submit"
                       className="px-10 py-1 text-gray-400 text-lg bg-pageBackground border border-pageBackground hover:border hover:bg-blue-900 hover:border-blue-500 hover:text-blue-300 rounded"
                     >
-                      Continue
+                      Save and continue
                     </button>
                   </div>
                 </form>

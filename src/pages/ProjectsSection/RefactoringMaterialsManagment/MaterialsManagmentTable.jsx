@@ -3,7 +3,8 @@ import axios from "axios";
 import { FaArrowLeft, FaArrowRight, FaSync } from "react-icons/fa";
 import Modal from "../../../components/Modal";
 import ModalAcept from "../../../components/ModalAcept";
-import AppMaterials from "./MaterialsAssemblies";
+import AppAddMaterials from "./MaterialsAssemblies";
+import AppCtrlMaterials from "./CtrlMaterials.jsx"; // Import the new component
 
 const ProjectsManagmentTable = () => {
   const apiIpAddress = import.meta.env.VITE_API_IP_ADDRESS; // API IP address
@@ -11,6 +12,8 @@ const ProjectsManagmentTable = () => {
   // ACTIVE PROJECTS AND POST NEW PROJECT STATES
   const [activeProjects, setActiveProjects] = useState([]); // get active projects states
   const [loading, setLoading] = useState(false); // loading state
+  const [showContainer, setShowContainer] = useState(false); // state to manage container visibility
+  const [selectedProjectId, setSelectedProjectId] = useState(null);
 
   // USEEFFECT API OPERATIONS
   useEffect(() => {
@@ -52,14 +55,21 @@ const ProjectsManagmentTable = () => {
   const endIndex = (currentPage + 1) * recordsPerPage;
 
   const truncateDescription = (description) => {
-    return description.length > 145 ? description.substring(0, 145) + "  . . ." : description;
+    return description.length > 145
+      ? description.substring(0, 145) + "  . . ."
+      : description;
+  };
+
+  const toggleContainer = (projectId) => {
+    setShowContainer((prevShowContainer) => !prevShowContainer);
+    setSelectedProjectId(projectId);
   };
 
   return (
     <>
       {/* PROJECTS MANAGEMENT TABLE */}
       <div className="">
-               <div className="flex items-center justify-between py-1 mt-5">
+        <div className="flex items-center justify-between py-1 mt-5">
           <button
             onClick={fetchActiveProjects}
             className="p-2 ml-auto text-white rounded hover:bg-gray-800 transition duration-200"
@@ -78,37 +88,50 @@ const ProjectsManagmentTable = () => {
             >
               <thead>
                 <tr className="w-full bg-blue-900 text-left">
-                  <th className="px-4 py-2 border border-blue-500">Identifier </th>
-                  <th className="px-4 py-2 border border-blue-500" colSpan="2">
+                  <th className="px-4 py-2 border border-blue-500">
+                    Identifier{" "}
+                  </th>
+                  <th className="px-4 py-2 border border-blue-500" colSpan="3">
                     Description
                   </th>
                 </tr>
               </thead>
               <tbody className="shadow-lg">
-                {currentProjects.map((project) => (
-                  <tr
-                    key={project.id}
-                    className="hover:bg-pageSideMenuTextHover transition duration-200"
-                  >
-                    <td className="px-4 border-t border-r border-b border-gray-500">
-                      #{project.identification_number}
-                    </td>
-                    <td className="px-4 py-2 border-t border-b border-gray-500">
-                      {truncateDescription(project.description)}
-                    </td>
-                    <td className="px-4 border-t border-b border-gray-500">
-                      <div className="flex justify-end items-center">
-                      <div className="p-2">
-                      <AppMaterials
-                      id={
-                        project.id
-                      }
-                      />
+                {currentProjects.map((project) => {
+                  const projectId = project.id;
+                  return (
+                    <tr
+                      key={projectId}
+                      className="hover:bg-pageSideMenuTextHover transition duration-200"
+                    >
+                      <td className="px-4 border-t border-r border-b border-gray-500">
+                        #{project.identification_number}
+                      </td>
+                      <td className=" pl-4 border-t border-b border-gray-500">
+                        {truncateDescription(project.description)}
+                      </td>
+                      <td className="border-t border-b border-gray-500">
+                        <div className="flex justify-end items-center">
+                          <div className="">
+                            <AppAddMaterials id={project.id} />
+                          </div>
                         </div>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                      <td className="pr-4 border-t border-b border-gray-500">
+                        <div className="flex justify-end items-center">
+                          <div className="">
+                            <button
+                              className="w-20 px-2 py-1 text-gray-400 text-xs bg-pageBackground border border-pageBackground hover:bg-green-900 hover:border-green-500 hover:text-green-300 rounded"
+                              onClick={() => toggleContainer(projectId)}
+                            >
+                              Ctrl Mts
+                            </button>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
             <div className="flex justify-between items-center mt-4">
@@ -134,6 +157,11 @@ const ProjectsManagmentTable = () => {
                 </button>
               )}
             </div>
+            {showContainer && selectedProjectId && (
+              <div className="mt-10">
+                <AppCtrlMaterials id={selectedProjectId}/> 
+              </div>
+            )}
           </div>
         )}
       </div>
