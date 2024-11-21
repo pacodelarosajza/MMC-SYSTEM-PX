@@ -225,20 +225,19 @@ const SubmitMaterials = ({ id }) => {
             <table className="min-w-full bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-lg mt-4">
               <thead>
                 <tr>
-                  <th className="py-2 px-4 border-b border-gray-700 bg-gray-700 text-left text-sm font-semibold text-gray-400">
-                    Assembly #
+                  
+                  <th className="py-2 px-4 border-b border-gray-700 bg-gray-700 text-center text-sm font-semibold text-gray-300" colSpan={2}>
+                    Assembly 
                   </th>
-                  <th className="py-2 px-4 border-b border-gray-700 bg-gray-700 text-left text-sm font-semibold text-gray-300">
-                    Assembly Description
-                  </th>
-                  <th className="py-2 px-4 border-b border-gray-700 bg-gray-700 text-left text-sm font-semibold text-gray-400">
-                    Subassembly #
-                  </th>
+                  
                   <th
-                    className="py-2 px-4 border-b border-gray-700 bg-gray-700 text-left text-sm font-semibold text-gray-300"
+                    className="py-2 px-4 border-b border-gray-700 bg-gray-700 text-center text-sm font-semibold text-gray-300"
                     colSpan={2}
                   >
-                    Subassembly Description
+                    Subassembly 
+                  </th>
+                  <th className="py-2 px-4 border-b border-gray-700 bg-gray-700 text-center text-sm font-semibold text-gray-300" >
+                     
                   </th>
                 </tr>
               </thead>
@@ -249,7 +248,7 @@ const SubmitMaterials = ({ id }) => {
                       <td className="text-gray-400 font-medium border border-gray-600 text-center p-2 text-xs">
                         {assemblyIndex + 1}
                       </td>
-                      <td className="text-ms text-gray-300 font-medium border border-gray-600 text-center p-2">
+                      <td className="bg-gray-700 bg-opacity-30 text-ms text-gray-300 font-medium border border-gray-600 text-center p-2">
                         {assembly.identification_number}
                       </td>
                       {subassemblies.filter(
@@ -259,7 +258,7 @@ const SubmitMaterials = ({ id }) => {
                           <td className="text-gray-400 font-medium border border-gray-600 text-center p-2 text-xs">
                             {assemblyIndex + 1}.1
                           </td>
-                          <td className="text-xs text-gray-200 font-medium border-t border-b border-l border-gray-600 p-2 text-center">
+                          <td className="text-xs text-gray-200 font-medium border border-gray-600 p-2 text-center bg-gray-700 bg-opacity-30">
                             {
                               subassemblies.filter(
                                 (subassembly) =>
@@ -434,7 +433,7 @@ const SubmitMaterials = ({ id }) => {
                               <td className="text-gray-400 font-medium border border-gray-600 text-center p-2 text-xs">
                                 {assemblyIndex + 1}.{subassemblyIndex + 1}
                               </td>
-                              <td className="text-xs text-gray-200 font-medium border border-gray-600 p-2 text-center">
+                              <td className="text-xs text-gray-200 font-medium border border-gray-600 p-2 text-center bg-gray-700 bg-opacity-30">
                                 {subassembly.identification_number}
                               </td>
                               <td className="text-xs text-gray-200 font-medium border-t border-b border-r border-gray-600 p-2">

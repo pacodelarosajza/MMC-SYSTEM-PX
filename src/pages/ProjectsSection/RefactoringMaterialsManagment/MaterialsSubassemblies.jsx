@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from "react";
-import ModalSuccess from "../../../components/ModalSuccess";
-import { FaSync } from "react-icons/fa";
 import SubmitMaterials from "./SubmitMaterials"; // Import the new component
 
 const MaterialsSubassemblies = ({ id }) => {
@@ -17,7 +15,6 @@ const MaterialsSubassemblies = ({ id }) => {
   });
   const [charCount, setCharCount] = useState(0);
   const [rows, setRows] = useState([formData]);
-  const [isModalSuccessOpen, setIsModalSuccessOpen] = useState(false);
   const [isSubmitMaterialsOpen, setIsSubmitMaterialsOpen] = useState(false); // New state
   const apiIpAddress = import.meta.env.VITE_API_IP_ADDRESS;
 
@@ -124,11 +121,6 @@ const MaterialsSubassemblies = ({ id }) => {
         }
       }
       // Handle successful response
-      setIsModalSuccessOpen(true);
-      setTimeout(() => {
-        setIsModalSuccessOpen(false);
-        setRows([formData]);
-      }, 1000);
     } catch (error) {
       console.error(error);
     }
@@ -458,13 +450,6 @@ const MaterialsSubassemblies = ({ id }) => {
           </div>
         </div>
       )}
-      <ModalSuccess
-        isOpen={isModalSuccessOpen}
-        onClose={() => setIsModalSuccessOpen(false)}
-        title="Subassemblies added successfully!"
-      >
-        <p className="text-5xl text-green-500">✔</p>
-      </ModalSuccess>
     </>
   );
 };

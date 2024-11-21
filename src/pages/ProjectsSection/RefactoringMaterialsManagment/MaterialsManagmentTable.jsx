@@ -110,23 +110,17 @@ const ProjectsManagmentTable = () => {
                       <td className=" pl-4 border-t border-b border-gray-500">
                         {truncateDescription(project.description)}
                       </td>
-                      <td className="border-t border-b border-gray-500">
-                        <div className="flex justify-end items-center">
-                          <div className="">
-                            <AppAddMaterials id={project.id} />
-                          </div>
-                        </div>
-                      </td>
                       <td className="pr-4 border-t border-b border-gray-500">
                         <div className="flex justify-end items-center">
-                          <div className="">
+                         
+                          <AppAddMaterials id={project.id} /> 
                             <button
                               className="w-20 px-2 py-1 text-gray-400 text-xs bg-pageBackground border border-pageBackground hover:bg-green-900 hover:border-green-500 hover:text-green-300 rounded"
                               onClick={() => toggleContainer(projectId)}
                             >
                               Ctrl Mts
                             </button>
-                          </div>
+                          
                         </div>
                       </td>
                     </tr>

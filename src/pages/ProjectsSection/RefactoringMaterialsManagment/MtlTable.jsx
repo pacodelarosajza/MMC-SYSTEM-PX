@@ -119,14 +119,14 @@ const MtlTable = ({ id }) => {
           </div>
           <div className="fixed top-2 right-2 ">
             <button
-              className="bg-orange-900 text-orange-300 px-6 py-1 rounded border border-orange-500 hover:bg-orange-700 hover:text-orange-100 hover:border-orange-300 text-lg mr-2 mt-4"
+              className="bg-orange-900 text-orange-300 px-6 py-1 rounded border border-orange-500 hover:bg-orange-700 hover:text-orange-100 hover:border-orange-300  mr-2 mt-4"
               onClick={() => setShowSearchStock(true)}
             >
               Search for matches in stock
             </button>
             <button
-              className="bg-blue-900 text-blue-300 px-6 py-1 rounded border border-blue-500 hover:bg-blue-700 hover:text-blue-100 hover:border-blue-300 text-lg mr-10 mt-4"
-              onClick={handleClose}
+          className="bg-red-900 text-red-300 px-6 py-1 rounded border border-red-500 hover:bg-red-700 hover:text-red-100 hover:border-red-300  mr-2 mt-4"
+          onClick={handleClose}
             >
               Close
             </button>
@@ -207,20 +207,7 @@ const MtlTable = ({ id }) => {
               ))}
             </tbody>
           </table>
-          <div className="right-2 ">
-            <button
-              className="bg-orange-900 text-orange-300 px-6 py-1 rounded border border-orange-500 hover:bg-orange-700 hover:text-orange-100 hover:border-orange-300 text-lg mr-2 mt-4"
-              onClick={handleClose}
-            >
-              Search for matches in stock
-            </button>
-            <button
-              className="bg-blue-900 text-blue-300 px-6 py-1 rounded border border-blue-500 hover:bg-blue-700 hover:text-blue-100 hover:border-blue-300 text-lg mr-10 mt-4"
-              onClick={handleClose}
-            >
-              Close
-            </button>
-          </div>
+          
         </div>
       </div>
     </div>

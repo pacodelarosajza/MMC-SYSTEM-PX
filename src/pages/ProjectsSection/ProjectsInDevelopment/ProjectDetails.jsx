@@ -36,6 +36,7 @@ const ProjectDetails = ({ identificationNumber }) => {
   const [isSubassemblyOpen, setIsSubassemblyOpen] = useState({}); // Subassembly details
   const [showInfo, setShowInfo] = useState({}); // Table assembly data section
   const [showItemInfo, setShowItemInfo] = useState({}); // Table item data section
+  const [showSubassemblyInfo, setShowSubassemblyInfo] = useState({}); // Table subassembly data section
 
   // ACTIONS
   const [textToCopy, setTextToCopy] = useState(""); // Copy to clipboard text
@@ -322,6 +323,14 @@ const ProjectDetails = ({ identificationNumber }) => {
     }));
   };
 
+  // Handle button click to show subassembly info
+  const handleSubassemblyButtonClick = (subassemblyId) => {
+    setShowSubassemblyInfo((prevState) => ({
+      ...prevState,
+      [subassemblyId]: !prevState[subassemblyId],
+    }));
+  };
+
   // OTHER FUNCTIONS
   // Handle copy assembly materials
   const handleCopyAssemblyMaterials = async (assemblyId) => {
@@ -481,7 +490,7 @@ const ProjectDetails = ({ identificationNumber }) => {
                                     <div className="flex items-center space-x-2">
                                       <div className="font-medium">
                                         {i + 1}.{" "}
-                                        <span className="ml-2">
+                                        <span className="ml-2 text-gray-300">
                                           {assembly.identification_number}
                                         </span>
                                       </div>
@@ -742,7 +751,7 @@ const ProjectDetails = ({ identificationNumber }) => {
                                   ))
                                 ) : (
                                   <>
-                                    <div className="text-gray-500 mt-3 mb-4 text-center">
+                                    <div className="mt-3 mb-4 list-disc text-white">
                                       {Array.isArray(
                                         subassembliesData[assembly.id]
                                       ) &&
@@ -769,7 +778,7 @@ const ProjectDetails = ({ identificationNumber }) => {
                                                             {" "}
                                                             ➜{" "}
                                                           </span>
-                                                          <span className="">
+                                                          <span className="text-gray-300">
                                                             {
                                                               subassembly.identification_number
                                                             }
@@ -791,26 +800,86 @@ const ProjectDetails = ({ identificationNumber }) => {
                                                     </span>
                                                   </h3>
                                                 </div>
-                                                <button
-                                                  onClick={() =>
-                                                    toggleSubassemblyList(
-                                                      subassembly.id
-                                                    )
-                                                  }
-                                                  className="px-4 py-2 bg-gray-500 text-sm text-gray-300 bg-pageBackground rounded hover:bg-gray-700"
-                                                >
-                                                  <FontAwesomeIcon
-                                                    icon={
-                                                      isSubassemblyOpen[
+                                                <div className="flex items-center space-x-4">
+                                                  <button
+                                                    onClick={() => handleSubassemblyButtonClick(subassembly.id)}
+                                                    className="rounded text-xs text-gray-600 border border-transparent hover:border-blue-800 font-semibold px-5 py-2 hover:bg-gray-900 hover:text-gary-200 transition duration-300 ease-in-out"
+                                                  >
+                                                    Subassembly File
+                                                  </button>
+                                                  <button
+                                                    onClick={() =>
+                                                      toggleSubassemblyList(
                                                         subassembly.id
-                                                      ]
-                                                        ? faChevronUp
-                                                        : faChevronDown
+                                                      )
                                                     }
-                                                  />
-                                                </button>
+                                                    className="px-4 py-2 bg-gray-500 text-sm text-gray-300 bg-pageBackground rounded hover:bg-gray-700"
+                                                  >
+                                                    <FontAwesomeIcon
+                                                      icon={
+                                                        isSubassemblyOpen[
+                                                          subassembly.id
+                                                        ]
+                                                          ? faChevronUp
+                                                          : faChevronDown
+                                                      }
+                                                    />
+                                                  </button>
+                                                </div>
                                               </div>
-
+                                              {/* TABLE SUBASSEMBLY DATA */}
+                                              {showSubassemblyInfo[subassembly.id] && (
+                                                <div className="pt-2 pb-10 px-2">
+                                                <table className="w-full mt-4 border-collapse border border-gray-500">
+                                                  <tbody>
+                                                      {[
+                                                        {
+                                                          label: "Identification Number",
+                                                          value: subassembly.identification_number,
+                                                          className: "text-gray-500 italic text-base font-medium",
+                                                        },
+                                                        {
+                                                          label: "Description",
+                                                          value: subassembly.description,
+                                                        },
+                                                        {
+                                                          label: "Price",
+                                                          value: `$${subassembly.price} USD`,
+                                                        },
+                                                        {
+                                                          label: "Delivery Date",
+                                                          value: subassembly.delivery_date,
+                                                        },
+                                                        {
+                                                          label: "Status",
+                                                          value: getAssemblyStatus(subassembly.completed),
+                                                          className:
+                                                            "bg-blue-900 bg-opacity-50 text-gray-400 italic",
+                                                        },
+                                                        {
+                                                          label: "Completed Date",
+                                                          value: subassembly.completed_date,
+                                                          className:
+                                                            "bg-blue-900 bg-opacity-50 text-gray-400 italic",
+                                                        },
+                                                      ].map((row, index) => (
+                                                        <tr key={index}>
+                                                          <td className="border border-blue-500 px-4 py-2">
+                                                            <strong>{row.label}</strong>
+                                                          </td>
+                                                          <td
+                                                            className={`border border-gray-500 px-4 py-2 ${
+                                                              row.className || ""
+                                                            }`}
+                                                          >
+                                                            {row.value}
+                                                          </td>
+                                                        </tr>
+                                                      ))}
+                                                    </tbody>
+                                                  </table>
+                                                </div>
+                                              )}
                                               {isSubassemblyOpen[
                                                 subassembly.id
                                               ] && (

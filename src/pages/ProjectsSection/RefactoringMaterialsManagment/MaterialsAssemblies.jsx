@@ -18,6 +18,7 @@ const MaterialsAssemblies = ({ id }) => {
     completed: 0,
   });
   const [charCount, setCharCount] = useState(0);
+  const [rowCharCounts, setRowCharCounts] = useState([0]);
   const [rows, setRows] = useState([formData]);
   const [showSubassemblies, setShowSubassemblies] = useState(false);
 
@@ -75,10 +76,12 @@ const MaterialsAssemblies = ({ id }) => {
 
   const addRow = () => {
     setRows([...rows, { ...formData }]);
+    setRowCharCounts([...rowCharCounts, 0]);
   };
 
   const removeRow = (index) => {
     setRows(rows.filter((_, i) => i !== index));
+    setRowCharCounts(rowCharCounts.filter((_, i) => i !== index));
   };
 
   const handleRowChange = (index, e) => {
@@ -95,7 +98,10 @@ const MaterialsAssemblies = ({ id }) => {
       i === index ? { ...row, [name]: value } : row
     );
     setRows(updatedRows);
-    setCharCount(value.length);
+    const updatedCharCounts = rowCharCounts.map((count, i) =>
+      i === index ? value.length : count
+    );
+    setRowCharCounts(updatedCharCounts);
     e.target.style.height = "auto";
     e.target.style.height = `${e.target.scrollHeight}px`;
   };
@@ -124,9 +130,9 @@ const MaterialsAssemblies = ({ id }) => {
         }
       }
       // Handle successful response
-      setIsModalSuccessOpen(true);
+      
       setTimeout(() => {
-        setIsModalSuccessOpen(false);
+        
         setIsModalOpen(false);
         setShowSubassemblies(true);
       }, 1000);
@@ -137,7 +143,7 @@ const MaterialsAssemblies = ({ id }) => {
 
   return (
     <>
-      <div className="p-4">
+      <div className="p-2">
         <button
           onClick={openModal}
           className="w-20 px-2 py-1 text-gray-400 text-xs bg-pageBackground border border-pageBackground hover:bg-yellow-900 hover:border-yellow-500 hover:text-yellow-300 rounded"
@@ -217,7 +223,7 @@ const MaterialsAssemblies = ({ id }) => {
                                 required
                               />
                               <div className="text-right text-xs text-gray-400">
-                                {charCount}/255
+                                {rowCharCounts[index]}/255
                               </div>
                             </td>
                             <td className="text-gray-300 font-medium border border-gray-600">

@@ -1,265 +1,367 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faLongArrowAltLeft } from "@fortawesome/free-solid-svg-icons";
+
+// Custom function to calculate similarity between two strings
+const calculateSimilarity = (str1, str2) => {
+  const longer = str1.length > str2.length ? str1 : str2;
+  const shorter = str1.length > str2.length ? str2 : str1;
+  const longerLength = longer.length;
+  if (longerLength === 0) {
+    return 1.0;
+  }
+  return (
+    (longerLength - editDistance(longer, shorter)) / parseFloat(longerLength)
+  );
+};
+
+const editDistance = (str1, str2) => {
+  const costs = [];
+  for (let i = 0; i <= str1.length; i++) {
+    let lastValue = i;
+    for (let j = 0; j <= str2.length; j++) {
+      if (i === 0) {
+        costs[j] = j;
+      } else {
+        if (j > 0) {
+          let newValue = costs[j - 1];
+          if (str1.charAt(i - 1) !== str2.charAt(j - 1)) {
+            newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
+          }
+          costs[j - 1] = lastValue;
+          lastValue = newValue;
+        }
+      }
+    }
+    if (i > 0) {
+      costs[str2.length] = lastValue;
+    }
+  }
+  return costs[str2.length];
+};
 
 const SearchStock = ({ id }) => {
-    const [items, setItems] = useState([]);
-    const [stockItems, setStockItems] = useState([]);
-    const [assemblies, setAssemblies] = useState({});
-    const [subassemblies, setSubassemblies] = useState({});
-    const [projectId, setProjectId] = useState("");
-    const [showSearchStock, setShowSearchStock] = useState(false);
-    const apiIpAddress = import.meta.env.VITE_API_IP_ADDRESS;
-  
-    useEffect(() => {
-      const fetchItems = async () => {
-        try {
-          const response = await fetch(
-            `${apiIpAddress}/api/getItems/project/${id}`
-          );
-          if (!response.ok) {
-            throw new Error("Failed to fetch items");
-          }
-          const result = await response.json();
-          setItems(result);
-        } catch (error) {
-          console.error(error);
-        }
-      };
-  
-      fetchItems();
-    }, [id, apiIpAddress]);
+  const [items, setItems] = useState([]);
+  const [stockItems, setStockItems] = useState([]);
+  const [matches, setMatches] = useState([]);
+  const [isVisible, setIsVisible] = useState(true);
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [quantityToTake, setQuantityToTake] = useState(0);
+  const apiIpAddress = import.meta.env.VITE_API_IP_ADDRESS;
 
-    useEffect(() => {
-        const fetchStockItems = async () => {
-            try {
-                const response = await fetch(`${apiIpAddress}/api/items-with-stock`);
-                if (!response.ok) {
-                    throw new Error("Failed to fetch items with stock");
-                }
-                const result = await response.json();
-                console.log(result);
-                setStockItems(result);
-            } catch (error) {
-                console.error(error);
-            }
-        };
+  const handleClose = () => {
+    window.location.reload();
+  };
 
-        fetchStockItems();
-    }, [apiIpAddress]);
-  
-    useEffect(() => {
-      const fetchProjectId = async () => {
-        try {
-          const response = await fetch(
-            `${apiIpAddress}/api/getProjects/id/${id}`
-          );
-          if (!response.ok) {
-            throw new Error("Failed to fetch project ID");
-          }
-          const result = await response.json();
-          setProjectId(result.identification_number);
-        } catch (error) {
-          console.error(error);
+  const handlePatchClick = (item) => {
+    setSelectedItem(item);
+  };
+
+  const handleQuantityChange = (e) => {
+    const maxQuantity = Math.min(
+      selectedItem.matchedStockItem.stock_items[0].stock.stock_quantity,
+      selectedItem.subassembly_assignment_quantity
+    );
+    const value = Math.min(e.target.value, maxQuantity);
+    setQuantityToTake(value);
+  };
+
+  const handlePatchSubmit = async () => {
+    if (quantityToTake > 0) {
+      try {
+        const newQuantity = selectedItem.subassembly_assignment_quantity - quantityToTake;
+
+        const projectResponse = await fetch(`${apiIpAddress}/api/patchItem/${selectedItem.id}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            subassembly_assignment_quantity: newQuantity,
+            ...(newQuantity === 0 && { in_subassembly: 1 }),
+          }),
+        });
+
+        if (!projectResponse.ok) {
+          throw new Error('Failed to update project item');
         }
-      };
-  
-      fetchProjectId();
-    }, [id, apiIpAddress]);
-  
-    useEffect(() => {
-      const fetchAssemblyName = async (assemblyId) => {
-        try {
-          const response = await fetch(
-            `${apiIpAddress}/api/getAssambly/${assemblyId}`
-          );
-          if (!response.ok) {
-            throw new Error("Failed to fetch assembly name");
-          }
-          const result = await response.json();
-          setAssemblies((prev) => ({
-            ...prev,
-            [assemblyId]: result.identification_number,
-          }));
-        } catch (error) {
-          console.error(error);
+
+        const stockResponse = await fetch(`${apiIpAddress}/api/items/${selectedItem.matchedStockItem.id}/stock`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            stock_quantity: selectedItem.matchedStockItem.stock_items[0].stock.stock_quantity - quantityToTake,
+          }),
+        });
+
+        if (!stockResponse.ok) {
+          throw new Error('Failed to update stock item');
         }
-      };
-  
-      const fetchSubassemblyName = async (subassemblyId) => {
-        try {
-          const response = await fetch(
-            `${apiIpAddress}/api/subassembly/${subassemblyId}`
-          );
-          if (!response.ok) {
-            throw new Error("Failed to fetch subassembly name");
-          }
-          const result = await response.json();
-          setSubassemblies((prev) => ({
-            ...prev,
-            [subassemblyId]: result.identification_number,
-          }));
-        } catch (error) {
-          console.error(error);
-        }
-      };
-  
-      items.forEach((item) => {
-        if (item.assembly_id && !assemblies[item.assembly_id]) {
-          fetchAssemblyName(item.assembly_id);
-        }
-        if (item.subassembly_id && !subassemblies[item.subassembly_id]) {
-          fetchSubassemblyName(item.subassembly_id);
-        }
-      });
-    }, [items, assemblies, subassemblies, apiIpAddress]);
-  
-    const handleClose = () => {
-      window.location.reload();
-    };
-  
-    if (showSearchStock) {
-      return <SearchStock id={id} />;
+
+        setMatches((prevMatches) =>
+          prevMatches.map((match) =>
+            match === selectedItem
+              ? { ...match, processed: true }
+              : match
+          )
+        );
+        setItems((prevItems) =>
+          prevItems.map((item) =>
+            item.number_material === selectedItem.number_material
+              ? { ...item, processed: true, subassembly_assignment_quantity: newQuantity, ...(newQuantity === 0 && { in_subassembly: 1 }) }
+              : item
+          )
+        );
+      } catch (error) {
+        console.error(error);
+      }
     }
-  
-    return (
-      <div className="submit-materials-container fixed z-10 inset-0 flex items-center justify-center bg-black bg-opacity-60 transition-opacity duration-300">
-        <div className="py-6 px-6 bg-white dark:bg-gray-800 rounded-lg shadow-2xl transform scale-100 transition-transform duration-200 w-full h-full overflow-y-auto scrollbar-thin scrollbar-thumb-blue-500 scrollbar-track-blue-200">
-          <div className="px-2 flex flex-col">
+    // Close the modal
+    setSelectedItem(null);
+    setQuantityToTake(0);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedItem(null);
+    setQuantityToTake(0);
+  };
+
+  useEffect(() => {
+    const fetchItems = async () => {
+      try {
+        const response = await fetch(
+          `${apiIpAddress}/api/getItems/project/${id}`
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch project items");
+        }
+        const result = await response.json();
+        setItems(result);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchItems();
+  }, [id, apiIpAddress]);
+
+  useEffect(() => {
+    const fetchStockItems = async () => {
+      try {
+        const response = await fetch(`${apiIpAddress}/api/items-with-stock`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch stock items");
+        }
+        const result = await response.json();
+        setStockItems(result);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchStockItems();
+  }, [apiIpAddress]);
+
+  useEffect(() => {
+    const findMatches = () => {
+      let remainingItems = [...items];
+      const matchedItems = [];
+
+      while (remainingItems.length > 0) {
+        const newMatches = remainingItems.flatMap((item) => {
+          const matchedStockItems = stockItems.filter(
+            (stockItem) =>
+              calculateSimilarity(
+                stockItem.description.toLowerCase(),
+                item.description.toLowerCase()
+              ) > 0.5
+          );
+          return matchedStockItems.map((matchedStockItem) => ({
+            ...item,
+            matchedStockItem,
+          }));
+        });
+
+        if (newMatches.length === 0) {
+          break;
+        }
+
+        matchedItems.push(...newMatches);
+        remainingItems = remainingItems.filter(
+          (item) =>
+            !newMatches.some(
+              (match) => match.number_material === item.number_material
+            )
+        );
+      }
+
+      setMatches(matchedItems);
+    };
+
+    if (items.length > 0 && stockItems.length > 0) {
+      findMatches();
+    }
+  }, [items, stockItems]);
+
+  if (!isVisible) {
+    return null;
+  }
+
+  const groupedMatches = matches.reduce((acc, item) => {
+    if (!acc[item.number_material]) {
+      acc[item.number_material] = [];
+    }
+    acc[item.number_material].push(item);
+    return acc;
+  }, {});
+
+  return (
+    <div className="submit-materials-container fixed z-10 inset-0 flex items-center justify-center bg-black bg-opacity-60 transition-opacity duration-300">
+      <div className="py-6 px-6 bg-white dark:bg-gray-800 rounded-lg shadow-2xl transform scale-100 transition-transform duration-200 w-full h-full overflow-y-auto scrollbar-thin scrollbar-thumb-blue-500 scrollbar-track-blue-200">
+        <div className="px-2 flex flex-col">
+          
+          <div className="flex gap-2">
             <h1 className="text-lg font-extrabold text-gray-500">
-              Materials management
+              Materials Matching.
             </h1>
-            <h1 className="text-xl font-bold mb-4 text-blue-600">
-              4. Materials Table
+            <h1 className="text-xl font-bold mb-10 text-blue-600">
+              Search for matches in stock
             </h1>
-            <div className="flex justify-center items-center">
-              <h1 className="text-3xl font-semibold text-gray-500">
-                Project. {projectId}
-              </h1>
-            </div>
-            <table className="min-w-full bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-lg mt-2">
-              <thead>
-                <tr>
-                  <th className="text-center py-2 px-2 border-b border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300">
-                    Assembly
-                  </th>
-                  <th className="text-center py-2 px-2 border-b border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300">
-                    Subassembly
-                  </th>
-                  <th className="text-center py-2 px-2 border-b border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300">
-                    MTL
-                  </th>
-                  <th className="text-center py-2 px-2 border-b border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300">
-                    PART NUMBER
-                  </th>
-                  <th className="text-center py-2 px-2 border-b border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300">
-                    DESCRIPTION
-                  </th>
-                  <th className="text-center py-2 px-2 border-b border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300">
-                    QTY
-                  </th>
-                  <th className="text-center py-2 px-2 border-b border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300">
-                    UNIT
-                  </th>
-                  <th className="text-center py-2 px-2 border-b border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300">
-                    SUPPLIER
-                  </th>
-                  <th className="text-center py-2 px-2 border-b border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300">
-                    PO
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {items.map((item, index) => (
-                  <React.Fragment key={index}>
-                    <tr className="hover:bg-gray-700">
-                      <td className="text-xs text-gray-300 font-medium border border-gray-600 text-center p-1 hover:bg-gray-600">
-                        {assemblies[item.assembly_id] || "Loading..."}
-                      </td>
-                      <td className="text-xs text-gray-300 font-medium border border-gray-600 text-center p-1 hover:bg-gray-600">
-                        {subassemblies[item.subassembly_id] || (
-                          <span className="text-gray-500">N/A</span>
-                        )}
-                      </td>
-                      <td className="text-xs text-gray-300 font-medium border border-gray-600 text-center p-1 hover:bg-gray-600">
-                        {item.number_material}
-                      </td>
-                      <td className="text-xs text-gray-300 font-medium border border-gray-600 text-center p-1 hover:bg-gray-600">
-                        {item.name}
-                      </td>
-                      <td className="text-xs text-gray-400 font-medium border border-gray-600 p-1 hover:bg-gray-600">
-                        {item.description.length > 50
-                          ? item.description.substring(0, 50) + "..."
-                          : item.description}
-                      </td>
-                      <td className="text-xs text-gray-300 font-medium border border-gray-600 text-center p-1 hover:bg-gray-600">
-                        {item.subassembly_assignment_quantity}
-                      </td>
-                      <td className="text-xs text-gray-300 font-medium border border-gray-600 text-center p-1 hover:bg-gray-600">
-                        {item.price}
-                      </td>
-                      <td className="text-xs text-gray-300 font-medium border border-gray-600 text-center p-1 hover:bg-gray-600">
-                        {item.supplier}
-                      </td>
-                      <td className="text-xs text-gray-300 font-medium border border-gray-600 text-center p-1 hover:bg-gray-600">
-                        {item.number_cotizacion}
-                      </td>
-                    </tr>
-                    {/*<tr>
-                      <td colSpan="10" className="bg-gray-900 text-center text-white">
-                        HOLA
-                      </td>
-                    </tr>*/}
-                  </React.Fragment>
-                ))}
-              </tbody>
-            </table>
-            <h1 className="text-xl font-bold mb-4 text-blue-600 mt-8">
-              Items with Stock
-            </h1>
-            <table className="min-w-full bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-lg mt-2">
-              <thead>
-                <tr>
-                  <th className="text-center py-2 px-2 border-b border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300">
-                    Item Name
-                  </th>
-                  <th className="text-center py-2 px-2 border-b border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300">
-                    Description
-                    </th>
-                  <th className="text-center py-2 px-2 border-b border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300">
-                    Supplier
-                  </th>
-                  <th className="text-center py-2 px-2 border-b border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300">
-                    Price
-                    </th>
-                  <th className="text-center py-2 px-2 border-b border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300">
-                    Stock Quantity
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {stockItems.map((item, index) => (
-                  <tr key={index} className="hover:bg-gray-700">
-                    <td className="text-xs text-gray-300 font-medium border border-gray-600 text-center p-1 hover:bg-gray-600">
-                      {item.number_material}
-                    </td>
-                    <td className="text-xs text-gray-300 font-medium border border-gray-600 text-center p-1 hover:bg-gray-600">
-                      {item.description}
-                    </td>
-                    <td className="text-xs text-gray-300 font-medium border border-gray-600 text-center p-1 hover:bg-gray-600">
-                      {item.supplier}
-                    </td>
-                    <td className="text-xs text-gray-300 font-medium border border-gray-600 text-center p-1 hover:bg-gray-600">
-                      {item.price}
-                    </td>
-                    <td className="text-xs text-gray-300 font-medium border border-gray-600 text-center p-1 hover:bg-gray-600">
-                      {item.stock_items[0]?.stock?.stock_quantity || "N/A"}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          </div>
+          <div className="grid grid-cols-12 gap-4">
+            <h2 className="col-span-4 text-xl font-bold text-gray-300 text-center">
+              Materials registered for the project{" "}
+            </h2>
+            <h2 className="col-span-6 text-xl font-bold text-gray-500 text-center">
+              Stock matches
+            </h2>
+          </div>
+          <hr className="border-t border-gray-500 mt-3 mb-10" />
+          <div className="space-y-2">
+            {Object.keys(groupedMatches).map((key, index) => (
+              <React.Fragment key={index}>
+                <div className="grid grid-cols-12 gap-10">
+                  <div className={`col-span-4 p-2 border-2 border-blue-500 bg-blue-500 bg-opacity-20 rounded-lg shadow-md ${groupedMatches[key][0].processed ? 'opacity-50' : ''}`}>
+                    <div className="text- flex gap-2 pb-1 font-bold">
+                      {/* CARD DE Materials registered for the project */}
+                      <p className="text-gray-400">
+                        {groupedMatches[key][0].id}
+                      </p>
+                      <p className="text-gray-200">MTL:</p>
+                      <p className="text-gray-400">
+                        {groupedMatches[key][0].number_material}
+                      </p>
+                      <p className="text-gray-200 underline">QTY:</p>
+                      <p className="text-gray-400 underline">
+                        {groupedMatches[key][0].subassembly_assignment_quantity}
+                      </p>
+                    </div>
+                    <p className="text-xs text-gray-300">
+                      {groupedMatches[key][0].description} / Supplier:{" "}
+                      {groupedMatches[key][0].supplier}
+                    </p>
+                  </div>
+                  <div className="col-span-6 space-y-2">
+                    {groupedMatches[key].map((item, subIndex) => (
+                      <div key={subIndex} className={`flex ${item.processed ? 'opacity-50' : ''}`}>
+                        <button
+                          id="patch-mtls"
+                          className="text-gray-400 text-2xl p-1 m-1 hover:text-green-500 rounded"
+                          onClick={() => handlePatchClick(item)}
+                          disabled={item.processed}
+                        >
+                          <FontAwesomeIcon icon={faLongArrowAltLeft} />
+                        </button>
+                        <div className="p-4 border border-green-500 bg-green-500 bg-opacity-5 rounded-lg shadow-md">
+                          <div className="text- flex gap-2 pb-1 font-bold">
+                            {/* CARD DE Stock matches */}
+                            <p className="text-gray-400">
+                              {item.matchedStockItem.id}
+                            </p>
+                            <p className="text-gray-200">MTL:</p>
+                            <p className="text-gray-400">
+                              {item.matchedStockItem.number_material}
+                            </p>
+                            <p className="text-gray-200 underline">QTY:</p>
+                            <p className="text-gray-400 underline">
+                              {
+                                item.matchedStockItem.stock_items[0].stock
+                                  .stock_quantity
+                              }
+                            </p>
+                          </div>
+                          <p className="text-xs text-gray-300">
+                            {item.matchedStockItem.description} / Supplier:{" "}
+                            {item.matchedStockItem.supplier}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <hr className="border-t border-gray-700 my-4" />
+              </React.Fragment>
+            ))}
           </div>
         </div>
+        <button
+          onClick={handleClose}
+          className="bg-red-900 text-red-300 px-8 py-2 rounded border border-red-500 hover:bg-red-700 hover:text-red-100 hover:border-red-300 absolute top-4 right-4"
+        >
+          Close
+        </button>
       </div>
+      {selectedItem && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60">
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
+          <h2 className="text-xl font-bold mb-4">Patch Materials</h2>
+          <div className="flex mb-2"> 
+              <div>Materials required for the project: </div>
+              <div className="mx-2 px-2 bg-gray-700 rounded font-semibold">
+                {selectedItem.subassembly_assignment_quantity}
+              </div>
+            </div>
+        
+            <div className="flex mb-2">
+              <div>Stock Quantity:</div>
+              <div className={`mx-2 px-2 bg-gray-700 rounded font-medium ${selectedItem.matchedStockItem.stock_items[0].stock.stock_quantity - (quantityToTake || 0) < 0 ? 'text-red-500' : 'bg-gray-700'}`}>
+                {selectedItem.matchedStockItem.stock_items[0].stock.stock_quantity} - {quantityToTake || 0} = {selectedItem.matchedStockItem.stock_items[0].stock.stock_quantity - (quantityToTake || 0)}
+              </div>
+            </div>
+            <input
+              type="number"
+              value={quantityToTake}
+              onChange={handleQuantityChange}
+              className="border p-2 rounded w-full mb-4 bg-gray-800 border border-gray-700"
+              placeholder="Enter quantity to take from stock"
+              max={Math.min(
+                selectedItem.matchedStockItem.stock_items[0].stock.stock_quantity,
+                selectedItem.subassembly_assignment_quantity
+              )}
+            />
+            
+            <div className="flex justify-end space-x-2">
+              <button
+                onClick={handleCloseModal}
+                className="bg-gray-500 text-white px-4 py-2 rounded"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handlePatchSubmit}
+                className="bg-blue-500 text-white px-4 py-2 rounded"
+                disabled={selectedItem.matchedStockItem.stock_items[0].stock.stock_quantity - (quantityToTake || 0) < 0}
+              >
+                Submit
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
+    </div>
   );
 };
 
