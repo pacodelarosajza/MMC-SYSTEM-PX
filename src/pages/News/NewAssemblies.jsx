@@ -34,22 +34,23 @@ const NotificationsComponent = () => {
         let iconColor = '';
 
         if (daysRemaining === 0) {
-          message = `¡Hoy es la fecha de entrega del ensamblaje ${assembly.identification_number}: ${assembly.description}!`;
+          message = `Today is the delivery date for assembly ${assembly.identification_number}: ${assembly.description}!`;
           icon = <FaCalendarCheck />;
           iconColor = 'text-green-500';
         } else if (daysRemaining < 0) {
-          message = `La fecha de entrega del ensamblaje ${assembly.identification_number} (${assembly.description}) ya pasó.`;
+          message = `The delivery date for assembly ${assembly.identification_number} (${assembly.description}) has passed.`;
           icon = <FaExclamationTriangle />;
           iconColor = 'text-red-500';
         } else if (daysRemaining <= 7) {
-          message = `Faltan ${daysRemaining} días para la entrega del ensamblaje ${assembly.identification_number}: ${assembly.description}.`;
+          message = `${daysRemaining} days left for the delivery of assembly ${assembly.identification_number}: ${assembly.description}.`;
           icon = <FaClock />;
           iconColor = 'text-yellow-400';
         } else {
-          message = `El ensamblaje ${assembly.identification_number} (${assembly.description}) tiene una fecha de entrega en más de 7 días.`;
+          message = `Assembly ${assembly.identification_number} (${assembly.description}) has a delivery date in more than 7 days.`;
           icon = <FaBell />;
           iconColor = 'text-blue-400';
         }
+        
 
         return {
           id: assembly.id,
@@ -185,9 +186,9 @@ const NotificationsComponent = () => {
                   <p className="text-sm text-gray-300 font-semibold">{notification.message}</p>
                   {/* --- Información adicional del ensamblaje --- */}
                   <div className="text-xs text-gray-500 mt-2">
-                    <p>Proyecto: {notification.project.description}</p>
-                    <p>Fecha de entrega: {notification.deliveryDate}</p>
-                    <p>Precio: {notification.price} {notification.currency}</p>
+                    <p>Project: {notification.project.description}</p>
+                    <p>Delivery Date: {notification.deliveryDate}</p>
+                    <p>Price: {notification.price} {notification.currency}</p>
                   </div>
                 </div>
               </div>

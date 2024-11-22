@@ -303,26 +303,26 @@ const MaterialsAssemblies = ({ id }) => {
                     </tbody>
                     <tfoot>
                       <tr>
-                        <td className="text-gray-400 text-right py-2 px-8  border-gray-500 bg-opacity-40 bg-gray-700 text-left text-lg font-semibold" colSpan={4}>
-                          Total Price
+                        <td className="text-gray-400 text-right py-1 px-8  border-gray-500 bg-opacity-40 bg-gray-700 text-left font-semibold" colSpan={4}>
+                          Total Assembly Price
                         </td>
-                        <td className={`pl-2 font-medium text-lg border-gray-600 ${totalPriceStyle}`} colSpan={2}>
+                        <td className={`pl-2 font-medium border-gray-600 ${totalPriceStyle}`} colSpan={2}>
                           $ {calculateTotalPrice().toFixed(2)}  <span className="text-gray-500">MXN</span>
                         </td>
                       </tr>
                       <tr>
-                        <td className="text-blue-400 text-right py-1 px-8 border-b-2 border-red-600 bg-opacity-20 bg-blue-500 text-left text-xs font-semibold" colSpan={4}>
+                        <td className="text-blue-400 text-right py-1 px-8 border-b border-red-600 bg-opacity-20 bg-blue-500 text-left font-semibold" colSpan={4}>
                           Cost Material Project
                         </td>
-                        <td className=" pl-2 text-blue-400 bg-opacity-20 bg-blue-500 font-medium border-b-2 border-red-600 text-xs" colSpan={2}>
+                        <td className=" pl-2 text-blue-400 bg-opacity-20 bg-blue-500 font-medium border-b border-red-600" colSpan={2}>
                           $ {costMaterial !== null ? costMaterial.toFixed(2) : "Loading..."} MXN
                         </td>
                       </tr>
                       <tr>
-                        <td className="text-right py-2 px-8 border-b border-gray-500 bg-opacity-40 bg-gray-700 text-left text-lg font-semibold" colSpan={4}>
-                          Remaining Cost
+                      <td className="text-gray-400 text-right py-1 px-8  border-gray-500 bg-opacity-40 bg-gray-700 text-left font-semibold" colSpan={4}>
+                        Remaining Cost
                         </td>
-                        <td className={`pl-2 text-lg font-medium border-r border-b border-gray-500 ${remainingCostStyle}`} colSpan={2}>
+                        <td className={`pl-2 font-medium border-r border-b border-gray-500 ${remainingCostStyle}`} colSpan={2}>
                           $ {remainingCost !== null ? remainingCost.toFixed(2) : "Loading..."}  <span className=" text-gray-500">MXN</span>
                         </td>
                       </tr>

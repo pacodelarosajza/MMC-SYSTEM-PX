@@ -30,23 +30,23 @@ const ProjectsComponent = () => {
         let iconColor = '';
 
         if (daysRemaining === 0) {
-          message = `¡Hoy es la fecha de entrega del proyecto ${project.identification_number}: ${project.description}!`;
+          message = `Today is the delivery date for project ${project.identification_number}: ${project.description}!`;
           icon = <FaCalendarCheck />;
           iconColor = 'text-green-500';
         } else if (daysRemaining < 0) {
-          message = `La fecha de entrega del proyecto ${project.identification_number} (${project.description}) ya pasó.`;
+          message = `The delivery date for project ${project.identification_number} (${project.description}) has passed.`;
           icon = <FaExclamationTriangle />;
           iconColor = 'text-red-500';
         } else if (daysRemaining <= 7) {
-          message = `Faltan ${daysRemaining} días para la entrega del proyecto ${project.identification_number}: ${project.description}.`;
+          message = `${daysRemaining} days left for the delivery of project ${project.identification_number}: ${project.description}.`;
           icon = <FaClock />;
           iconColor = 'text-yellow-400';
         } else {
-          message = `El proyecto ${project.identification_number} (${project.description}) tiene una fecha de entrega en más de 7 días.`;
+          message = `Project ${project.identification_number} (${project.description}) has a delivery date in more than 7 days.`;
           icon = <FaBell />;
           iconColor = 'text-blue-400';
         }
-
+        
         return {
           id: project.id,
           message,
@@ -152,9 +152,9 @@ const ProjectsComponent = () => {
                   <p className="text-sm text-gray-300 font-semibold">{project.message}</p>
                   {/* --- Información adicional del proyecto --- */}
                   <div className="text-xs text-gray-500 mt-2">
-                    <p>Identificación: {project.identificationNumber}</p>
-                    <p>Fecha de entrega: {project.deliveryDate}</p>
-                    <p>Costo material: ${project.costMaterial}</p>
+                    <p>Identification: {project.identificationNumber}</p>
+                    <p>Delivery Date: {project.deliveryDate}</p>
+                    <p>Material Cost: ${project.costMaterial}</p>
                   </div>
                 </div>
               </div>

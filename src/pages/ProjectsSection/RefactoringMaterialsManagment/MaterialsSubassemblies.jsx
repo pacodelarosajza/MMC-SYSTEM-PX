@@ -255,7 +255,7 @@ const MaterialsSubassemblies = ({ id }) => {
                           onClick={() =>
                             handleAddClick(item.id, item.identification_number)
                           }
-                          className="w-15 px-2 py-1 font-medium hover:bg-orange-600 text-xs bg-gray-800 rounded"
+                          className="w-15 px-2 py-1 font-medium hover:bg-blue-600 text-xs bg-gray-800 rounded"
                           >
                           Add
                         </button>
@@ -265,26 +265,26 @@ const MaterialsSubassemblies = ({ id }) => {
                 </tbody>
                 <tfoot  className="border border-gray-600">
                   <tr>
-                    <td className="text-gray-400 text-right py-2 px-8 border-gray-500 bg-opacity-40 bg-gray-700 text-left text-lg font-semibold" colSpan={4}>
-                      Total Price
+                  <td className="text-gray-400 text-right py-1 px-8  border-gray-500 bg-opacity-40 bg-gray-700 text-left font-semibold" colSpan={4}>
+                  Total Assembly Price
                     </td>
-                    <td className="pl-2 font-medium text-lg border-gray-600" colSpan={2}>
+                    <td className="pl-2 font-medium border-gray-600" colSpan={2}>
                       ${totalPrice.toFixed(2)} MXN
                     </td>
                   </tr>
                   <tr>
-                    <td className="text-blue-400 text-right py-1 px-8 border-b-2 border-red-600 bg-opacity-20 bg-blue-500 text-left text-xs font-semibold" colSpan={4}>
+                    <td className="text-blue-400 text-right py-1 px-8 border-b border-red-600 bg-opacity-20 bg-blue-500 text-left  font-semibold" colSpan={4}>
                       Cost Material Project
                     </td>
-                    <td className="pl-2 text-blue-400 bg-opacity-20 bg-blue-500 font-medium border-b-2 border-red-600 text-xs" colSpan={2}>
+                    <td className="pl-2 text-blue-400 bg-opacity-20 bg-blue-500 font-medium border-b border-red-600 " colSpan={2}>
                       ${costMaterial !== null ? costMaterial.toFixed(2) : "Loading..."} MXN
                     </td>
                   </tr>
                   <tr>
-                    <td className="text-right py-2 px-8 border-b border-gray-500 bg-opacity-40 bg-gray-700 text-left text-lg font-semibold" colSpan={4}>
+                  <td className="text-gray-400 text-right py-1 px-8  border-gray-500 bg-opacity-40 bg-gray-700 text-left font-semibold" colSpan={4}>
                       Remaining Cost
                     </td>
-                    <td className={`pl-2 text-lg font-medium border-r border-b border-gray-500 ${remainingCost < 0 ? 'text-orange-500' : ''}`} colSpan={2}>
+                    <td className={`pl-2 font-medium border-gray-600 ${remainingCost < 0 ? 'text-orange-500' : ''}`} colSpan={2}>
                       ${remainingCost !== null ? remainingCost.toFixed(2) : "Loading..."} MXN
                     </td>
                   </tr>
@@ -513,26 +513,26 @@ const MaterialsSubassemblies = ({ id }) => {
                     </tbody>
                     <tfoot  className="border border-gray-600">
                   <tr>
-                    <td className="text-right text-gray-400 py-2 px-8 border-gray-500 bg-opacity-40 bg-gray-700 text-left text-sm font-semibold" colSpan={4}>
-                      Total Price
+                  <td className="text-gray-400 text-right py-1 px-8  border-gray-500 bg-opacity-40 bg-gray-700 text-left font-semibold" colSpan={4}>
+                    Total Subassembly Price
                     </td>
-                    <td className="pl-2 font-medium text-lg border-gray-600" colSpan={2}>
+                    <td className="pl-2 font-medium border-gray-600" colSpan={2}>
                       ${totalPrice.toFixed(2)} MXN
                     </td>
                   </tr>
                   <tr>
-                    <td className="text-indigo-400 text-right py-1 px-8 border-b border-red-600 bg-opacity-20 bg-indigo-500 text-left text-xs font-semibold" colSpan={4}>
+                    <td className="text-indigo-400 text-right py-1 px-8 border-b border-red-600 bg-opacity-20 bg-indigo-500 text-left font-semibold" colSpan={4}>
                       Cost Material Assembly
                     </td>
-                    <td className="pl-2 text-indigo-400 bg-opacity-20 bg-indigo-500 font-medium border-b border-red-600 text-xs" colSpan={2}>
+                    <td className="pl-2 text-indigo-400 bg-opacity-20 bg-indigo-500 font-medium border-b border-red-600" colSpan={2}>
                       ${costMaterial !== null ? costMaterial.toFixed(2) : "Loading..."} MXN
                     </td>
                   </tr>
                   <tr>
-                    <td className="text-right py-2 px-8 border-b border-gray-500 bg-opacity-40 bg-gray-700 text-left text-sm font-semibold" colSpan={4}>
-                      Remaining Cost
+                  <td className="text-gray-400 text-right py-1 px-8  border-gray-500 bg-opacity-40 bg-gray-700 text-left font-semibold" colSpan={4}>
+                  Remaining Cost
                     </td>
-                    <td className={`pl-2 text-lg font-medium border-r border-b border-gray-500 ${remainingCost < 0 ? 'text-orange-500' : ''}`} colSpan={2}>
+                    <td className={`pl-2 font-medium border-r border-b border-gray-500 ${remainingCost < 0 ? 'text-orange-500' : ''}`} colSpan={2}>
                       ${remainingCost !== null ? remainingCost.toFixed(2) : "Loading..."} MXN
                     </td>
                   </tr>

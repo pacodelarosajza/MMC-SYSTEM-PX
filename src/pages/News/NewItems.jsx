@@ -34,22 +34,22 @@ const NotificationsComponent = () => {
         let iconColor = '';
 
         if (daysRemaining === 0) {
-          message = `¡Hoy ha llegado el artículo ${item.name}: ${item.description}!`;
+          message = `The item ${item.name} has arrived today: ${item.description}!`;
           icon = <FaCalendarCheck />;
           iconColor = 'text-green-500';
         } else if (daysRemaining < 0) {
-          message = `El artículo ${item.name} (${item.description}) llegó el ${item.arrived_date}.`;
+          message = `The item ${item.name} (${item.description}) arrived on ${item.arrived_date}.`;
           icon = <FaExclamationTriangle />;
           iconColor = 'text-red-500';
         } else if (daysRemaining <= 7) {
-          message = `Faltan ${daysRemaining} días para la llegada del artículo ${item.name}: ${item.description}.`;
+          message = `${daysRemaining} days left for the arrival of item ${item.name}: ${item.description}.`;
           icon = <FaClock />;
           iconColor = 'text-yellow-400';
         } else {
-          message = `El artículo ${item.name} tiene una fecha de llegada en más de 7 días.`;
+          message = `The item ${item.name} has an arrival date in more than 7 days.`;
           icon = <FaBell />;
-          iconColor = 'text-blue-400';
         }
+        
 
         return {
           id: item.id,
@@ -154,7 +154,7 @@ const NotificationsComponent = () => {
       <div className="mb-4">
         <input
           type="text"
-          placeholder="Buscar artículo..."
+          placeholder="Search Item..."
           value={searchQuery}
           onChange={handleSearch}
           className="w-full p-3 bg-gray-700 text-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
@@ -165,7 +165,7 @@ const NotificationsComponent = () => {
 
       {/* --- LISTADO DE NOTIFICACIONES --- */}
       {filteredNotifications.length === 0 ? (
-        <p className="text-lg text-gray-400">No tienes nuevas notificaciones</p>
+        <p className="text-lg text-gray-400">You don't have notifications</p>
       ) : (
         <div className="space-y-6">
           {/* --- ITERAR SOBRE LAS NOTIFICACIONES --- */}
@@ -184,9 +184,9 @@ const NotificationsComponent = () => {
                   <p className="text-sm text-gray-300 font-semibold">{notification.message}</p>
                   {/* --- Información adicional del artículo --- */}
                   <div className="text-xs text-gray-500 mt-2">
-                    <p>Proyecto: {notification.project}</p>
-                    <p>Fecha de llegada: {notification.arrivedDate}</p>
-                    <p>Precio: {notification.price} {notification.currency}</p>
+                    <p>Project: {notification.project}</p>
+                    <p>Delivery Date: {notification.arrivedDate}</p>
+                    <p>Price: {notification.price} {notification.currency}</p>
                   </div>
                 </div>
               </div>

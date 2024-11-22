@@ -17,6 +17,8 @@ import NewSubassemblies from './pages/News/NewSubassemblies';
 import News from './pages/News';
 import Me from './pages/Me';
 
+import Bars from './pages/barss';
+
 // Admin only
 import Users from './pages/Users';
 import NewUserForm from './pages/NewUserForm';
@@ -50,6 +52,8 @@ const App = () => {
           <Route path="news" element={<PrivateRoute><News /></PrivateRoute>} />
           <Route path="me" element={<PrivateRoute><Me /></PrivateRoute>} />
           <Route path="stock-update" element={<PrivateRoute><StockUpdate /></PrivateRoute>} />
+
+          <Route path="bars" element={<PrivateRoute><Bars /></PrivateRoute>} />
           
           {/* Admin only */}
          

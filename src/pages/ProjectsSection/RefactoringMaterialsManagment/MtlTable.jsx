@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import SearchStock from './SearchStock';
+import SearchStock from "./SearchStock";
 
 const MtlTable = ({ id }) => {
   const [items, setItems] = useState([]);
@@ -7,6 +7,7 @@ const MtlTable = ({ id }) => {
   const [subassemblies, setSubassemblies] = useState({});
   const [projectId, setProjectId] = useState("");
   const [showSearchStock, setShowSearchStock] = useState(false);
+  const [totalPrice, setTotalPrice] = useState(0);
   const apiIpAddress = import.meta.env.VITE_API_IP_ADDRESS;
 
   useEffect(() => {
@@ -94,6 +95,15 @@ const MtlTable = ({ id }) => {
     });
   }, [items, assemblies, subassemblies, apiIpAddress]);
 
+  useEffect(() => {
+    const calculateTotalPrice = () => {
+      const total = items.reduce((sum, item) => sum + item.price, 0);
+      setTotalPrice(total);
+    };
+
+    calculateTotalPrice();
+  }, [items]);
+
   const handleClose = () => {
     window.location.reload();
   };
@@ -119,13 +129,14 @@ const MtlTable = ({ id }) => {
           </div>
           <div className="fixed top-2 right-2 my-4">
             <button
-className=" px-4 py-2 mx-2 font-medium hover:bg-orange-600 bg-pageBackground rounded"
+              className=" px-4 py-2 mx-2 font-medium hover:bg-orange-600 bg-pageBackground rounded"
               onClick={() => setShowSearchStock(true)}
             >
               Search for matches in stock
             </button>
             <button
-className=" px-4 py-2 mx-2 font-medium hover:bg-red-600 bg-pageBackground rounded"          onClick={handleClose}
+              className=" px-4 py-2 mx-2 font-medium hover:bg-red-600 bg-pageBackground rounded"
+              onClick={handleClose}
             >
               Close
             </button>
@@ -206,7 +217,11 @@ className=" px-4 py-2 mx-2 font-medium hover:bg-red-600 bg-pageBackground rounde
               ))}
             </tbody>
           </table>
-          
+          <div className="flex justify-end mt-4">
+            <h2 className="text-xl font-bold text-gray-500">
+              Total Price: ${totalPrice.toFixed(2)}
+            </h2>
+          </div>
         </div>
       </div>
     </div>

@@ -102,13 +102,13 @@ const UsersPage = () => {
       }
 
       const updatedUser = await response.json();
-      console.log("Usuario actualizado:", updatedUser);
+      console.log("User Updated:", updatedUser);
 
-      setMessage('Usuario actualizado correctamente.'); // Mensaje de éxito
+      setMessage('User Updated Correctly.'); // Mensaje de éxito
       setEditUser(null); // Cierra el formulario de edición
     } catch (error) {
-      console.error("Error en la actualización:", error);
-      setMessage('Error al actualizar el usuario.'); // Mensaje de error
+      console.error("Error update:", error);
+      setMessage('Error to update.'); // Mensaje de error
     }
   };
 
@@ -139,12 +139,12 @@ const UsersPage = () => {
       {/* Campo de búsqueda general */}
 <div className="relative mb-6">
   <label className="block text-gray-300 mb-2 text-lg font-semibold">
-    Buscar Usuarios
+    Search Users
   </label>
   <div className="relative flex items-center">
     <input
       type="text"
-      placeholder="Buscar por correo electrónico, número de usuario o tipo (ej. 'admin')"
+      placeholder="Search user for email, user number or type (ex. 'admin')"
       className="w-full p-4 pl-12 pr-4 border border-gray-700 rounded-lg bg-gray-900 text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600 transition duration-300 ease-in-out"
       value={searchTerm}
       onChange={(e) => setSearchTerm(e.target.value)}

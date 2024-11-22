@@ -63,12 +63,29 @@ const Dashboard = ({ onLogout }) => {
     }));
   };
 
+
   // Ejecutar la función para cada proyecto al cargar los datos
   useEffect(() => {
     projects.forEach((project) => {
       getProjectProgress(project.id);
     });
   }, [projects]);
+
+  // Calcular el progreso en función de los ítems entregados
+  useEffect(() => {
+    if (items.length > 0) {
+      const totalItems = items.length;
+      const deliveredItems = items.filter(
+        (item) => item.in_subassembly === 1
+      ).length;
+      const progressPercentage = (deliveredItems / totalItems) * 100;
+      setProgress(progressPercentage);
+    }
+  }, [items]);
+
+
+
+
 
   // Total de páginas
   const totalPages = Math.ceil(projects.length / projectsPerPage);
@@ -107,6 +124,11 @@ const Dashboard = ({ onLogout }) => {
           );
           const loadedProjects = projectsResponse.data;
           setProjects(loadedProjects); // Almacenamos los proyectos en el estado
+
+          // Llamar a la función getProjectProgress para cada proyecto
+          loadedProjects.forEach((project) => {
+            getProjectProgress(project.project.id); // Asegúrate de pasar project.project.id
+          });
         } catch (error) {
           console.error('Error fetching projects:', error);
         }
@@ -116,17 +138,7 @@ const Dashboard = ({ onLogout }) => {
     }
   }, []); // Solo se ejecuta una vez cuando el componente se monta
 
-  // Calcular el progreso en función de los ítems entregados
-  useEffect(() => {
-    if (items.length > 0) {
-      const totalItems = items.length;
-      const deliveredItems = items.filter(
-        (item) => item.in_subassembly === 1
-      ).length;
-      const progressPercentage = (deliveredItems / totalItems) * 100;
-      setProgress(progressPercentage);
-    }
-  }, [items]);
+
 
   const handleNavigate = () => {
     setShowChildRoutes(true);
@@ -169,18 +181,20 @@ const Dashboard = ({ onLogout }) => {
           `}
       >
         <div className="justify-center">
-          <img
-            src="src/assets/YaskawaLogo6.png"
-            alt="YASKAWA"
-            className="w-auto mt-8 h-auto"
+          <p
+            className="w-auto mt-8 h-auto text-2xl font-bold text-white tracking-wide uppercase"
             style={{
               display: "block",
               margin: "0 auto",
               textAlign: "center",
-              fontWeight: "bold",
+              fontFamily: "Arial, sans-serif",  // Usa una fuente similar si no tienes la fuente exacta de YASKAWA
+              letterSpacing: "0.05em", // Aumenta el espaciado entre letras para un efecto más industrial
+              transform: "scale(1.1)", // Agrega un poco de escala para hacer el texto más prominente
             }}
-          />
-          <p className="text-center login-line mb-8">
+          >
+            YASKAWA
+          </p>
+          <p className="text-center text-blue-400 login-line mb-8">
             <strong>MCM Controller</strong>
           </p>
         </div>
@@ -315,12 +329,12 @@ const Dashboard = ({ onLogout }) => {
                   <div className="flex flex-wrap justify-start gap-6">
                     {currentProjects.map((project) => (
                       <div
-                        key={project.id}
+                        key={project.project.id}  // Asegúrate de que 'project.project.id' es la ID correcta
                         className="flex flex-col items-center"
                       >
                         {/* Número de identificación del proyecto */}
                         <span className="font-semibold text-sm text-gray-400 mb-2">
-                          <strong>#{project.identification_number}</strong>
+                          <strong>#{project.project.identification_number}</strong> {/* Accede a project.project.identification_number */}
                         </span>
 
                         {/* Contenedor del círculo */}
@@ -351,31 +365,31 @@ const Dashboard = ({ onLogout }) => {
                             height="100%"
                           >
                             <path
-                              className={`progress-circle ${progresses[project.id] < 50
-                                ? "stroke-red-600"
-                                : progresses[project.id] < 75
-                                  ? "stroke-blue-600"
-                                  : "stroke-green-600"
+                              className={`progress-circle ${progresses[project.project.id] < 50
+                                  ? "stroke-red-600"
+                                  : progresses[project.project.id] < 75
+                                    ? "stroke-blue-600"
+                                    : "stroke-green-600"
                                 }`}
                               fill="none"
                               strokeWidth="2"
                               strokeLinecap="round"
                               strokeLinejoin="round"
-                              strokeDasharray={`${progresses[project.id]}, 100`}
+                              strokeDasharray={`${progresses[project.project.id] || 0}, 100`}  // Usa '|| 0' para evitar errores si el valor es undefined
                               d="M18 2a16 16 0 1 1 0 32 16 16 0 1 1 0 -32"
                             />
                           </svg>
 
                           {/* Texto del porcentaje */}
                           <div className="absolute text-xl font-semibold text-white">
-                            {Math.round(progresses[project.id] || 0)}%
+                            {Math.round(progresses[project.project.id] || 0)}%  {/* Redondear el valor */}
                           </div>
                         </div>
 
                         {/* Texto adicional para indicar estado */}
                         <div className="text-center text-xs text-gray-300">
                           <span className="font-semibold">
-                            {progresses[project.id] >= 100
+                            {progresses[project.project.id] >= 100
                               ? "Completado"
                               : "In Progress"}
                           </span>
@@ -480,7 +494,7 @@ const Dashboard = ({ onLogout }) => {
                   <div
                     key={project.project.id} // Usamos project.project.id para acceder al ID real del proyecto
                     className="relative bg-gray-700 p-3 rounded-lg shadow shadow-shadowBlueColor shadow-xl text-sm cursor-pointer hover:bg-gray-600 transition duration-200"
-                    
+
                   >
                     {/*<h2 className="font-bold text-lg">ID: {project.project.id}</h2>*/}
                     <p className="text-green-500 text-xl text-right">

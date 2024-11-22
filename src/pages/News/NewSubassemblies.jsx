@@ -30,25 +30,24 @@ const SubassemblyComponent = () => {
         let message = '';
         let icon = null;
         let iconColor = '';
-
         if (daysRemaining === 0) {
-          message = `¡Hoy es la fecha de entrega del subensamble ${subassembly.identification_number}!`;
+          message = `Today is the delivery date for subassembly ${subassembly.identification_number}!`;
           icon = <FaCalendarCheck />;
           iconColor = 'text-green-500';
         } else if (daysRemaining < 0) {
-          message = `La fecha de entrega del subensamble ${subassembly.identification_number} ya pasó.`;
+          message = `The delivery date for subassembly ${subassembly.identification_number} has passed.`;
           icon = <FaExclamationTriangle />;
           iconColor = 'text-red-500';
         } else if (daysRemaining <= 7) {
-          message = `Faltan ${daysRemaining} días para la entrega del subensamble ${subassembly.identification_number}.`;
+          message = `${daysRemaining} days left for the delivery of subassembly ${subassembly.identification_number}.`;
           icon = <FaClock />;
           iconColor = 'text-yellow-400';
         } else {
-          message = `El subensamble ${subassembly.identification_number} tiene una fecha de entrega en más de 7 días.`;
+          message = `Subassembly ${subassembly.identification_number} has a delivery date in more than 7 days.`;
           icon = <FaClipboard />;
           iconColor = 'text-blue-400';
         }
-
+        
         return {
           id: subassembly.id,
           message,
@@ -127,25 +126,25 @@ const SubassemblyComponent = () => {
           onClick={() => applyFilter('all')}
           className={`px-4 py-2 ${filter === 'all' ? 'bg-indigo-500 text-white' : 'bg-gray-700 text-gray-300'} rounded-md`}
         >
-          Todos
+          All
         </button>
         <button
           onClick={() => applyFilter('past')}
           className={`px-4 py-2 ${filter === 'past' ? 'bg-red-500 text-white' : 'bg-gray-700 text-gray-300'} rounded-md`}
         >
-          Ya pasados
+          Passed already
         </button>
         <button
           onClick={() => applyFilter('dueSoon')}
           className={`px-4 py-2 ${filter === 'dueSoon' ? 'bg-yellow-400 text-white' : 'bg-gray-700 text-gray-300'} rounded-md`}
         >
-          Entrega cercana
+          Upcoming delivery
         </button>
         <button
           onClick={() => applyFilter('moreThan7Days')}
           className={`px-4 py-2 ${filter === 'moreThan7Days' ? 'bg-blue-400 text-white' : 'bg-gray-700 text-gray-300'} rounded-md`}
         >
-          Más de 7 días
+          More than 7 days
         </button>
       </div>
 
@@ -183,10 +182,10 @@ const SubassemblyComponent = () => {
                   <p className="text-sm text-gray-300 font-semibold">{subassembly.message}</p>
                   {/* --- Información adicional del subensamble --- */}
                   <div className="text-xs text-gray-500 mt-2">
-                    <p>Identificación: {subassembly.identificationNumber}</p>
-                    <p>Descripción: {subassembly.description}</p>
-                    <p>Fecha de entrega: {subassembly.deliveryDate}</p>
-                    <p>Costo: {subassembly.price} {subassembly.currency}</p>
+                    <p>Identification: {subassembly.identificationNumber}</p>
+                    <p>Description: {subassembly.description}</p>
+                    <p>Delivery Date: {subassembly.deliveryDate}</p>
+                    <p>Cost: {subassembly.price} {subassembly.currency}</p>
                   </div>
                 </div>
               </div>

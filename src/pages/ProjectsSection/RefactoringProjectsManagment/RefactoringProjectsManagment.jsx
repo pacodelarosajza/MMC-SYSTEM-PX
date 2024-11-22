@@ -2,6 +2,7 @@ import React from "react";
 
 import AppTable from "../RefactoringProjectsManagment/ProjectsManagmentTable"; 
 import AppCreate from "../RefactoringProjectsManagment/Create";
+import AppCostProjects from "../RefactoringProjectsManagment/CostProjects";
 
 function RefactoringProjectsManagment() {
   return (
@@ -11,11 +12,14 @@ function RefactoringProjectsManagment() {
           Projects management
         </h1>
         <h2 className="text-xl text-blue-400 font-bold text-right">Projects In Development</h2>
-        <div className="m-5 mt-10">
+        <div className="m-5">
           <AppCreate />
         </div>
-        <div className="px-5 py-3">
+        <div className="px-5">
           <AppTable />
+        </div> 
+        <div className="px-5">
+          <AppCostProjects />
         </div>        
       </div>
     </>

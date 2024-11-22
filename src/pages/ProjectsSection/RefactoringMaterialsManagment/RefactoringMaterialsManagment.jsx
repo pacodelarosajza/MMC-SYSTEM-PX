@@ -11,6 +11,7 @@ function RefactoringMaterialsManagment() {
         <div className="px-5 py-3">
           <AppTable />
         </div>   
+         
       </div>
     </>
   );
