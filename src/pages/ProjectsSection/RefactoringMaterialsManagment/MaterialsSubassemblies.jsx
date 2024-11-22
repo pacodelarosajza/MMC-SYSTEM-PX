@@ -147,6 +147,7 @@ const MaterialsSubassemblies = ({ id }) => {
           throw new Error("Failed to submit row");
         }
       }
+      setRows([formData]); // Clear the inputs
       setIsModalSuccessOpen(true); // Show success modal
     } catch (error) {
       console.error(error);

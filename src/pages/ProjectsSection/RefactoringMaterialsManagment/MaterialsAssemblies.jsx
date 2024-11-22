@@ -186,7 +186,7 @@ const MaterialsAssemblies = ({ id }) => {
       <div className="p-2">
         <button
           onClick={openModal}
-          className="w-15 px-2 py-1 font-medium hover:bg-orange-600 text-sm bg-pageBackground rounded"
+          className="w-15 px-2 py-1 font-medium hover:bg-blue-600 text-sm bg-pageBackground rounded"
         >
           Add Mtl
         </button>

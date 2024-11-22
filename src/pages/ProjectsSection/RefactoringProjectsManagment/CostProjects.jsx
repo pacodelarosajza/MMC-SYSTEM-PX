@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faSync } from "@fortawesome/free-solid-svg-icons";
 
 const CostProjects = () => {
   const [items, setItems] = useState([]);
@@ -53,6 +55,16 @@ const CostProjects = () => {
     setTotalStock(total);
   };
 
+  const calculateTotalValueSum = () => {
+    return items.reduce((sum, item) => {
+      const totalStockQuantity = item.stock_items.reduce(
+        (stockSum, stockItem) => stockSum + parseFloat(stockItem.stock.stock_quantity),
+        0
+      );
+      return sum + totalStockQuantity * parseFloat(item.price);
+    }, 0);
+  };
+
   useEffect(() => {
     fetchItems();
     fetchProjects();
@@ -70,9 +82,25 @@ const CostProjects = () => {
     );
   };
 
+  const reloadTable = () => {
+    fetchItems();
+    fetchProjects();
+  };
+
   return (
-    <div id="card" className="p-5 bg-gray-800 mt-10 rounded">   
-      <h2 className="pb-5 text-xl text-blue-400 font-bold">Active project costs</h2>  
+    <div id="card" className="p-5 bg-gray-800 mt-10 rounded">
+      <div className="flex justify-between items-center">
+        <h2 className="pb-5 text-xl text-blue-400 font-bold">
+          Active project costs
+        </h2>
+        <button
+          onClick={reloadTable}
+          className="p-1 my-4 mx-4 text-white rounded hover:bg-gray-700 transition duration-200"
+          title="Refresh data"
+        >
+          <FontAwesomeIcon icon={faSync} color="gray" size="lg" />
+        </button>
+      </div>
       <table
         className="text-sm table-auto w-full text-lightWhiteLetter"
         id="projects-actions"
@@ -113,20 +141,23 @@ const CostProjects = () => {
           ))}
         </tbody>
       </table>
-          <div className="">
-          <table
-        className="text-sm table-auto w-full text-lightWhiteLetter"
-        id="projects-actions"
-      >
-        <thead>
-          <tr className="w-full text-left border border-gray-500">
-            <th className="px-4 py-2 text-blue-400 rounded-tl-lg border border-gray-500">Total Stock</th>
-            <td className="px-4 py-2 border border-gray-500 font-medium">$ {totalStock} MXN</td>
-          </tr>
-        </thead>
-      </table>
-          </div>
-      
+      <div className="pt-2">
+        <table
+          className="text-sm table-auto w-full text-lightWhiteLetter"
+          id="projects-actions"
+        >
+          <thead>
+            <tr className="w-full text-left border border-gray-700">
+              <th className="px-4 py-2 text-blue-400 rounded-tl-lg border border-gray-500">
+                Total Stock
+              </th>
+              <td className="px-4 py-2 font-bold text-blue-400 rounded-tl-lg border border-gray-500">
+                $ {calculateTotalValueSum().toFixed(2)} MXN
+              </td>
+            </tr>
+          </thead>
+        </table>
+      </div>
     </div>
   );
 };

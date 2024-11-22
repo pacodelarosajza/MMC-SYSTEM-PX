@@ -225,19 +225,14 @@ const SubmitMaterials = ({ id }) => {
             <table className="border border-gray-700 min-w-full bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-lg mt-4">
               <thead>
                 <tr>
-                  
-                  <th className="py-2 px-4 border-b border-gray-700 bg-gray-700 text-center text-sm font-semibold text-gray-300" colSpan={2}>
-                    Assembly 
+                  <th className="py-2 px-4 border-b border-gray-700 bg-gray-700 text-center text-sm font-semibold text-gray-300">
+                    Assembly
                   </th>
-                  
-                  <th
-                    className="py-2 px-4 border-b border-gray-700 bg-gray-700 text-center text-sm font-semibold text-gray-300"
-                    colSpan={2}
-                  >
-                    Subassembly 
+                  <th className="py-2 px-4 border-b border-gray-700 bg-gray-700 text-center text-sm font-semibold text-gray-300">
+                    Subassembly
                   </th>
-                  <th className="py-2 px-4 border-b border-gray-700 bg-gray-700 text-center text-sm font-semibold text-gray-300" >
-                     
+                  <th className="py-2 px-4 border-b border-gray-700 bg-gray-700 text-center text-sm font-semibold text-gray-300">
+                    Actions
                   </th>
                 </tr>
               </thead>
@@ -245,9 +240,6 @@ const SubmitMaterials = ({ id }) => {
                 {assemblies.map((assembly, assemblyIndex) => (
                   <React.Fragment key={assembly.id}>
                     <tr className="hover:bg-gray-700 hover:bg-opacity-50">
-                      <td className="text-gray-400 font-medium border border-gray-600 text-center p-2 text-xs">
-                        {assemblyIndex + 1}
-                      </td>
                       <td className="bg-gray-700 bg-opacity-30 text-ms text-gray-300 font-medium border border-gray-600 text-center p-2">
                         {assembly.identification_number}
                       </td>
@@ -255,9 +247,6 @@ const SubmitMaterials = ({ id }) => {
                         (subassembly) => subassembly.assembly_id === assembly.id
                       ).length > 0 ? (
                         <>
-                          <td className="text-gray-400 font-medium border border-gray-600 text-center p-2 text-xs">
-                            {assemblyIndex + 1}.1
-                          </td>
                           <td className="text-xs text-gray-200 font-medium border border-gray-600 p-2 text-center bg-gray-700 bg-opacity-30">
                             {
                               subassemblies.filter(
@@ -289,10 +278,7 @@ const SubmitMaterials = ({ id }) => {
                         </>
                       ) : (
                         <>
-                          <td
-                            className="text-ms italic text-gray-500 font-medium border border-gray-600 text-center p-2"
-                            colSpan={2}
-                          >
+                          <td className="text-ms italic text-gray-500 font-medium border border-gray-600 text-center p-2">
                             No subassemblies
                           </td>
                           <td className="text-xs text-gray-200 font-medium border border-gray-600 p-2">
@@ -429,10 +415,7 @@ const SubmitMaterials = ({ id }) => {
                         <React.Fragment key={subassembly.id}>
                           {subassemblyIndex > 0 && (
                             <tr className="hover:bg-gray-700 hover:bg-opacity-50">
-                              <td colSpan={2}></td>
-                              <td className="text-gray-400 font-medium border border-gray-600 text-center p-2 text-xs">
-                                {assemblyIndex + 1}.{subassemblyIndex + 1}
-                              </td>
+                              <td className="bg-gray-700 bg-opacity-30 text-ms text-gray-300 font-medium border border-gray-600 text-center p-2"></td>
                               <td className="text-xs text-gray-200 font-medium border border-gray-600 p-2 text-center bg-gray-700 bg-opacity-30">
                                 {subassembly.identification_number}
                               </td>

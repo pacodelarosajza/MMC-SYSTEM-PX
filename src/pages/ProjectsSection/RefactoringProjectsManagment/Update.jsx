@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import Modal from "../../../components/Modal";
 import ModalAcept from "../../../components/ModalAcept";
-import { FaSync, FaPlus, FaTimes } from "react-icons/fa";
+import { FaSync, FaPlus, FaTimes, FaCheck } from "react-icons/fa";
 
 const Update = ({ id }) => {
   const apiIpAddress = import.meta.env.VITE_API_IP_ADDRESS;
@@ -424,16 +424,16 @@ const Update = ({ id }) => {
                       <button
                         type="button"
                         onClick={() => removeAdminUserSelection(selection.id)}
-                        className="ml-2 px-2 border border-red-500 bg-red-900 text-red-300 rounded hover:border-red-400 hover:bg-red-700 hover:text-red-200"
-                      >
-                        <strong>Cancel</strong>
+                        className="ml-2 w-15 p-2 font-medium hover:bg-red-500 text-sm bg-red-600 rounded"
+                        >
+                        <FaTimes />
                       </button>
                       <button
                         type="button"
                         onClick={() => handleAddAdminUser(selection)}
-                        className="ml-2 px-2 border border-blue-500 bg-blue-900 text-blue-300 rounded hover:border-blue-400 hover:bg-blue-700 hover:text-blue-200"
+                        className="ml-2 w-15 p-2 font-medium hover:bg-green-500 text-sm bg-green-600 rounded"
                       >
-                        <strong>Confirm</strong>
+                        <FaCheck />
                       </button>
                     </div>
                   ))}
@@ -513,19 +513,20 @@ const Update = ({ id }) => {
                           </option>
                         ))}
                       </select>
+                      
                       <button
                         type="button"
-                        onClick={() => removeOperUserSelection(selection.id)}
-                        className="ml-2 px-2 border border-red-500 bg-red-900 text-red-300 rounded hover:border-red-400 hover:bg-red-700 hover:text-red-200"
-                      >
-                        <strong>Cancel</strong>
+                        onClick={() => removeAdminUserSelection(selection.id)}
+                        className="ml-2 w-15 p-2 font-medium hover:bg-red-500 text-sm bg-red-600 rounded"
+                        >
+                        <FaTimes />
                       </button>
                       <button
                         type="button"
                         onClick={() => handleAddOperUser(selection)}
-                        className="ml-2 px-2 border border-blue-500 bg-blue-900 text-blue-300 rounded hover:border-blue-400 hover:bg-blue-700 hover:text-blue-200"
+                        className="ml-2 w-15 p-2 font-medium hover:bg-green-500 text-sm bg-green-600 rounded"
                       >
-                        <strong>Confirm</strong>
+                        <FaCheck />
                       </button>
                     </div>
                   ))}

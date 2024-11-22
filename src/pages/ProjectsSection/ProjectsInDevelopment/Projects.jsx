@@ -518,10 +518,10 @@ const Projects = ({ setShowChildRoutes }) => {
                 <thead>
                   <tr className="w-full text-indigo-400 text-left ">
                     <th className="px-4 py-2 rounded-tl-lg">Identifier</th>
-                    <th className="px-4 py-2 border-l border-gray-500 rounded-tr-lg">
+                    <th className="px-4 py-2 border-l border-gray-600 rounded-tr-lg">
                       Description
                     </th>
-                    <th className="px-4 py-2 border-l border-gray-500 rounded-tr-lg">
+                    <th className="px-4 py-2 border-l border-gray-600 rounded-tr-lg">
                       status
                     </th>
                   </tr>
@@ -536,13 +536,13 @@ const Projects = ({ setShowChildRoutes }) => {
                         className="cursor-pointer hover:bg-pageSideMenuTextHover transition duration-200"
                         onClick={() => handleSelectProject(project.id)}
                       >
-                        <td className="px-4 py-2 font-medium border-t border-r border-b border-gray-500">
+                        <td className="px-4 py-2 font-medium border-t border-r border-b border-gray-600">
                           {project.identification_number}
                         </td>
-                        <td className="px-4 py-2 border border-gray-500">
+                        <td className="px-4 py-2 border border-gray-600">
                           {truncateDescription(project.description, 80)}
                         </td>
-                        <td className="border-t border-l border-b text-gray-400 border-gray-500 px-4 py-2 italic">
+                        <td className="border-t border-l border-b text-gray-400 border-gray-600 px-4 py-2 italic">
                           {project.completed ? (
                             <div className="flex items-center space-between">
                               <div className="text-gray-400 italic">
@@ -576,7 +576,7 @@ const Projects = ({ setShowChildRoutes }) => {
                     <tr>
                       <td
                         colSpan="3"
-                        className="px-4 py-2 border border-gray-500 text-center"
+                        className="px-4 py-2 border border-gray-600 text-center"
                       >
                         No projects found
                       </td>
@@ -598,13 +598,13 @@ const Projects = ({ setShowChildRoutes }) => {
                   <thead>
                     <tr className="w-full text-indigo-400 text-left ">
                       <th className="px-4 py-2 rounded-tl-lg">Identifier</th>
-                      <th className="px-4 py-2 border-l border-gray-500 rounded-tr-lg">
+                      <th className="px-4 py-2 border-l border-gray-600 rounded-tr-lg">
                         Responsible
                       </th>
-                      <th className="px-4 py-2 border-l border-gray-500 rounded-tr-lg">
+                      <th className="px-4 py-2 border-l border-gray-600 rounded-tr-lg">
                         Delivery Date
                       </th>
-                      <th className="px-4 py-2 border-l border-gray-500 rounded-tr-lg">
+                      <th className="px-4 py-2 border-l border-gray-600 rounded-tr-lg">
                         Progress
                       </th>
                     </tr>
@@ -618,20 +618,20 @@ const Projects = ({ setShowChildRoutes }) => {
                         onClick={() => handleSelectProject(project.id)}
                         disabled={loading}
                       >
-                        <td className="px-4 font-medium py-2 border-t border-r border-b border-gray-400">
+                        <td className="px-4 font-medium py-2 border-t border-r border-b border-gray-600">
                           {project.identification_number}
                         </td>
-                        <td className="px-4 py-2 border border-gray-400">
+                        <td className="px-4 py-2 border border-gray-600">
                           {getProjectManager(project.id).map(
                             (userNumber, index) => (
                               <div key={index}>{userNumber}</div>
                             )
                           )}
                         </td>
-                        <td className="px-4 py-2 border border-gray-400">
+                        <td className="px-4 py-2 border border-gray-600">
                           {project.delivery_date}
                         </td>
-                        <td className="px-4 py-2 border-t border-l border-b border-gray-400">
+                        <td className="px-4 py-2 border-t border-l border-b border-gray-600">
                           <div
                             className={`font-bold ${
                               (progresses[project.id] || 0) < 25

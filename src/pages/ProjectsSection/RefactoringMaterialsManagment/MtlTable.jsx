@@ -7,7 +7,6 @@ const MtlTable = ({ id }) => {
   const [subassemblies, setSubassemblies] = useState({});
   const [projectId, setProjectId] = useState("");
   const [showSearchStock, setShowSearchStock] = useState(false);
-  const [totalPrice, setTotalPrice] = useState(0);
   const apiIpAddress = import.meta.env.VITE_API_IP_ADDRESS;
 
   useEffect(() => {
@@ -95,15 +94,6 @@ const MtlTable = ({ id }) => {
     });
   }, [items, assemblies, subassemblies, apiIpAddress]);
 
-  useEffect(() => {
-    const calculateTotalPrice = () => {
-      const total = items.reduce((sum, item) => sum + item.price, 0);
-      setTotalPrice(total);
-    };
-
-    calculateTotalPrice();
-  }, [items]);
-
   const handleClose = () => {
     window.location.reload();
   };
@@ -127,9 +117,22 @@ const MtlTable = ({ id }) => {
               Project. {projectId}
             </h1>
           </div>
+          <tr>
+            <td
+              colSpan="7"
+              className="text-right text-lg text-gray-300 font-medium p-1"
+            >
+              Total UNIT:
+            </td>
+            <td className="text-lg text-gray-300 font-medium text-center p-1">
+              $ {items
+                .reduce((total, item) => total + parseFloat(item.price), 0)
+                .toFixed(2)} MXN
+            </td>
+          </tr>
           <div className="fixed top-2 right-2 my-4">
             <button
-              className=" px-4 py-2 mx-2 font-medium hover:bg-orange-600 bg-pageBackground rounded"
+              className=" px-4 py-2 mx-2 font-medium hover:bg-blue-600 bg-pageBackground rounded"
               onClick={() => setShowSearchStock(true)}
             >
               Search for matches in stock
@@ -141,7 +144,7 @@ const MtlTable = ({ id }) => {
               Close
             </button>
           </div>
-          <table className="border border-gray-700 min-w-full bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-lg mt-2">
+          <table className="mb-10 border border-gray-700 min-w-full bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-lg mt-2">
             <thead>
               <tr>
                 <th className="text-center py-1 px-1 border-b border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300">
@@ -217,11 +220,6 @@ const MtlTable = ({ id }) => {
               ))}
             </tbody>
           </table>
-          <div className="flex justify-end mt-4">
-            <h2 className="text-xl font-bold text-gray-500">
-              Total Price: ${totalPrice.toFixed(2)}
-            </h2>
-          </div>
         </div>
       </div>
     </div>
