@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import Modal from "../../../components/Modal";
 import ModalAcept from "../../../components/ModalAcept";
-import { FaSync } from "react-icons/fa"; // Import FaSync
+import { FaSync, FaPlus, FaTimes } from "react-icons/fa";
 
 const Update = ({ id }) => {
   const apiIpAddress = import.meta.env.VITE_API_IP_ADDRESS;
@@ -259,8 +259,8 @@ const Update = ({ id }) => {
       <div>
         <button
           onClick={openModal}
-          className="w-15 px-2 py-1 text-gray-400 text-xs bg-pageBackground border border-pageBackground hover:border hover:bg-green-900 hover:border-green-500 hover:text-green-300 rounded"
-        >
+          className="w-15 px-2 py-1 font-medium hover:bg-blue-600 text-sm bg-pageBackground rounded"
+          >
           Edit
         </button>
       </div>
@@ -269,7 +269,7 @@ const Update = ({ id }) => {
         <div className="fixed z-10 inset-0 flex items-center justify-center bg-black bg-opacity-60 transition-opacity duration-300">
           <div className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-2xl transform scale-100 hover:scale-105 transition-transform duration-200 w-full max-w-2xl">
             <div className="p-5 flex flex-col justify-center items-center">
-              <h2 className="text-3xl font-bold mb-6 text-blue-600">
+              <h2 className="text-3xl font-bold mb-6 text-blue-500">
                 Update Project
               </h2>
 
@@ -363,7 +363,7 @@ const Update = ({ id }) => {
                   </label>
                   <button
                     onClick={reloadAdmins}
-                    className="p-2 mx-4 text-white rounded hover:bg-gray-800 transition duration-200"
+                    className="p-2 m-1 text-white rounded hover:bg-gray-700 transition duration-200"
                   >
                     <FaSync color="gray" size={15} />
                   </button>
@@ -391,9 +391,9 @@ const Update = ({ id }) => {
                           "No admins registered" && (
                           <button
                             onClick={() => handleDeleteUser(admin["user.id"])}
-                            className="ml-2 px-2 bg-red-900 text-red-300 rounded hover:bg-red-700 hover:text-red-200 text-sm"
-                          >
-                            x
+                            className="ml-2 w-15 p-2 font-medium text-sm hover:bg-red-600 rounded"
+                            >
+                            <FaTimes />
                           </button>
                         )}
                       </div>
@@ -440,9 +440,9 @@ const Update = ({ id }) => {
                   <button
                     type="button"
                     onClick={addAdminUserSelection}
-                    className="px-2 border border-blue-500 bg-blue-900 text-blue-300 rounded"
-                  >
-                    <strong>+</strong>
+                    className="ml-2 w-15 p-2 font-medium hover:bg-blue-500 text-sm bg-blue-600 rounded"
+                    >
+                    <FaPlus />
                   </button>
                 </div>
                 <hr className="my-8 border-gray-300 dark:border-gray-600" />
@@ -452,9 +452,9 @@ const Update = ({ id }) => {
                   </label>
                   <button
                     onClick={reloadOperators}
-                    className="p-2 mx-4 text-white rounded hover:bg-gray-800 transition duration-200"
-                  >
-                    <FaSync color="gray" size={15} />
+                    className="p-2 m-1 text-white rounded hover:bg-gray-700 transition duration-200"
+          >
+            <FaSync color="gray" size={15} />
                   </button>
                 </div>
                 <div
@@ -483,9 +483,9 @@ const Update = ({ id }) => {
                             onClick={() =>
                               handleDeleteUser(operator["user.id"])
                             }
-                            className="ml-2 px-2 bg-red-900 text-red-300 rounded hover:bg-red-700 hover:text-red-200 text-sm"
-                          >
-                            x
+                            className="ml-2 w-15 p-2 font-medium text-sm hover:bg-red-600 rounded"
+                        >
+                        <FaTimes />
                           </button>
                         )}
                       </div>
@@ -532,16 +532,16 @@ const Update = ({ id }) => {
                   <button
                     type="button"
                     onClick={addOperUserSelection}
-                    className="px-2 border border-blue-500 bg-blue-900 text-blue-300 rounded"
-                  >
-                    <strong>+</strong>
+                    className="ml-2 w-15 p-2 font-medium hover:bg-blue-500 text-sm bg-blue-600 rounded"
+                    >
+                    <FaPlus />  
                   </button>
                 </div>
                 <div className="flex justify-end pt-10 items-center">
                   <button
                     type="button"
                     onClick={handleSave}
-                    className="px-10 py-1 text-gray-400 text-lg bg-pageBackground border border-pageBackground hover:border hover:bg-blue-900 hover:border-blue-500 hover:text-blue-300 rounded"
+                    className="w-32 px-4 py-2 font-medium hover:bg-blue-600 bg-pageBackground rounded"
                   >
                     Save
                   </button>

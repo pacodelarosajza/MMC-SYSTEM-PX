@@ -10,6 +10,7 @@ function RefactoringProjectsManagment() {
         <h1 className="text-3xl font-extrabold text-gray-500 mt-5 text-right">
           Projects management
         </h1>
+        <h2 className="text-xl text-blue-400 font-bold text-right">Projects In Development</h2>
         <div className="m-5 mt-10">
           <AppCreate />
         </div>

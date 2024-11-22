@@ -438,8 +438,8 @@ const OldProjectDetails = ({ identificationNumber }) => {
   return (
     <>
       {/* PROJECT DETAILS */}
-      <div className="pt-20">
-        <h2 className="text-2xl pb-3 font-bold text-gray-500 text-center">
+      <div className="pt-10">
+        <h2 className="text-2xl pb-5 font-bold text-center">
           List of Assemblies
         </h2>{" "}
         {isLoading ? (
@@ -472,8 +472,8 @@ const OldProjectDetails = ({ identificationNumber }) => {
                                     className="text-gray-300"
                                   >
                                     <div className="flex items-center space-x-2">
-                                      <div className="font-medium">
-                                        {i + 1}.{" "}
+                                      <div className="font-semibold text-lg text-indigo-400">
+                                      
                                         <span className="ml-2">
                                           {assembly.identification_number}
                                         </span>
@@ -486,7 +486,7 @@ const OldProjectDetails = ({ identificationNumber }) => {
                               <div className="flex items-center space-x-4">
                                 <CopyToClipboard text={textToCopy}>
                                   <button
-                                    className={`font-medium text-xs ${
+                                    className={`font-medium text-sm ${
                                       copyStatus[assembly.id]
                                         ? "text-green-500"
                                         : "text-gray-500 transition-colors duration-1000"
@@ -500,8 +500,7 @@ const OldProjectDetails = ({ identificationNumber }) => {
                                   </button>
                                 </CopyToClipboard>
                                 <button
-                                  className="rounded text-xs hover:bg-gray-800 text-gray-500 border border-transparent hover:shadow-lg px-5 py-2 transition duration-300 ease-in-out"
-                                  onClick={() => handleEpicorFormat(assembly.id)}
+ className="w-15 px-4 py-2 font-medium hover:text-gray-100 text-gray-500 hover:bg-indigo-600 text-sm bg-pageBackground rounded"                                    onClick={() => handleEpicorFormat(assembly.id)}
                                 >
                                   EPICOR Format
                                 </button>

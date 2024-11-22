@@ -180,6 +180,12 @@ const History = ({ setShowChildRoutes }) => {
     }
   };
 
+  const getStatusStyle = (completed) => {
+    return completed
+      ? "text-green-500 italic font-medium"
+      : "text-orange-500 italic font-medium";
+  };
+
   return (
     <div className="min-h-screen p-8">
       <div className="flex flex-col items-center justify-center p-[5rem]">
@@ -194,12 +200,12 @@ const History = ({ setShowChildRoutes }) => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onBlur={handleContentBlur}
-            placeholder="project id. 000351 ..."
+            placeholder="project by identifier"
             className="w-96 p-2 rounded-l focus:bg-gray-800 hover:bg-gray-800 text-sm text-gray-200 bg-pageBackground border border-blue-500 focus:outline-none focus:border-blue-400"
           />{" "}
           <button
             onClick={handleButtonClickBySearch}
-            className="px-4 py-2 ml-1 bg-blue-900 text-sm text-gray-300 border border-blue-500 rounded-r hover:bg-blue-700 haver:border-blue-300"
+            className="px-4 py-2 ml-1 bg-blue-600 border border-blue-600 text-sm rounded-r hover:bg-blue-500 font-medium"
           >
             <strong>Search</strong>
           </button>
@@ -209,13 +215,15 @@ const History = ({ setShowChildRoutes }) => {
       <div className="card" id="pj-list-projects">
         <table className="min-w-full px-5 border-t-2 border-b-2 border-blue-400">
           <thead>
-            <tr className="w-full bg-blue-900 text-left">
+            <tr className="w-full bg-indigo-900 text-left">
               <th className="bg-gray-900 font-semibold text-gray-300 text-left px-4 py-2 border border-blue-500">
                 Identifier
               </th>
-              <th className="font-semibold text-gray-300 text-left px-4 py-2 border border-blue-500">
-                Manager ID
-              </th>
+              {isFocusedContent && (
+                <th className="font-semibold text-gray-300 text-left px-4 py-2 border border-blue-500">
+                  Status
+                </th>
+              )}
               <th
                 className="font-semibold text-gray-300 text-left px-4 py-2 border border-blue-500"
                 colSpan="2"
@@ -230,23 +238,24 @@ const History = ({ setShowChildRoutes }) => {
                 searchResults.map((project) => (
                   <tr
                     key={project.id}
-                    className="hover:bg-gray-700 border border-gray-700 text-sm"
+                    className="hover:bg-gray-700 hover:bg-opacity-30 border border-gray-700 text-sm"
                     onClick={() => handleMoreInfo(project.id)}
                   >
                     <td className="px-4 py-1 border border-gray-700">
                       #{project.identification_number}
                     </td>
-                    <td className="px-4 py-1 border border-gray-700">
-                      {getProjectManager(project.id)}
+                    <td className={`px-4 py-1 border border-gray-700 ${getStatusStyle(project.completed)}`}>
+                      {project.completed ? "Completed" : "In Progress"}
                     </td>
                     <td className="px-4 py-1 border-t border-b border-l border-gray-700">
                       {truncateDescription(project.description, 80)}
                     </td>
+
                     <td className="px-4 py-1 border-t border-b border-r border-gray-700">
                       <div className="flex justify-end">
                         <button
                           id="old-project-botton"
-                          className="px-4 py-2 text-sm text-gray-300 bg-gray-800 rounded hover:bg-gray-500 hover:text-gray-800"
+                          className="px-4 py-2 text-sm bg-gray-800 text-gray-400 rounded hover:bg-gray-700 hover:text-gray-200"
                           onClick={() => handleShareProject(project.id)}
                           disabled={loading}
                         >
@@ -275,9 +284,6 @@ const History = ({ setShowChildRoutes }) => {
                 >
                   <td className="px-4 py-1 border border-gray-700">
                     #{project.identification_number}
-                  </td>
-                  <td className="px-4 py-1 border border-gray-700">
-                    {getProjectManager(project.id)}
                   </td>
                   <td className="px-4 py-1 border-t border-b border-l border-gray-700">
                     {truncateDescription(project.description, 80)}

@@ -3,12 +3,15 @@ import Modal from "../../../components/Modal";
 import ModalAcept from "../../../components/ModalAcept";
 import ModalSuccess from "../../../components/ModalSuccess";
 import MaterialsSubassemblies from "./MaterialsSubassemblies";
+import { FaSync, FaPlus, FaTimes } from "react-icons/fa";
 
 const MaterialsAssemblies = ({ id }) => {
   const apiIpAddress = import.meta.env.VITE_API_IP_ADDRESS;
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isModalCancelOpen, setIsModalCancelOpen] = useState(false);
   const [isModalSuccessOpen, setIsModalSuccessOpen] = useState(false);
+  const [isWarningModalOpen, setIsWarningModalOpen] = useState(false);
+  const [proceedWithNegativeCost, setProceedWithNegativeCost] = useState(false);
   const [formData, setFormData] = useState({
     identification_number: "",
     description: "",
@@ -21,6 +24,7 @@ const MaterialsAssemblies = ({ id }) => {
   const [rowCharCounts, setRowCharCounts] = useState([0]);
   const [rows, setRows] = useState([formData]);
   const [showSubassemblies, setShowSubassemblies] = useState(false);
+  const [costMaterial, setCostMaterial] = useState(null);
 
   const openModal = () => {
     setIsModalOpen(true);
@@ -108,6 +112,10 @@ const MaterialsAssemblies = ({ id }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (remainingCost < 0 && !proceedWithNegativeCost) {
+      setIsWarningModalOpen(true);
+      return;
+    }
     try {
       for (const row of rows) {
         const postData = {
@@ -141,12 +149,44 @@ const MaterialsAssemblies = ({ id }) => {
     }
   };
 
+  const handleWarningContinue = () => {
+    setProceedWithNegativeCost(true);
+    setIsWarningModalOpen(false);
+    handleSubmit(new Event('submit'));
+  };
+
+  const fetchProjectData = useCallback(async () => {
+    try {
+      const response = await fetch(`${apiIpAddress}/api/getProjects/id/${id}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch project data");
+      }
+      const data = await response.json();
+      setCostMaterial(data.cost_material);
+    } catch (error) {
+      console.error(error);
+    }
+  }, [id, apiIpAddress]);
+
+  useEffect(() => {
+    fetchProjectData();
+  }, [fetchProjectData]);
+
+  const calculateTotalPrice = () => {
+    return rows.reduce((total, row) => total + parseFloat(row.price || 0), 0);
+  };
+
+  const remainingCost = costMaterial !== null ? costMaterial - calculateTotalPrice() : null;
+
+  const totalPriceStyle = calculateTotalPrice() < 0 ? "text-orange-500" : "text-gray-200";
+  const remainingCostStyle = remainingCost < 0 ? "text-red-500" : "text-gray-200";
+
   return (
     <>
       <div className="p-2">
         <button
           onClick={openModal}
-          className="w-20 px-2 py-1 text-gray-400 text-xs bg-pageBackground border border-pageBackground hover:bg-yellow-900 hover:border-yellow-500 hover:text-yellow-300 rounded"
+          className="w-15 px-2 py-1 font-medium hover:bg-orange-600 text-sm bg-pageBackground rounded"
         >
           Add Mtl
         </button>
@@ -158,12 +198,12 @@ const MaterialsAssemblies = ({ id }) => {
               <h1 className="text-1xl font-extrabold text-gray-500 text-right">
                   Materials management
                 </h1>
-                <h2 className="text-3xl font-bold mb-10 text-blue-600">
+                <h2 className="text-3xl font-bold mb-10 text-blue-500">
                   1. Registration of assemblies
                 </h2>
 
                 <form onSubmit={handleSubmit} className="w-full">
-                  <table className="min-w-full bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-lg">
+                  <table className="border border-bg-gray-800 min-w-full bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-lg">
                     <thead>
                       <tr>
                         <th className="text-center py-2 px-2 border-b border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">
@@ -252,41 +292,70 @@ const MaterialsAssemblies = ({ id }) => {
                               <button
                                 type="button"
                                 onClick={() => removeRow(index)}
-                                className="ml-2 px-2 bg-red-900 text-red-300 rounded hover:bg-red-700 hover:text-red-200 text-sm"
-                              >
-                                x
+                                className="ml-2 w-15 p-2 font-medium text-sm hover:bg-red-600 rounded"
+                                >
+                                <FaTimes />
                               </button>
                             </td>
                           </tr>
                         </>
                       ))}
                     </tbody>
+                    <tfoot>
+                      <tr>
+                        <td className="text-gray-400 text-right py-2 px-8  border-gray-500 bg-opacity-40 bg-gray-700 text-left text-lg font-semibold" colSpan={4}>
+                          Total Price
+                        </td>
+                        <td className={`pl-2 font-medium text-lg border-gray-600 ${totalPriceStyle}`} colSpan={2}>
+                          $ {calculateTotalPrice().toFixed(2)}  <span className="text-gray-500">MXN</span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="text-blue-400 text-right py-1 px-8 border-b-2 border-red-600 bg-opacity-20 bg-blue-500 text-left text-xs font-semibold" colSpan={4}>
+                          Cost Material Project
+                        </td>
+                        <td className=" pl-2 text-blue-400 bg-opacity-20 bg-blue-500 font-medium border-b-2 border-red-600 text-xs" colSpan={2}>
+                          $ {costMaterial !== null ? costMaterial.toFixed(2) : "Loading..."} MXN
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="text-right py-2 px-8 border-b border-gray-500 bg-opacity-40 bg-gray-700 text-left text-lg font-semibold" colSpan={4}>
+                          Remaining Cost
+                        </td>
+                        <td className={`pl-2 text-lg font-medium border-r border-b border-gray-500 ${remainingCostStyle}`} colSpan={2}>
+                          $ {remainingCost !== null ? remainingCost.toFixed(2) : "Loading..."}  <span className=" text-gray-500">MXN</span>
+                        </td>
+                      </tr>
+                    </tfoot>
                   </table>
                   <div className="p-2">
                     <button
                       type="button"
                       onClick={addRow}
-                      className="px-4 py-2 ml-1 bg-orange-900 text-sm text-gray-300 border border-orange-500 rounded hover:bg-orange-700 haver:border-orange-300 text-orange-200 hover:text-orange-100"
-                    >
-                      Add Row
+                      className="ml-2 w-15 p-2 font-medium hover:bg-blue-500 text-sm bg-blue-600 rounded"
+                      >
+                      <FaPlus />
                     </button>
                   </div>
+                 
                   <div className="flex justify-end gap-4">
                     <button
                       type="button"
                       onClick={handleCancel}
-                      className="px-10 py-1 text-gray-400 text-lg bg-pageBackground border border-pageBackground hover:border hover:bg-red-900 hover:border-red-500 hover:text-red-300 rounded"
-                    >
-                      Cancel
+                      className="w-32 px-4 py-2 font-medium hover:bg-red-600 bg-pageBackground rounded"
+                  >
+                    Cancel
                     </button>
                     <button
                       type="submit"
-                      className="px-10 py-1 text-gray-400 text-lg bg-pageBackground border border-pageBackground hover:border hover:bg-blue-900 hover:border-blue-500 hover:text-blue-300 rounded"
-                    >
+                      className=" px-4 py-2 font-medium hover:bg-blue-600 bg-pageBackground rounded"
+                  >
+                    
                       Save and continue
                     </button>
                   </div>
                 </form>
+                
               </div>
             </div>
           </div>
@@ -310,6 +379,15 @@ const MaterialsAssemblies = ({ id }) => {
       >
         <p className="text-5xl text-green-500">✔</p>
       </ModalSuccess>
+
+      <ModalAcept
+        isOpen={isWarningModalOpen}
+        onClose={() => setIsWarningModalOpen(false)}
+        onContinue={handleWarningContinue}
+        title="Exceeding Project Budget"
+      >
+        <p>You are exceeding the budget for this project. Are you sure you want to continue?</p>
+      </ModalAcept>
     </>
   );
 };

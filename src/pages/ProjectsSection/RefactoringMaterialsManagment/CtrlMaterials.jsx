@@ -14,7 +14,7 @@ const CtrlMaterials = ({ id }) => {
     try {
       const response = await fetch(
         `${apiIpAddress}/api/getItems${
-          name ? `/name/${name}` : `/project/${projectId}`
+          name ? `/name/${name}/project/${projectId}` : `/project/${projectId}`
         }`
       );
       if (!response.ok) {
@@ -135,23 +135,23 @@ const CtrlMaterials = ({ id }) => {
               id="input-search"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search by PART NUMBER"
+              placeholder="Search by Part Number"
               className="w-80 p-2 rounded-l focus:bg-gray-700 hover:bg-gray-700 text-sm text-gray-200 bg-gray-800 border border-blue-500 focus:outline-none focus:border-blue-400"
             />
             <button
               onClick={handleSearch}
-              className="px-4 py-2 ml-1 bg-blue-900 text-sm text-gray-300 border border-blue-500 rounded-r hover:bg-blue-700 hover:border-blue-300"
+              className="px-4 py-2 ml-1 bg-blue-600 border border-blue-600 text-sm rounded-r hover:bg-blue-500 font-medium"
             >
               Search
             </button>
           </div>
         </div>
 
-        <div className="flex pb-1 justify-end">
+        <div className="flex pb-2 justify-end">
           <select
             value={view}
             onChange={(e) => setView(e.target.value)}
-            className="w-60 p-1 rounded focus:bg-gray-700 hover:bg-gray-700 text-sm text-gray-200 bg-gray-800 border border-blue-500 focus:outline-none focus:border-blue-400"
+            className="w-60 p-2 rounded focus:bg-gray-700 hover:bg-gray-700 text-sm text-gray-200 bg-gray-800 focus:outline-none focus:border-blue-400"
           >
             <option value="more">More information</option>
             <option value="less">Less information</option>
@@ -162,104 +162,104 @@ const CtrlMaterials = ({ id }) => {
       <table className="text-xs table-auto w-full text-lightWhiteLetter border border-gray-700">
         <thead>
           <tr className="bg-gray-800 text-gray-200">
-            <th className="text-center py-1 px-1 border-b border-gray-200 dark:border-gray-700 bg-gray-900 text-left text-xxs font-semibold text-gray-300">
-              No.
+            <th className="text-center py-1 px-1 border-b border-gray-200 dark:border-gray-700 bg-blue-600 text-left text-xxs font-semibold ">
+              #
             </th>
             {view !== "mtl" && view !== "search" && (
               <>
-                <th className="text-center py-1 px-1 border-b border-gray-200 dark:border-gray-700 bg-gray-900 text-left text-xxs font-semibold text-gray-300">
-                  ASSEMBLY
+                <th className="text-center py-1 px-1 border-b border-gray-200 dark:border-gray-700 bg-blue-600 text-left text-xxs font-semibold ">
+                  Assembly
                 </th>
-                <th className="text-center py-1 px-1 border-b border-gray-200 dark:border-gray-700 bg-gray-900 text-left text-xxs font-semibold text-gray-300">
-                  SUBASSEMBLY
+                <th className="text-center py-1 px-1 border-b border-gray-200 dark:border-gray-700 bg-blue-600 text-left text-xxs font-semibold ">
+                  Sebassembly
                 </th>
               </>
             )}
-            <th className="text-center py-1 px-1 border-b border-gray-200 dark:border-gray-700 bg-gray-900 text-left text-xxs font-semibold text-gray-300">
+            <th className="text-center py-1 px-1 border-b border-gray-200 dark:border-gray-700 bg-blue-600 text-left text-xxs font-semibold">
               MTL
             </th>
-            <th className="text-center py-1 px-1 border-b border-gray-200 dark:border-gray-700 bg-gray-900 text-left text-xxs font-semibold text-gray-300">
-              PART NUMBER
+            <th className="text-center py-1 px-1 border-b border-gray-200 dark:border-gray-700 bg-blue-600 text-left text-xxs font-semibold">
+              Part Number
             </th>
-            <th className="text-center py-1 px-1 border-b border-gray-200 dark:border-gray-700 bg-gray-900 text-left text-xxs font-semibold text-gray-300">
-              DESCRIPTION
+            <th className="text-center py-1 px-1 border-b border-gray-200 dark:border-gray-700 bg-blue-600 text-left text-xxs font-semibold">
+              Description
             </th>
             {view === "more" && (
               <>
-                <th className="text-center py-1 px-1 border-b border-gray-200 dark:border-gray-700 bg-gray-900 text-left text-xxs font-semibold text-gray-300">
+                <th className="text-center py-1 px-1 border-b border-gray-200 dark:border-gray-700 bg-blue-600 text-left text-xxs font-semibold">
                   QTY
                 </th>
-                <th className="text-center py-1 px-1 border-b border-gray-200 dark:border-gray-700 bg-gray-900 text-left text-xxs font-semibold text-gray-300">
-                  UNIT (MXN)
+                <th className="text-center py-1 px-1 border-b border-gray-200 dark:border-gray-700 bg-blue-600 text-left text-xxs font-semibold">
+                  Unit (MXN)
                 </th>
-                <th className="text-center py-1 px-1 border-b border-gray-200 dark:border-gray-700 bg-gray-900 text-left text-xxs font-semibold text-gray-300">
-                  SUPPLIER
+                <th className="text-center py-1 px-1 border-b border-gray-200 dark:border-gray-700 bg-blue-600 text-left text-xxs font-semibold">
+                  Suppler
                 </th>
-                <th className="text-center py-1 px-1 border-b border-gray-200 dark:border-gray-700 bg-gray-900 text-left text-xxs font-semibold text-gray-300">
+                <th className="text-center py-1 px-1 border-b border-gray-200 dark:border-gray-700 bg-blue-600 text-left text-xxs font-semibold">
                   PO
                 </th>
               </>
             )}
             {view === "mtl" && (
               <>
-                <th className="text-center py-1 px-1 border-b border-gray-200 dark:border-gray-700 bg-gray-900 text-left text-xxs font-semibold text-gray-300">
+                <th className="text-center py-1 px-1 border-b border-gray-200 dark:border-gray-700 bg-blue-600 text-left text-xxs font-semibold">
                   QTY
                 </th>
               </>
             )}
             {view === "search" && (
               <>
-                <th className="text-center py-1 px-1 border-b border-gray-200 dark:border-gray-700 bg-gray-900 text-left text-xxs font-semibold text-gray-300">
+                <th className="text-center py-1 px-1 border-b border-gray-200 dark:border-gray-700 bg-blue-600 text-left text-xxs font-semibold">
                   ASSEMBLY
                 </th>
-                <th className="text-center py-1 px-1 border-b border-gray-200 dark:border-gray-700 bg-gray-900 text-left text-xxs font-semibold text-gray-300">
+                <th className="text-center py-1 px-1 border-b border-gray-200 dark:border-gray-700 bg-blue-600 text-left text-xxs font-semibold">
                   SUBASSEMBLY
                 </th>
-                <th className="text-center py-1 px-1 border-b border-gray-200 dark:border-gray-700 bg-gray-900 text-left text-xxs font-semibold text-gray-300">
+                <th className="text-center py-1 px-1 border-b border-gray-200 dark:border-gray-700 bg-blue-600 text-left text-xxs font-semibold ">
                   QTY
                 </th>
-                <th className="text-center py-1 px-1 border-b border-gray-200 dark:border-gray-700 bg-gray-900 text-left text-xxs font-semibold text-gray-300">
+                <th className="text-center py-1 px-1 border-b border-gray-200 dark:border-gray-700 bg-blue-600 text-left text-xxs font-semibold">
                   UNIT (MXN)
                 </th>
-                <th className="text-center py-1 px-1 border-b border-gray-200 dark:border-gray-700 bg-gray-900 text-left text-xxs font-semibold text-gray-300">
+                <th className="text-center py-1 px-1 border-b border-gray-200 dark:border-gray-700 bg-blue-600 text-left text-xxs font-semibold ">
                   SUPPLIER
                 </th>
-                <th className="text-center py-1 px-1 border-b border-gray-200 dark:border-gray-700 bg-gray-900 text-left text-xxs font-semibold text-gray-300">
+                <th className="text-center py-1 px-1 border-b border-gray-200 dark:border-gray-700 bg-blue-600 text-left text-xxs font-semibold ">
                   PO
                 </th>
               </>
             )}
-            <th className="text-center py-1 px-1 border-b border-gray-200 dark:border-gray-700 bg-gray-900 text-left text-xxs font-semibold text-gray-300">
-              DELIVERY TIME
+            <th className="text-center py-1 px-1 border-b border-gray-200 dark:border-gray-700 bg-blue-600 text-left text-xxs font-semibold ">
+              Delivery Time
             </th>
           </tr>
         </thead>
         <tbody>
           {items.map((item, index) => (
             <tr key={index} className="hover:bg-gray-700 hover:bg-opacity-50">
-              <td className="text-gray-400 font-medium border border-gray-600 text-center p-1 hover:bg-gray-500">
+              <td className="text-gray-300 font-medium border border-gray-600 text-center p-1 hover:bg-gray-700">
                 {index + 1}
               </td>
               {view !== "mtl" && view !== "search" && (
                 <>
-                  <td className="text-gray-400 font-medium border border-gray-600 text-center p-1 hover:bg-gray-500">
+                  <td className="text-gray-300 font-medium border border-gray-600 text-center p-1 hover:bg-gray-700">
                     {assemblies[item.assembly_id] || "Loading..."}
                   </td>
-                  <td className="text-gray-400 font-medium border border-gray-600 text-center p-1 hover:bg-gray-500">
+                  <td className="text-gray-300 font-medium border border-gray-600 text-center p-1 hover:bg-gray-700">
                     {subassemblies[item.subassembly_id] || (
                       <span className="text-gray-500">N/A</span>
                     )}
                   </td>
                 </>
               )}
-              <td className="text-gray-400 font-medium border border-gray-600 text-center p-1 hover:bg-gray-500">
+              <td className="text-gray-300 font-medium border border-gray-600 text-center p-1 hover:bg-gray-700">
                 {item.number_material}
               </td>
-              <td className="text-gray-400 font-medium border border-gray-600 text-center p-1 hover:bg-gray-500">
+              <td className="text-gray-300 font-medium border border-gray-600 text-center p-1 hover:bg-gray-700">
                 {item.name}
               </td>
               <td
-                className="text-gray-400 font-medium border border-gray-600 text-center p-1 hover:bg-gray-500"
+                className="text-gray-300 font-medium border border-gray-600 text-center p-1 hover:bg-gray-700"
                 title={item.description}
               >
                 {item.description.length > 50
@@ -268,56 +268,56 @@ const CtrlMaterials = ({ id }) => {
               </td>
               {view === "more" && (
                 <>
-                  <td className="text-gray-400 font-medium border border-gray-600 text-center p-1 hover:bg-gray-500">
+                  <td className="text-gray-300 font-medium border border-gray-600 text-center p-1 hover:bg-gray-700">
                     {item.subassembly_assignment_quantity}
                   </td>
-                  <td className="text-gray-400 font-medium border border-gray-600 text-center p-1 hover:bg-gray-500">
+                  <td className="text-gray-300 font-medium border border-gray-600 text-center p-1 hover:bg-gray-700">
                     {item.price}
                   </td>
-                  <td className="text-gray-400 font-medium border border-gray-600 text-center p-1 hover:bg-gray-500">
+                  <td className="text-gray-300 font-medium border border-gray-600 text-center p-1 hover:bg-gray-700">
                     {item.supplier}
                   </td>
-                  <td className="text-gray-400 font-medium border border-gray-600 text-center p-1 hover:bg-gray-500">
+                  <td className="text-gray-300 font-medium border border-gray-600 text-center p-1 hover:bg-gray-700">
                     {item.number_cotizacion}
                   </td>
                 </>
               )}
               {view === "mtl" && (
                 <>
-                  <td className="text-gray-400 font-medium border border-gray-600 text-center p-1 hover:bg-gray-500">
+                  <td className="text-gray-300 font-medium border border-gray-600 text-center p-1 hover:bg-gray-700">
                     {item.subassembly_assignment_quantity}
                   </td>
                 </>
               )}
               {view === "search" && (
                 <>
-                  <td className="text-gray-400 font-medium border border-gray-600 text-center p-1 hover:bg-gray-500">
+                  <td className="text-gray-300 font-medium border border-gray-600 text-center p-1 hover:bg-gray-700">
                     {assemblies[item.assembly_id] || "Loading..."}
                   </td>
-                  <td className="text-gray-400 font-medium border border-gray-600 text-center p-1 hover:bg-gray-500">
+                  <td className="text-gray-300 font-medium border border-gray-600 text-center p-1 hover:bg-gray-700">
                     {subassemblies[item.subassembly_id] || (
                       <span className="text-gray-500">N/A</span>
                     )}
                   </td>
-                  <td className="text-gray-400 font-medium border border-gray-600 text-center p-1 hover:bg-gray-500">
+                  <td className="text-gray-300 font-medium border border-gray-600 text-center p-1 hover:bg-gray-700">
                     {item.subassembly_assignment_quantity}
                   </td>
-                  <td className="text-gray-400 font-medium border border-gray-600 text-center p-1 hover:bg-gray-500">
+                  <td className="text-gray-300 font-medium border border-gray-600 text-center p-1 hover:bg-gray-700">
                     {item.price}
                   </td>
-                  <td className="text-gray-400 font-medium border border-gray-600 text-center p-1 hover:bg-gray-500">
+                  <td className="text-gray-300 font-medium border border-gray-600 text-center p-1 hover:bg-gray-700">
                     {item.supplier}
                   </td>
-                  <td className="text-gray-400 font-medium border border-gray-600 text-center p-1 hover:bg-gray-500">
+                  <td className="text-gray-300 font-medium border border-gray-600 text-center p-1 hover:bg-gray-700">
                     {item.number_cotizacion}
                   </td>
                 </>
               )}
-              <td className="text-gray-400 font-medium border border-gray-600 text-center p-1 hover:bg-gray-500">
+              <td className="text-gray-300 font-medium border border-gray-600 text-center p-1 hover:bg-gray-700">
                 <input
                   type="date"
-                  className={`text-xxs font-medium bg-gray-700 border border-gray-600 p-1 hover:bg-gray-600 ${
-                    item.date_order ? "text-white" : "text-red-400"
+                  className={`text-xxs font-medium bg-gray-700 border border-gray-600 p-1 hover:bg-gray-700 ${
+                    item.date_order ? "text-white" : "text-red-500"
                   }`}
                   value={item.date_order || ""}
                   onChange={(e) => handleDateChange(item.id, e.target.value)}

@@ -17,7 +17,7 @@ const Modal = ({ isOpen, onClose, title, children }) => {
           <button
             type="button"
             onClick={onClose}
-            className="px-3 py-1 border border-blue-500 bg-blue-900 text-blue-300 hover:border-blue-400 hover:bg-blue-700 hover:text-blue-200 rounded"
+            className="w-15 px-4 py-2 font-medium hover:bg-blue-600 text-sm bg-pageBackground rounded"
           >
             Close
           </button>

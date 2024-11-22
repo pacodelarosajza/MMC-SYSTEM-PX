@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Modal from "../../../components/Modal";
 import ModalAcept from "../../../components/ModalAcept";
+import { FaPlus, FaTimes } from "react-icons/fa";
 
 function Create() {
   const apiIpAddress = import.meta.env.VITE_API_IP_ADDRESS;
@@ -204,7 +205,7 @@ function Create() {
       <div>
         <button
           onClick={openModal}
-          className="bg-blue-900 bg-opacity-75 text-gray-100 font-semibold py-2 px-20 rounded transition duration-300 ease-in-out transform hover:bg-blue-700 hover:text-white hover:scale-105 shadow-lg border-2 border-blue-700 hover:shadow-xl"
+          className="bg-blue-500 bg-opacity-75 text-gray-100 font-semibold py-2 px-20 rounded transition duration-300 ease-in-out transform hover:bg-blue-700 hover:text-white hover:scale-105 shadow-lg hover:shadow-xl"
         >
           Create new project
         </button>
@@ -214,7 +215,7 @@ function Create() {
         <div className="fixed z-10 inset-0 flex items-center justify-center bg-black bg-opacity-60 transition-opacity duration-300">
           <div className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-2xl transform scale-100 hover:scale-105 transition-transform duration-200 w-full max-w-2xl">
             <div className="p-5 flex flex-col justify-center items-center">
-              <h2 className="text-3xl font-bold mb-6 text-blue-600">
+              <h2 className="text-3xl font-bold mb-6 text-blue-500">
                 New Project
               </h2>
 
@@ -336,18 +337,18 @@ function Create() {
                       <button
                         type="button"
                         onClick={() => removeAdminUserSelection(selection.id)}
-                        className="ml-2 px-2  border border-red-500 bg-red-900 text-red-300 rounded hover:border-red-400 hover:bg-red-700 hover:text-red-200"
-                      >
-                        <strong>x</strong>
+                        className="ml-2 w-15 p-2 font-medium hover:bg-red-500 text-sm bg-red-600 rounded"
+                        >
+                        <FaTimes />
                       </button>
                     </div>
                   ))}
                   <button
                     type="button"
                     onClick={addAdminUserSelection}
-                    className="px-2 border border-blue-500 bg-blue-900 text-blue-300 rounded"
-                  >
-                    <strong>+</strong>
+                    className="ml-2 w-15 p-2 font-medium hover:bg-blue-500 text-sm bg-blue-600 rounded"
+                    >
+                    <FaPlus />
                   </button>
                 </div>
                 <hr className="my-4 border-gray-300 dark:border-gray-600" />
@@ -378,31 +379,31 @@ function Create() {
                       <button
                         type="button"
                         onClick={() => removeOperUserSelection(selection.id)}
-                        className="ml-2 px-2 border border-red-500 bg-red-900 text-red-300 rounded hover:border-red-400 hover:bg-red-700 hover:text-red-200"
-                      >
-                        <strong>x</strong>
+                        className="ml-2 w-15 p-2 font-medium hover:bg-red-500 text-sm bg-red-600 rounded"
+                        >
+                        <FaTimes />
                       </button>
                     </div>
                   ))}
                   <button
                     type="button"
                     onClick={addOperUserSelection}
-                    className="px-2 border border-blue-500 bg-blue-900 text-blue-300 rounded"
+                    className="ml-2 w-15 p-2 font-medium hover:bg-blue-500 text-sm bg-blue-600 rounded"
                   >
-                    <strong>+</strong>
+                    <FaPlus />
                   </button>
                 </div>
-                <div className="flex justify-end pt-10 items-center gap-4">
+                                <div className="flex justify-end pt-10 items-center gap-4">
                   <button
                     type="button"
                     onClick={handleCancel}
-                    className="px-10 py-1 text-gray-400 text-lg bg-pageBackground border border-pageBackground hover:border hover:bg-red-900 hover:border-red-500 hover:text-red-300 rounded"
+                    className="w-32 px-4 py-2 font-medium hover:bg-red-600 bg-pageBackground rounded"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="px-10 py-1 text-gray-400 text-lg bg-pageBackground border border-pageBackground hover:border hover:bg-blue-900 hover:border-blue-500 hover:text-blue-300 rounded"
+                    className="w-32 px-4 py-2 font-medium hover:bg-blue-600 bg-pageBackground rounded"
                   >
                     Save
                   </button>

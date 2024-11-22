@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import AppProjectDetails from "./ProjectDetails";
-import { FaArrowLeft, FaArrowRight, FaShare } from "react-icons/fa";
+import { FaArrowLeft, FaArrowRight, FaShare, FaTimes } from "react-icons/fa";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSync } from "@fortawesome/free-solid-svg-icons";
 import Modal from "../../../components/Modal";
@@ -49,6 +49,10 @@ const Projects = ({ setShowChildRoutes }) => {
   const [isProjectCompleted, setIsProjectCompleted] = useState(false);
   const [isNoAssembliesModalOpen, setIsNoAssembliesModalOpen] = useState(false);
   const [noAssembliesProjectId, setNoAssembliesProjectId] = useState(null);
+  const [laborCost, setLaborCost] = useState(0);
+  const [totalCost, setTotalCost] = useState(0);
+  const [profitMargin, setProfitMargin] = useState(0);
+  const [sellingPrice, setSellingPrice] = useState(0);
 
   const recordsPerPage = 5;
   const navigate = useNavigate();
@@ -242,9 +246,12 @@ const Projects = ({ setShowChildRoutes }) => {
             const overallProjectProgress = progresses[projectId] || 0;
             if (overallProjectProgress === 100) {
               setIsProjectCompleted(true);
-              await axios.patch(`${apiIpAddress}/api/patchProject/${projectId}`, {
-                completed: 1,
-              });
+              await axios.patch(
+                `${apiIpAddress}/api/patchProject/${projectId}`,
+                {
+                  completed: 1,
+                }
+              );
               window.location.reload();
             }
           }
@@ -266,6 +273,21 @@ const Projects = ({ setShowChildRoutes }) => {
       });
     }
   }, [selectedProject, assemblies]);
+
+  useEffect(() => {
+    if (selectedProject) {
+      const projectLaborCost = selectedProject.labor_cost || 0;
+      const projectMaterialCost = selectedProject.cost_material || 0;
+      const projectTotalCost = projectLaborCost + projectMaterialCost;
+      const projectProfitMargin = selectedProject.profit_margin || 0;
+      const projectSellingPrice = projectTotalCost * (1 + projectProfitMargin / 100);
+
+      setLaborCost(projectLaborCost);
+      setTotalCost(projectTotalCost);
+      setProfitMargin(projectProfitMargin);
+      setSellingPrice(projectSellingPrice);
+    }
+  }, [selectedProject]);
 
   const getProjectManager = (projectId) => {
     if (
@@ -357,34 +379,37 @@ const Projects = ({ setShowChildRoutes }) => {
     ],
   };
 
-  const materialChartData = selectedProject && assemblies[selectedProject.id]
-    ? {
-        labels: assemblies[selectedProject.id].map(
-          (assembly) => assembly.identification_number
-        ),
-        datasets: [
-          {
-            label: `Material Progress in Project ${selectedProject.identification_number}`,
-            data: assemblies[selectedProject.id].map(
-              (assembly) => materialProgresses[assembly.id] || 0
-            ),
-            backgroundColor: assemblies[selectedProject.id].map((assembly) => {
-              const progress = materialProgresses[assembly.id] || 0;
-              if (progress < 25) return "rgba(255, 99, 132, 0.2)"; // red
-              if (progress < 50) return "rgba(54, 162, 235, 0.2)"; // blue
-              return "rgba(75, 192, 192, 0.2)"; // green
-            }),
-            borderColor: assemblies[selectedProject.id].map((assembly) => {
-              const progress = materialProgresses[assembly.id] || 0;
-              if (progress < 25) return "rgba(255, 99, 132, 1)"; // red
-              if (progress < 50) return "rgba(54, 162, 235, 1)"; // blue
-              return "rgba(75, 192, 192, 1)"; // green
-            }),
-            borderWidth: 1,
-          },
-        ],
-      }
-    : {};
+  const materialChartData =
+    selectedProject && assemblies[selectedProject.id]
+      ? {
+          labels: assemblies[selectedProject.id].map(
+            (assembly) => assembly.identification_number
+          ),
+          datasets: [
+            {
+              label: `Material Progress in Project ${selectedProject.identification_number}`,
+              data: assemblies[selectedProject.id].map(
+                (assembly) => materialProgresses[assembly.id] || 0
+              ),
+              backgroundColor: assemblies[selectedProject.id].map(
+                (assembly) => {
+                  const progress = materialProgresses[assembly.id] || 0;
+                  if (progress < 25) return "rgba(255, 99, 132, 0.2)"; // red
+                  if (progress < 50) return "rgba(54, 162, 235, 0.2)"; // blue
+                  return "rgba(75, 192, 192, 0.2)"; // green
+                }
+              ),
+              borderColor: assemblies[selectedProject.id].map((assembly) => {
+                const progress = materialProgresses[assembly.id] || 0;
+                if (progress < 25) return "rgba(255, 99, 132, 1)"; // red
+                if (progress < 50) return "rgba(54, 162, 235, 1)"; // blue
+                return "rgba(75, 192, 192, 1)"; // green
+              }),
+              borderWidth: 1,
+            },
+          ],
+        }
+      : {};
 
   const chartOptions = {
     responsive: true,
@@ -452,7 +477,7 @@ const Projects = ({ setShowChildRoutes }) => {
 
   return (
     <>
-      <div className="m-5 py-5 min-h-screen">
+      <div className="mx-5 min-h-screen">
         <>
           <div className="flex justify-between items-center pt-4 pb-4 mb-5">
             <div className="flex justify-center items-center">
@@ -478,7 +503,7 @@ const Projects = ({ setShowChildRoutes }) => {
               />
               <button
                 onClick={handleButtonClickBySearch}
-                className="px-4 py-2 ml-1 bg-blue-900 text-sm text-gray-300 border border-blue-500 rounded-r hover:bg-blue-700 haver:border-blue-300"
+                className="px-4 py-2 ml-1 bg-blue-600 border border-blue-600 text-sm rounded-r hover:bg-blue-500 font-medium"
               >
                 <strong>Search</strong>
               </button>
@@ -486,18 +511,22 @@ const Projects = ({ setShowChildRoutes }) => {
           </div>
           <div className="text-gray-500">
             {isFocusedContent ? (
-              <table className="text-sm table-auto w-full border text-lightWhiteLetter">
+              <table
+                className="text-sm table-auto w-full text-lightWhiteLetter"
+                id="projects-actions"
+              >
                 <thead>
-                  <tr className="w-full bg-blue-900 text-left">
-                    <th className="px-4 py-2 border bg-blue-700 border-blue-400">
-                      Proj. ID
-                    </th>
-                    <th className="px-4 py-2 border border-blue-500">
+                  <tr className="w-full text-indigo-400 text-left ">
+                    <th className="px-4 py-2 rounded-tl-lg">Identifier</th>
+                    <th className="px-4 py-2 border-l border-gray-500 rounded-tr-lg">
                       Description
                     </th>
-                    <th className="px-4 py-2 border border-blue-500">Status</th>
+                    <th className="px-4 py-2 border-l border-gray-500 rounded-tr-lg">
+                      status
+                    </th>
                   </tr>
                 </thead>
+
                 <tbody className="shadow-lg">
                   {/* TABLA DE PROYECTOS */}
                   {Array.isArray(searchResults) && searchResults.length > 0 ? (
@@ -507,13 +536,13 @@ const Projects = ({ setShowChildRoutes }) => {
                         className="cursor-pointer hover:bg-pageSideMenuTextHover transition duration-200"
                         onClick={() => handleSelectProject(project.id)}
                       >
-                        <td className="px-4 py-2 font-medium border border-gray-500">
+                        <td className="px-4 py-2 font-medium border-t border-r border-b border-gray-500">
                           {project.identification_number}
                         </td>
                         <td className="px-4 py-2 border border-gray-500">
                           {truncateDescription(project.description, 80)}
                         </td>
-                        <td className="border text-gray-400 border-gray-500 px-4 py-2 italic">
+                        <td className="border-t border-l border-b text-gray-400 border-gray-500 px-4 py-2 italic">
                           {project.completed ? (
                             <div className="flex items-center space-between">
                               <div className="text-gray-400 italic">
@@ -562,23 +591,25 @@ const Projects = ({ setShowChildRoutes }) => {
                   {/* Adjusted height */}
                   <Bar data={chartData} options={chartOptions} />
                 </div>
-                <table className="text-sm my-5 table-auto w-full border text-lightWhiteLetter">
+                <table
+                  className="my-5 text-sm table-auto w-full text-lightWhiteLetter"
+                  id="projects-actions"
+                >
                   <thead>
-                    <tr className="w-full bg-blue-900 text-left">
-                      <th className="px-4 py-2 border border-blue-500">
-                        Identifier
+                    <tr className="w-full text-indigo-400 text-left ">
+                      <th className="px-4 py-2 rounded-tl-lg">Identifier</th>
+                      <th className="px-4 py-2 border-l border-gray-500 rounded-tr-lg">
+                        Responsible
                       </th>
-                      <th className="px-4 py-2 border border-blue-500">
-                        Project Manager
-                      </th>
-                      <th className="px-4 py-2 border border-blue-500">
+                      <th className="px-4 py-2 border-l border-gray-500 rounded-tr-lg">
                         Delivery Date
                       </th>
-                      <th className="px-4 py-2 border border-blue-500">
+                      <th className="px-4 py-2 border-l border-gray-500 rounded-tr-lg">
                         Progress
                       </th>
                     </tr>
                   </thead>
+
                   <tbody className="shadow-lg">
                     {currentProjects.map((project) => (
                       <tr
@@ -587,7 +618,7 @@ const Projects = ({ setShowChildRoutes }) => {
                         onClick={() => handleSelectProject(project.id)}
                         disabled={loading}
                       >
-                        <td className="px-4 font-medium py-2 border border-gray-400">
+                        <td className="px-4 font-medium py-2 border-t border-r border-b border-gray-400">
                           {project.identification_number}
                         </td>
                         <td className="px-4 py-2 border border-gray-400">
@@ -600,7 +631,7 @@ const Projects = ({ setShowChildRoutes }) => {
                         <td className="px-4 py-2 border border-gray-400">
                           {project.delivery_date}
                         </td>
-                        <td className="px-4 py-2 border border-gray-400">
+                        <td className="px-4 py-2 border-t border-l border-b border-gray-400">
                           <div
                             className={`font-bold ${
                               (progresses[project.id] || 0) < 25
@@ -653,10 +684,10 @@ const Projects = ({ setShowChildRoutes }) => {
                     <div className="flex justify-end mt-4">
                       <button
                         onClick={handleDeselectProject}
-                        className="px-4 py-2 ml-1 bg-orange-900 text-sm text-orange-300 border border-orange-500 rounded hover:bg-orange-700 haver:border-orange-300"
                         title="Close details"
+                        className="m-2 w-15 p-2 font-medium text-sm hover:bg-red-500 bg-red-600 rounded"
                       >
-                        <strong>X</strong>
+                        <FaTimes />
                       </button>
                     </div>
                     <div className="flex justify-center items-center">
@@ -720,38 +751,22 @@ const Projects = ({ setShowChildRoutes }) => {
                           <h2 className="font-bold text-gray-300 text-base">
                             {selectedProject.identification_number}
                           </h2>
+                          <div className="col-span-12 md:col-span-6 flex justify-center">
+                            <div className="text-xs text-center text-gray-500">
+                              <hr className="my-2 border-b border-gray-500 shadow-md opacity-50" />
+                              Delivery Date.
+                              <strong>{selectedProject.delivery_date}</strong>
+                            </div>
+                          </div>
                         </div>
                       </div>
-                    </div>
-
-                    <div className="flex justify-center grid grid-cols-12 gap-4">
-                      <div className="col-span-12 md:col-span-6 flex justify-center">
-                        <div className="text-lg text-center text-gray-500">
-                          <hr className="my-2 border-b border-gray-500 shadow-md opacity-50" />
-                          Delivery Date.
-                          <strong>{selectedProject.delivery_date}</strong>
-                        </div>
-                      </div>
-                      <div className="col-span-12 md:col-span-6 flex justify-center">
-                        <div className="text-lg text-center text-gray-500">
-                          <hr className="my-2 border-b border-gray-500 shadow-md opacity-50" />
-                          Cost Material.
-                          <strong>${selectedProject.cost_material} MXN</strong>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="my-5" style={{ height: "300px" }}>
-                      <Bar
-                        data={materialChartData}
-                        options={materialChartOptions}
-                      />
                     </div>
                     <div className="px-10 flex justify-center grid grid-cols-12 gap-4">
                       <div className="col-span-12 md:col-span-3 flex">
                         <div className="p-4 rounded-lg shadow-lg transition duration-300 transform hover:translate-y-1 flex-grow border border-gray-700 hover:bg-gray-800">
                           <div className="flex items-center mb-2">
                             <strong className="text-lg font-extrabold text-blue-400 pb-2">
-                              Project manager
+                              Responsible
                             </strong>
                           </div>
                           <ul className="text-white">
@@ -796,7 +811,32 @@ const Projects = ({ setShowChildRoutes }) => {
                         </div>
                       </div>
                     </div>
-                    <hr className="mt-5 border-b border-gray-800" />
+
+                    <div className="my-5" style={{ height: "300px" }}>
+                      <Bar
+                        data={materialChartData}
+                        options={materialChartOptions}
+                      />
+                    </div>
+                   
+                    {/* CARD OF COSTS */}
+                    <div className="col-span-12 md:col-span-6 flex">
+                      <div className="p-4 rounded-lg shadow-lg transition duration-300 transform hover:translate-y-1 flex-grow border border-gray-700 hover:bg-gray-800">
+                        <div className="flex items-center mb-2">
+                          <strong className="text-lg font-extrabold text-blue-400 pb-2">
+                            Cost
+                          </strong>
+                        </div>
+                        <div className="text-white text-justify">
+                          <p>Material Cost: ${selectedProject.cost_material} MXN</p>
+                          <p>Labor Cost: ${laborCost} MXN</p>
+                          <p>Total Cost: ${totalCost} MXN</p>
+                          <p>Profit Margin: {profitMargin}%</p>
+                          <p>Selling Price: ${sellingPrice} MXN</p>
+                        </div>
+                      </div>
+                    </div>
+
                     <AppProjectDetails
                       identificationNumber={
                         selectedProject.identification_number

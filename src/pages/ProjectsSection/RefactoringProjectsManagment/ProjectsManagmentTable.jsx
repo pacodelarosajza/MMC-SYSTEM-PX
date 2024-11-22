@@ -111,8 +111,7 @@ const ProjectsManagmentTable = () => {
     <>
       {/* PROJECTS MANAGEMENT TABLE */}
       <div className="">
-        <div className="flex items-center justify-between py-1 mt-5">
-          <h2 className="text-xl text-blue-400 font-bold">Projects In Development</h2>
+                <div className="flex items-center justify-end py-1 mt-5">
           <button
             onClick={fetchActiveProjects}
             className="p-2 mx-4 text-white rounded hover:bg-gray-800 transition duration-200"
@@ -130,9 +129,9 @@ const ProjectsManagmentTable = () => {
               id="projects-actions"
             >
               <thead>
-                <tr className="w-full bg-blue-900 text-left">
-                  <th className="px-4 py-2 border border-blue-500">Identifier </th>
-                  <th className="px-4 py-2 border border-blue-500" colSpan="2">
+                <tr className="w-full text-indigo-400 text-left ">
+                  <th className="px-4 py-2 rounded-tl-lg">Identifier</th>
+                  <th className="px-4 py-2 border-l border-gray-500 rounded-tr-lg" colSpan="2">
                     Description
                   </th>
                 </tr>
@@ -159,7 +158,7 @@ const ProjectsManagmentTable = () => {
                         <div className="p-2">
                           <button
                             onClick={() => handleDeleteProject(project.id)}
-                            className="w-15 px-2 py-1 text-gray-400 hover:bg-red-900 text-xs hover:text-red-300 bg-pageBackground border border-pageBackground hover:border hover:border-red-500 rounded"
+                            className="w-15 px-2 py-1 font-medium hover:bg-red-600 text-sm bg-pageBackground rounded"
                           >
                             Delete
                           </button>

@@ -87,11 +87,9 @@ const ProjectsManagmentTable = () => {
               id="projects-actions"
             >
               <thead>
-                <tr className="w-full bg-blue-900 text-left">
-                  <th className="px-4 py-2 border border-blue-500">
-                    Identifier{" "}
-                  </th>
-                  <th className="px-4 py-2 border border-blue-500" colSpan="3">
+                <tr className="w-full text-indigo-400 text-left ">
+                  <th className="px-4 py-2 rounded-tl-lg">Identifier</th>
+                  <th className="px-4 py-2 border-l border-gray-500 rounded-tr-lg" colSpan="2">
                     Description
                   </th>
                 </tr>
@@ -115,8 +113,8 @@ const ProjectsManagmentTable = () => {
                          
                           <AppAddMaterials id={project.id} /> 
                             <button
-                              className="w-20 px-2 py-1 text-gray-400 text-xs bg-pageBackground border border-pageBackground hover:bg-green-900 hover:border-green-500 hover:text-green-300 rounded"
-                              onClick={() => toggleContainer(projectId)}
+          className="w-15 px-2 py-1 font-medium hover:bg-indigo-600 text-sm bg-pageBackground rounded"
+            onClick={() => toggleContainer(projectId)}
                             >
                               Ctrl Mts
                             </button>

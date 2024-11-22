@@ -213,16 +213,16 @@ const SubmitMaterials = ({ id }) => {
 
   return (
     <>
-      <div className="submit-materials-container fixed z-10 inset-0 flex items-center justify-center bg-black bg-opacity-60 transition-opacity duration-300">
+      <div className="p-5 submit-materials-container fixed z-10 inset-0 flex items-center justify-center bg-black bg-opacity-60 transition-opacity duration-300">
         <div className="py-12 px-10 bg-white dark:bg-gray-800 rounded-lg shadow-2xl transform scale-100 transition-transform duration-200 w-full h-full overflow-y-auto scrollbar-thin scrollbar-thumb-blue-500 scrollbar-track-blue-200">
           <div className="px-2 flex flex-col justify-center items-center">
             <h1 className="text-1xl font-extrabold text-gray-500 text-right">
               Materials management
             </h1>
-            <h2 className="text-3xl font-bold mb-10 text-blue-600">
+            <h2 className="text-3xl font-bold mb-10 text-blue-500">
               3. Submit Materials
             </h2>
-            <table className="min-w-full bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-lg mt-4">
+            <table className="border border-gray-700 min-w-full bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-lg mt-4">
               <thead>
                 <tr>
                   
@@ -244,7 +244,7 @@ const SubmitMaterials = ({ id }) => {
               <tbody>
                 {assemblies.map((assembly, assemblyIndex) => (
                   <React.Fragment key={assembly.id}>
-                    <tr>
+                    <tr className="hover:bg-gray-700 hover:bg-opacity-50">
                       <td className="text-gray-400 font-medium border border-gray-600 text-center p-2 text-xs">
                         {assemblyIndex + 1}
                       </td>
@@ -269,7 +269,7 @@ const SubmitMaterials = ({ id }) => {
                           <td className="text-xs text-gray-200 font-medium border border-gray-600 p-2">
                             <div className="flex justify-center items-center h-full">
                               <button
-                                className="bg-blue-900 text-blue-300 px-2 py-1 rounded border border-blue-500 hover:bg-blue-700 hover:text-blue-100 hover:border-blue-300"
+                                className="w-15 px-2 py-1 font-medium hover:bg-blue-600 text-xs bg-gray-800 rounded"
                                 onClick={() =>
                                   toggleMessage(
                                     `subassembly-${
@@ -298,7 +298,7 @@ const SubmitMaterials = ({ id }) => {
                           <td className="text-xs text-gray-200 font-medium border border-gray-600 p-2">
                             <div className="flex justify-center items-center h-full">
                               <button
-                                className="bg-blue-900 text-blue-300 px-2 py-1 rounded border border-blue-500 hover:bg-blue-700 hover:text-blue-100 hover:border-blue-300"
+                                className="w-15 px-2 py-1 font-medium hover:bg-blue-600 text-xs bg-gray-800 rounded"
                                 onClick={() =>
                                   toggleMessage(`assembly-${assembly.id}`)
                                 }
@@ -428,7 +428,7 @@ const SubmitMaterials = ({ id }) => {
                       .map((subassembly, subassemblyIndex) => (
                         <React.Fragment key={subassembly.id}>
                           {subassemblyIndex > 0 && (
-                            <tr>
+                            <tr className="hover:bg-gray-700 hover:bg-opacity-50">
                               <td colSpan={2}></td>
                               <td className="text-gray-400 font-medium border border-gray-600 text-center p-2 text-xs">
                                 {assemblyIndex + 1}.{subassemblyIndex + 1}
@@ -439,8 +439,8 @@ const SubmitMaterials = ({ id }) => {
                               <td className="text-xs text-gray-200 font-medium border-t border-b border-r border-gray-600 p-2">
                                 <div className="flex justify-center items-center h-full">
                                   <button
-                                    className="bg-blue-900 text-blue-300 px-2 py-1 rounded border border-blue-500 hover:bg-blue-700 hover:text-blue-100 hover:border-blue-300"
-                                    onClick={() =>
+                                className="w-15 px-2 py-1 font-medium hover:bg-blue-600 text-xs bg-gray-800 rounded"
+                                onClick={() =>
                                       toggleMessage(
                                         `subassembly-${subassembly.id}`
                                       )
@@ -574,10 +574,12 @@ const SubmitMaterials = ({ id }) => {
           </div>
           <div className="pt-20 flex justify-center gap-4">
             <button
-              className="px-10 py-1 text-gray-400 text-xl bg-pageBackground border border-pageBackground hover:border hover:bg-blue-900 hover:border-blue-500 hover:text-blue-300 rounded"
               onClick={handleSaveAndContinue}
-            >
-              Save and continue
+              className=" px-4 py-2 font-medium hover:bg-blue-600 bg-pageBackground rounded"
+                  >
+                    
+                      Save and continue
+                  
             </button>
           </div>
         </div>

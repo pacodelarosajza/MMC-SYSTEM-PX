@@ -103,13 +103,13 @@ const MtlTable = ({ id }) => {
   }
 
   return (
-    <div className="submit-materials-container fixed z-10 inset-0 flex items-center justify-center bg-black bg-opacity-60 transition-opacity duration-300">
+    <div className="p-5 submit-materials-container fixed z-10 inset-0 flex items-center justify-center bg-black bg-opacity-60 transition-opacity duration-300">
       <div className="py-6 px-6 bg-white dark:bg-gray-800 rounded-lg shadow-2xl transform scale-100 transition-transform duration-200 w-full h-full overflow-y-auto scrollbar-thin scrollbar-thumb-blue-500 scrollbar-track-blue-200">
         <div className="px-2 flex flex-col">
           <h1 className="text-lg font-extrabold text-gray-500">
             Materials management
           </h1>
-          <h1 className="text-xl font-bold mb-4 text-blue-600">
+          <h1 className="text-xl font-bold mb-4 text-blue-500">
             4. Materials Table
           </h1>
           <div className="flex justify-center items-center">
@@ -117,21 +117,20 @@ const MtlTable = ({ id }) => {
               Project. {projectId}
             </h1>
           </div>
-          <div className="fixed top-2 right-2 ">
+          <div className="fixed top-2 right-2 my-4">
             <button
-              className="bg-orange-900 text-orange-300 px-6 py-1 rounded border border-orange-500 hover:bg-orange-700 hover:text-orange-100 hover:border-orange-300  mr-2 mt-4"
+className=" px-4 py-2 mx-2 font-medium hover:bg-orange-600 bg-pageBackground rounded"
               onClick={() => setShowSearchStock(true)}
             >
               Search for matches in stock
             </button>
             <button
-          className="bg-red-900 text-red-300 px-6 py-1 rounded border border-red-500 hover:bg-red-700 hover:text-red-100 hover:border-red-300  mr-2 mt-4"
-          onClick={handleClose}
+className=" px-4 py-2 mx-2 font-medium hover:bg-red-600 bg-pageBackground rounded"          onClick={handleClose}
             >
               Close
             </button>
           </div>
-          <table className="min-w-full bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-lg mt-2">
+          <table className="border border-gray-700 min-w-full bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-lg mt-2">
             <thead>
               <tr>
                 <th className="text-center py-1 px-1 border-b border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300">

@@ -17,6 +17,7 @@ import Modal from "../../../components/Modal";
 import ModalAcept from "../../../components/ModalAcept";
 import EpicorModal from "../../../components/EpicorModal"; // Import the new EpicorModal component
 import { debounce } from "lodash";
+import { FaHourglassHalf } from "react-icons/fa";
 
 const ProjectDetails = ({ identificationNumber }) => {
   // IP ADDRESS
@@ -70,8 +71,16 @@ const ProjectDetails = ({ identificationNumber }) => {
     if (isSelecting) {
       const [startRow, startCol] = selectedCells[0];
       const newSelectedCells = [];
-      for (let i = Math.min(startRow, rowIndex); i <= Math.max(startRow, rowIndex); i++) {
-        for (let j = Math.min(startCol, colIndex); j <= Math.max(startCol, colIndex); j++) {
+      for (
+        let i = Math.min(startRow, rowIndex);
+        i <= Math.max(startRow, rowIndex);
+        i++
+      ) {
+        for (
+          let j = Math.min(startCol, colIndex);
+          j <= Math.max(startCol, colIndex);
+          j++
+        ) {
           newSelectedCells.push([i, j]);
         }
       }
@@ -96,20 +105,22 @@ const ProjectDetails = ({ identificationNumber }) => {
   };
 
   const getSelectedCellsData = () => {
-    return selectedCells.map(([rowIndex, colIndex]) => {
-      const item = epicorData[rowIndex - 1];
-      const value = [
-        item.number_material,
-        item.name,
-        item.description,
-        item.subassembly_assignment_quantity,
-        item.price,
-        "FALSE",
-        "FALSE",
-        item.supplier,
-      ][colIndex];
-      return value;
-    }).join("\n");
+    return selectedCells
+      .map(([rowIndex, colIndex]) => {
+        const item = epicorData[rowIndex - 1];
+        const value = [
+          item.number_material,
+          item.name,
+          item.description,
+          item.subassembly_assignment_quantity,
+          item.price,
+          "FALSE",
+          "FALSE",
+          item.supplier,
+        ][colIndex];
+        return value;
+      })
+      .join("\n");
   };
 
   const handleCopySelectedCells = () => {
@@ -118,7 +129,7 @@ const ProjectDetails = ({ identificationNumber }) => {
   };
 
   const handleKeyDown = (event) => {
-    if (event.ctrlKey && event.key === 'c') {
+    if (event.ctrlKey && event.key === "c") {
       // Removed functionality for copying selected cells using Ctrl+C
     }
   };
@@ -340,7 +351,7 @@ const ProjectDetails = ({ identificationNumber }) => {
           (subassembly) => subassembliesItemsData[subassembly.id] || []
         )
       : [];
-  
+
     const allItems = [...assemblyItems, ...subassemblyItems];
     const materialsList = await Promise.all(
       allItems.map(async (item) => {
@@ -355,7 +366,7 @@ const ProjectDetails = ({ identificationNumber }) => {
         return `${subassemblyIdPart}\nMat. ${item.number_material}\n${item.name}\n${item.description}\nQty: ${item.subassembly_assignment_quantity}\nSuppl: ${item.supplier}\n${item.price} ${item.currency}`;
       })
     );
-  
+
     setTextToCopy(materialsList.join("\n"));
     setCopyStatus((prevState) => ({ ...prevState, [assemblyId]: true }));
     setTimeout(() => {
@@ -417,7 +428,7 @@ const ProjectDetails = ({ identificationNumber }) => {
           (subassembly) => subassembliesItemsData[subassembly.id] || []
         )
       : [];
-  
+
     const allItems = [...assemblyItems, ...subassemblyItems];
     const itemsWithSubassemblyInfo = await Promise.all(
       allItems.map(async (item) => {
@@ -426,12 +437,16 @@ const ProjectDetails = ({ identificationNumber }) => {
             `${apiIpAddress}/api/subassembly/${item.subassembly_id}`
           );
           const subassembly = subassemblyResponse.data;
-          return { ...item, subassembly_identification_number: subassembly.identification_number };
+          return {
+            ...item,
+            subassembly_identification_number:
+              subassembly.identification_number,
+          };
         }
         return item;
       })
     );
-  
+
     setEpicorData(itemsWithSubassemblyInfo);
     setIsEpicorModalOpen(true);
   };
@@ -484,7 +499,7 @@ const ProjectDetails = ({ identificationNumber }) => {
                                     className={`${
                                       assembly.completed === 0
                                         ? "text-gray-200"
-                                        : "text-green-500 italic text-opacity-70"
+                                        : ""
                                     }`}
                                   >
                                     <div className="flex items-center space-x-2">
@@ -497,10 +512,13 @@ const ProjectDetails = ({ identificationNumber }) => {
                                       <div>
                                         {assembly.completed === 0 ? (
                                           <span className="mx-2 underline italic text-yellow-500 text-xs">
-                                            PENDING
+                                            <FaHourglassHalf />
                                           </span>
                                         ) : (
-                                          <FontAwesomeIcon icon={faCheck} />
+                                          <FontAwesomeIcon
+                                            icon={faCheck}
+                                            className="text-green-500"
+                                          />
                                         )}
                                       </div>
                                     </div>
@@ -510,7 +528,7 @@ const ProjectDetails = ({ identificationNumber }) => {
                               <div className="flex items-center space-x-4">
                                 <CopyToClipboard text={textToCopy}>
                                   <button
-                                    className={`font-medium text-xs ${
+                                    className={`font-medium text-sm ${
                                       copyStatus[assembly.id]
                                         ? "text-green-500"
                                         : "text-gray-500 transition-colors duration-1000"
@@ -524,14 +542,16 @@ const ProjectDetails = ({ identificationNumber }) => {
                                   </button>
                                 </CopyToClipboard>
                                 <button
-                                  className="rounded text-xs hover:bg-gray-800 text-gray-500 border border-transparent hover:shadow-lg px-5 py-2 transition duration-300 ease-in-out"
-                                  onClick={() => handleEpicorFormat(assembly.id)}
+                                  className="w-15 px-4 py-2 font-medium hover:text-gray-100 text-gray-500 hover:bg-indigo-600 text-sm bg-pageBackground rounded"
+                                  onClick={() =>
+                                    handleEpicorFormat(assembly.id)
+                                  }
                                 >
                                   EPICOR Format
                                 </button>
                                 <button
                                   onClick={() => handleButtonClick(assembly.id)}
-                                  className="rounded text-xs bg-gray-900 text-gray-500 border border-transparent hover:border-blue-800 font-bold shadow-lg px-5 py-2 hover:bg-blue-900 hover:text-blue-200 transition duration-300 ease-in-out"
+                                  className="w-15 px-4 py-2 font-medium hover:bg-blue-600 text-sm bg-pageBackground rounded"
                                 >
                                   Assembly File
                                 </button>
@@ -769,7 +789,7 @@ const ProjectDetails = ({ identificationNumber }) => {
                                                         subassembly.completed ===
                                                         0
                                                           ? "text-gray-200"
-                                                          : "text-green-300 italic text-opacity-70"
+                                                          : ""
                                                       }`}
                                                     >
                                                       <div className="flex items-center space-x-2">
@@ -788,11 +808,12 @@ const ProjectDetails = ({ identificationNumber }) => {
                                                           {subassembly.completed ===
                                                           0 ? (
                                                             <span className="mx-2 underline italic text-yellow-400 text-xs">
-                                                              PENDING
+                                                              <FaHourglassHalf />
                                                             </span>
                                                           ) : (
                                                             <FontAwesomeIcon
                                                               icon={faCheck}
+                                                              className="text-green-500"
                                                             />
                                                           )}
                                                         </div>
@@ -802,7 +823,11 @@ const ProjectDetails = ({ identificationNumber }) => {
                                                 </div>
                                                 <div className="flex items-center space-x-4">
                                                   <button
-                                                    onClick={() => handleSubassemblyButtonClick(subassembly.id)}
+                                                    onClick={() =>
+                                                      handleSubassemblyButtonClick(
+                                                        subassembly.id
+                                                      )
+                                                    }
                                                     className="rounded text-xs text-gray-600 border border-transparent hover:border-blue-800 font-semibold px-5 py-2 hover:bg-gray-900 hover:text-gary-200 transition duration-300 ease-in-out"
                                                   >
                                                     Subassembly File
@@ -828,48 +853,64 @@ const ProjectDetails = ({ identificationNumber }) => {
                                                 </div>
                                               </div>
                                               {/* TABLE SUBASSEMBLY DATA */}
-                                              {showSubassemblyInfo[subassembly.id] && (
+                                              {showSubassemblyInfo[
+                                                subassembly.id
+                                              ] && (
                                                 <div className="pt-2 pb-10 px-2">
-                                                <table className="w-full mt-4 border-collapse border border-gray-500">
-                                                  <tbody>
+                                                  <table className="w-full mt-4 border-collapse border border-gray-500">
+                                                    <tbody>
                                                       {[
                                                         {
-                                                          label: "Identification Number",
-                                                          value: subassembly.identification_number,
-                                                          className: "text-gray-500 italic text-base font-medium",
+                                                          label:
+                                                            "Identification Number",
+                                                          value:
+                                                            subassembly.identification_number,
+                                                          className:
+                                                            "text-gray-500 italic text-base font-medium",
                                                         },
                                                         {
                                                           label: "Description",
-                                                          value: subassembly.description,
+                                                          value:
+                                                            subassembly.description,
                                                         },
                                                         {
                                                           label: "Price",
                                                           value: `$${subassembly.price} USD`,
                                                         },
                                                         {
-                                                          label: "Delivery Date",
-                                                          value: subassembly.delivery_date,
+                                                          label:
+                                                            "Delivery Date",
+                                                          value:
+                                                            subassembly.delivery_date,
                                                         },
                                                         {
                                                           label: "Status",
-                                                          value: getAssemblyStatus(subassembly.completed),
+                                                          value:
+                                                            getAssemblyStatus(
+                                                              subassembly.completed
+                                                            ),
                                                           className:
                                                             "bg-blue-900 bg-opacity-50 text-gray-400 italic",
                                                         },
                                                         {
-                                                          label: "Completed Date",
-                                                          value: subassembly.completed_date,
+                                                          label:
+                                                            "Completed Date",
+                                                          value:
+                                                            subassembly.completed_date,
                                                           className:
                                                             "bg-blue-900 bg-opacity-50 text-gray-400 italic",
                                                         },
                                                       ].map((row, index) => (
                                                         <tr key={index}>
                                                           <td className="border border-blue-500 px-4 py-2">
-                                                            <strong>{row.label}</strong>
+                                                            <strong>
+                                                              {row.label}
+                                                            </strong>
                                                           </td>
                                                           <td
                                                             className={`border border-gray-500 px-4 py-2 ${
-                                                              row.className || ""
+                                                              row.className ||
+                                                              ""
                                                             }`}
                                                           >
                                                             {row.value}
@@ -1162,19 +1203,27 @@ const ProjectDetails = ({ identificationNumber }) => {
                 <thead>
                   <tr className="w-full text-left">
                     <th className="px-1 py-1 bg-gray-800 text-center"></th>
-                    {epicorData.some(item => item.subassembly_identification_number) && (
+                    {epicorData.some(
+                      (item) => item.subassembly_identification_number
+                    ) && (
                       <th className="px-1 py-1 bg-green-900 border border-green-500 text-center text-gray">
                         A
                       </th>
                     )}
-                    {["A", "B", "C", "D", "E", "F", "G", "H"].map((header, index) => (
-                      <th
-                        key={index}
-                        className="px-1 py-1 bg-green-900 border border-green-500 text-center text-gray"
-                      >
-                        {epicorData.some(item => item.subassembly_identification_number) ? String.fromCharCode(66 + index) : header}
-                      </th>
-                    ))}
+                    {["A", "B", "C", "D", "E", "F", "G", "H"].map(
+                      (header, index) => (
+                        <th
+                          key={index}
+                          className="px-1 py-1 bg-green-900 border border-green-500 text-center text-gray"
+                        >
+                          {epicorData.some(
+                            (item) => item.subassembly_identification_number
+                          )
+                            ? String.fromCharCode(66 + index)
+                            : header}
+                        </th>
+                      )
+                    )}
                   </tr>
                 </thead>
                 <tbody className="shadow-lg bg-white text-black">
@@ -1182,7 +1231,9 @@ const ProjectDetails = ({ identificationNumber }) => {
                     <td className="font-semibold px-2 py-2 bg-green-900 text-white border-green-500 border-b border-t border-r border-gray-700 text-center">
                       1
                     </td>
-                    {epicorData.some(item => item.subassembly_identification_number) && (
+                    {epicorData.some(
+                      (item) => item.subassembly_identification_number
+                    ) && (
                       <td className="px-2 py-2 bg-blue-900 border  border-blue-400 truncate text-white text-center font-semibold">
                         Subassembly ID
                       </td>
@@ -1195,7 +1246,7 @@ const ProjectDetails = ({ identificationNumber }) => {
                       "Cost",
                       "-",
                       "-",
-                      "Supplier"
+                      "Supplier",
                     ].map((header, index) => (
                       <td
                         key={index}
@@ -1206,20 +1257,25 @@ const ProjectDetails = ({ identificationNumber }) => {
                     ))}
                   </tr>
                   {epicorData.map((item, rowIndex) => (
-                    <tr
-                      key={rowIndex}
-                      className=""
-                    >
+                    <tr key={rowIndex} className="">
                       <td className="font-semibold px-2 py-2 bg-green-900 border-green-500 border-b border-t border-r border-gray-700 text-center text-white">
                         {rowIndex + 2}
                       </td>
-                      {epicorData.some(item => item.subassembly_identification_number) && (
+                      {epicorData.some(
+                        (item) => item.subassembly_identification_number
+                      ) && (
                         <td
                           className={`px-2 py-2 border border-gray-500 text-center truncate cursor-crosshair select-text ${
-                            isSelected(rowIndex + 1, 0) ? "bg-blue-500 bg-opacity-50" : ""
+                            isSelected(rowIndex + 1, 0)
+                              ? "bg-blue-500 bg-opacity-50"
+                              : ""
                           }`}
-                          onMouseDown={() => handleCellMouseDown(rowIndex + 1, 0)}
-                          onMouseOver={() => handleCellMouseOver(rowIndex + 1, 0)}
+                          onMouseDown={() =>
+                            handleCellMouseDown(rowIndex + 1, 0)
+                          }
+                          onMouseOver={() =>
+                            handleCellMouseOver(rowIndex + 1, 0)
+                          }
                         >
                           {item.subassembly_identification_number || ""}
                         </td>
@@ -1232,15 +1288,42 @@ const ProjectDetails = ({ identificationNumber }) => {
                         item.price,
                         "FALSE",
                         "FALSE",
-                        item.supplier
+                        item.supplier,
                       ].map((value, colIndex) => (
                         <td
                           key={colIndex}
                           className={`px-2 py-2 border border-gray-500 text-center truncate cursor-crosshair select-text ${
-                            isSelected(rowIndex + 1, epicorData.some(item => item.subassembly_identification_number) ? colIndex + 1 : colIndex) ? "bg-blue-500 bg-opacity-50" : ""
+                            isSelected(
+                              rowIndex + 1,
+                              epicorData.some(
+                                (item) => item.subassembly_identification_number
+                              )
+                                ? colIndex + 1
+                                : colIndex
+                            )
+                              ? "bg-blue-500 bg-opacity-50"
+                              : ""
                           }`}
-                          onMouseDown={() => handleCellMouseDown(rowIndex + 1, epicorData.some(item => item.subassembly_identification_number) ? colIndex + 1 : colIndex)}
-                          onMouseOver={() => handleCellMouseOver(rowIndex + 1, epicorData.some(item => item.subassembly_identification_number) ? colIndex + 1 : colIndex)}
+                          onMouseDown={() =>
+                            handleCellMouseDown(
+                              rowIndex + 1,
+                              epicorData.some(
+                                (item) => item.subassembly_identification_number
+                              )
+                                ? colIndex + 1
+                                : colIndex
+                            )
+                          }
+                          onMouseOver={() =>
+                            handleCellMouseOver(
+                              rowIndex + 1,
+                              epicorData.some(
+                                (item) => item.subassembly_identification_number
+                              )
+                                ? colIndex + 1
+                                : colIndex
+                            )
+                          }
                         >
                           {value}
                         </td>
