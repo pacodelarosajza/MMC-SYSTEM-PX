@@ -23,6 +23,7 @@ const MaterialsSubassemblies = ({ id }) => {
   const [costMaterial, setCostMaterial] = useState(null); // New state
   const [totalPrice, setTotalPrice] = useState(0); // New state
   const [remainingCost, setRemainingCost] = useState(0); // New state
+  const [totalSubassemblyPrice, setTotalSubassemblyPrice] = useState(0); // New state
   const apiIpAddress = import.meta.env.VITE_API_IP_ADDRESS;
 
   useEffect(() => {
@@ -179,7 +180,10 @@ const MaterialsSubassemblies = ({ id }) => {
 
   useEffect(() => {
     const calculateTotalPrice = () => {
-      const total = data.reduce((sum, item) => sum + parseFloat(item.price || 0), 0);
+      const total = data.reduce(
+        (sum, item) => sum + parseFloat(item.price || 0),
+        0
+      );
       setTotalPrice(total);
     };
 
@@ -192,10 +196,25 @@ const MaterialsSubassemblies = ({ id }) => {
     }
   }, [costMaterial, totalPrice]);
 
+  useEffect(() => {
+    const calculateTotalSubassemblyPrice = () => {
+      const total = subassemblies.reduce(
+        (sum, item) => sum + parseFloat(item.price || 0),
+        0
+      );
+      setTotalSubassemblyPrice(total);
+    };
+
+    calculateTotalSubassemblyPrice();
+  }, [subassemblies]);
+
   return (
     <>
       {isSubmitMaterialsOpen ? (
-        <SubmitMaterials id={id} onClose={() => setIsSubmitMaterialsOpen(false)} />
+        <SubmitMaterials
+          id={id}
+          onClose={() => setIsSubmitMaterialsOpen(false)}
+        />
       ) : (
         <div className="fixed z-10 inset-0 flex items-center justify-center bg-black bg-opacity-60 transition-opacity duration-300">
           <div className="py-12 px-10 bg-white dark:bg-gray-800 rounded-lg shadow-2xl transform scale-100 hover:scale-105 transition-transform duration-200 w-full max-w-6xl max-h-[80vh] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-500 scrollbar-track-blue-200">
@@ -232,7 +251,10 @@ const MaterialsSubassemblies = ({ id }) => {
                 </thead>
                 <tbody>
                   {data.map((item, index) => (
-                    <tr key={index} className="hover:bg-gray-700 hover:bg-opacity-50">
+                    <tr
+                      key={index}
+                      className="hover:bg-gray-700 hover:bg-opacity-50"
+                    >
                       <td className="text-gray-400 font-medium border border-gray-600 text-center p-2">
                         {index + 1}
                       </td>
@@ -257,36 +279,64 @@ const MaterialsSubassemblies = ({ id }) => {
                             handleAddClick(item.id, item.identification_number)
                           }
                           className="w-15 px-2 py-1 font-medium hover:bg-blue-600 text-xs bg-gray-800 rounded"
-                          >
+                        >
                           Add
                         </button>
                       </td>
                     </tr>
                   ))}
                 </tbody>
-                <tfoot  className="border border-gray-600">
+                <tfoot className="border border-gray-600">
                   <tr>
-                  <td className="text-gray-400 text-right py-1 px-8  border-gray-500 bg-opacity-40 bg-gray-700 text-left font-semibold" colSpan={4}>
-                  Total Assembly Price
+                    <td
+                      className="text-gray-400 text-right py-1 px-8  border-gray-500 bg-opacity-40 bg-gray-700 text-left font-semibold"
+                      colSpan={4}
+                    >
+                      Total Assembly Price
                     </td>
-                    <td className="pl-2 font-medium border-gray-600" colSpan={2}>
+                    <td
+                      className="pl-2 font-medium border-gray-600"
+                      colSpan={2}
+                    >
                       ${totalPrice.toFixed(2)} MXN
                     </td>
                   </tr>
                   <tr>
-                    <td className="text-blue-400 text-right py-1 px-8 border-b border-red-600 bg-opacity-20 bg-blue-500 text-left  font-semibold" colSpan={4}>
+                    <td
+                      className="text-blue-400 text-right py-1 px-8 border-b border-red-600 bg-opacity-20 bg-blue-500 text-left  font-semibold"
+                      colSpan={4}
+                    >
                       Cost Material Project
                     </td>
-                    <td className="pl-2 text-blue-400 bg-opacity-20 bg-blue-500 font-medium border-b border-red-600 " colSpan={2}>
-                      ${costMaterial !== null ? costMaterial.toFixed(2) : "Loading..."} MXN
+                    <td
+                      className="pl-2 text-blue-400 bg-opacity-20 bg-blue-500 font-medium border-b border-red-600 "
+                      colSpan={2}
+                    >
+                      $
+                      {costMaterial !== null
+                        ? costMaterial.toFixed(2)
+                        : "Loading..."}{" "}
+                      MXN
                     </td>
                   </tr>
                   <tr>
-                  <td className="text-gray-400 text-right py-1 px-8  border-gray-500 bg-opacity-40 bg-gray-700 text-left font-semibold" colSpan={4}>
+                    <td
+                      className="text-gray-400 text-right py-1 px-8  border-gray-500 bg-opacity-40 bg-gray-700 text-left font-semibold"
+                      colSpan={4}
+                    >
                       Remaining Cost
                     </td>
-                    <td className={`pl-2 font-medium border-gray-600 ${remainingCost < 0 ? 'text-orange-500' : ''}`} colSpan={2}>
-                      ${remainingCost !== null ? remainingCost.toFixed(2) : "Loading..."} MXN
+                    <td
+                      className={`pl-2 font-medium border-r border-b border-gray-500 ${
+                        remainingCost < 0 ? "text-orange-500" : ""
+                      }`}
+                      colSpan={2}
+                    >
+                      $
+                      {selectedItemId && totalSubassemblyPrice !== null
+                        ? (selectedItemId.price - totalSubassemblyPrice).toFixed(2)
+                        : "Loading..."}{" "}
+                      MXN
                     </td>
                   </tr>
                 </tfoot>
@@ -296,47 +346,44 @@ const MaterialsSubassemblies = ({ id }) => {
             <div className="mt-6">
               {selectedItemId ? (
                 <>
-                <div className="p-5">
+                  <div className="p-5">
+                    {/* TABLA DE GET DE SUBENSAMBLES */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex mt-5 gap-2">
+                        <h1 className="text-1xl text-gray-600">
+                          List of subassemblies of assembly
+                        </h1>
+                        <h1 className="text-1xl font-medium text-gray-400">
+                          {selectedItemId.identificationNumber}
+                        </h1>
+                      </div>
+                      <div className="flex items-center  py-1 mt-5">
+                        <button
+                          onClick={handleRefreshClick}
+                          className="p-2 ml-auto text-white rounded hover:bg-gray-700 transition duration-200"
+                        >
+                          <FaSync color="gray" size={15} />
+                        </button>
+                      </div>
+                    </div>
 
-                
-                  <div className="flex  justify-end mt-4">
-                    <button
-                      type="button"
-                      onClick={handleDeactivateClick}
-                      className="mr-2 w-15 p-2 font-medium text-sm hover:bg-red-500 bg-red-600 rounded"
-                                >
-                                <FaTimes />
-                    </button>
-                  </div>
-                  <div className="flex mt-5 gap-2">
-                    <h1 className="text-1xl text-gray-600">
-                      Subassemblies for assembly
-                    </h1>
-                    <h1 className="text-1xl font-medium text-gray-400">
-                      {selectedItemId.identificationNumber}
-                    </h1>
-                  </div>
-                  <form onSubmit={handleSubmit} className="mt-5 w-full">
-                    <table className="border border-gray-900 min-w-full bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-lg">
-                      <thead>
+                    <table className="min-w-full bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-lg mt-4">
+                      <thead className="border border-gray-700">
                         <tr>
-                          <th className="text-center py-2 px-2 border-b border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">
+                          <th className="text-center py-1 px-1 border-b border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300">
                             No.
                           </th>
-                          <th className="py-2 px-4 border-b border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">
+                          <th className="py-1 px-2 border-b border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300">
                             Identification Number
                           </th>
-                          <th className="py-2 px-4 border-b border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">
-                            Description <br />
-                            <span className="text-xs text-gray-500">
-                              (Non-mandatory)
-                            </span>
+                          <th className="py-1 px-2 border-b border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300">
+                            Description
                           </th>
-                          <th className="py-2 px-4 border-b border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">
+                          <th className="py-1 px-2 border-b border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300">
                             Delivery Date
                           </th>
                           <th
-                            className="py-2 px-4 border-b border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-sm font-semibold text-gray-600 dark:text-gray-300"
+                            className="py-1 px-2 border-b border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300"
                             colSpan={2}
                           >
                             Price{" "}
@@ -345,200 +392,276 @@ const MaterialsSubassemblies = ({ id }) => {
                         </tr>
                       </thead>
                       <tbody>
-                        {rows.map((row, index) => (
-                          <tr key={index}>
-                            <td className="text-gray-400 font-medium border border-gray-600 text-center">
-                              {index + 1}
-                            </td>
-                            <td className="text-gray-300 font-medium border border-gray-600">
-                              <input
-                                type="text"
-                                name="identification_number"
-                                value={row.identification_number}
-                                onChange={(e) => handleRowChange(index, e)}
-                                className="w-full px-2 py-1 bg-transparent appearance-none border-none focus:outline-none tracking-wide"
-                                required
-                              />
-                            </td>
-                            <td className="text-gray-300 font-medium border border-gray-600">
-                              <textarea
-                                name="description"
-                                value={
-                                  row.description.length > 255
-                                    ? row.description.substring(0, 50) + "..."
-                                    : row.description
-                                }
-                                onChange={(e) =>
-                                  handleRowDescriptionChange(index, e)
-                                }
-                                maxLength="255"
-                                className="w-full px-2 py-1 bg-transparent appearance-none border-none focus:outline-none tracking-wide resize-none overflow-hidden"
-                                required
-                              />
-                              <div className="text-right text-xs text-gray-400">
-                                {charCount}/255
-                              </div>
-                            </td>
-                            <td className="text-gray-300 font-medium border border-gray-600">
-                              <input
-                                type="date"
-                                name="delivery_date"
-                                value={row.delivery_date}
-                                onChange={(e) => handleRowChange(index, e)}
-                                className="w-full px-2 py-1 bg-transparent appearance-none border-none focus:outline-none tracking-wide"
-                                required
-                              />
-                            </td>
-                            <td className="text-gray-300 font-medium border-l border-b border-t border-gray-600">
-                              <input
-                                type="number"
-                                name="price"
-                                value={row.price}
-                                onChange={(e) => handleRowChange(index, e)}
-                                className="w-full px-2 py-1 bg-transparent appearance-none border-none focus:outline-none tracking-wide"
-                                min="0"
-                                step="0.01"
-                                required
-                              />
-                            </td>
-                            <td className="text-gray-200 font-medium border-r border-b border-gray-600">
-                              <button
-                                type="button"
-                                onClick={() => removeRow(index)}
-                                className="ml-2 w-15 p-2 font-medium text-sm hover:bg-red-600 rounded"
-                                >
-                                <FaTimes />
-                              </button>
+                        {subassemblies.length > 0 ? (
+                          subassemblies.map((item, index) => (
+                            <tr key={index}>
+                              <td className="text-gray-400 font-medium border border-gray-600 text-center p-2">
+                                {index + 1}
+                              </td>
+                              <td className="text-ms text-gray-300 font-medium border border-gray-600 text-center p-2">
+                                {item.identification_number}
+                              </td>
+                              <td className="text-xs text-gray-400 font-medium border border-gray-600 p-2">
+                                {item.description.length > 50
+                                  ? item.description.substring(0, 50) + "..."
+                                  : item.description}
+                              </td>
+                              <td className="text-ms text-gray-300 font-medium border border-gray-600 text-center p-2">
+                                {item.delivery_date}
+                              </td>
+                              <td className="text-ms text-gray-300 font-medium border border-gray-600 text-center p-2">
+                                {item.price}
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td
+                              colSpan="6"
+                              className="text-center text-gray-500 py-4"
+                            >
+                              No subassemblies registered.
                             </td>
                           </tr>
-                        ))}
+                        )}
                       </tbody>
-                      
+                      <tfoot className="border border-gray-600">
+                        <tr>
+                          <td
+                            className="text-gray-400 text-right py-1 px-8 border-gray-500 bg-opacity-40 bg-gray-700 text-left font-semibold"
+                            colSpan={4}
+                          >
+                            Total Subassembly Price
+                          </td>
+                          <td
+                            className="pl-2 font-medium border-gray-600"
+                            colSpan={2}
+                          >
+                            ${totalSubassemblyPrice.toFixed(2)} MXN
+                          </td>
+                        </tr>
+                        <tr>
+                          <td
+                            className="text-indigo-400 text-right py-1 px-8 border-b border-red-600 bg-opacity-20 bg-indigo-500 text-left font-semibold"
+                            colSpan={4}
+                          >
+                            Cost Material Assembly
+                          </td>
+                          <td
+                            className="pl-2 text-indigo-400 bg-opacity-20 bg-indigo-500 font-medium border-b border-red-600"
+                            colSpan={2}
+                          >
+                            ${selectedItemId.price} MXN
+                          </td>
+                        </tr>
+                        <tr>
+                          <td
+                            className="text-gray-400 text-right py-1 px-8 border-gray-500 bg-opacity-40 bg-gray-700 text-left font-semibold"
+                            colSpan={4}
+                          >
+                            Remaining Cost
+                          </td>
+                          <td
+                            className={`pl-2 font-medium border-r border-b border-gray-500 ${
+                              remainingCost < 0 ? "text-orange-500" : ""
+                            }`}
+                            colSpan={2}
+                          >
+                            $
+                            {selectedItemId && totalSubassemblyPrice !== null
+                              ? (selectedItemId.price - totalSubassemblyPrice).toFixed(2)
+                              : "Loading..."}{" "}
+                            MXN
+                          </td>
+                        </tr>
+                      </tfoot>
                     </table>
-                    <div className="flex items-center">
-                      <div className="p-2">
-                        <button
-                          type="button"
-                          onClick={addRow}
-                          className="ml-2 w-15 p-2 font-medium hover:bg-blue-500 text-sm bg-blue-600 rounded"
-                      >
-                      <FaPlus />
-                        </button>
-                      </div>
-                      <div className="flex justify-end gap-4">
-                        <button
-                          type="submit"
-                          className="ml-2 w-15 px-2 py-1 font-medium hover:bg-blue-500 bg-blue-600 rounded"
-                      >
-                      Save
-                        </button>
-                      </div>
-                    </div>
-                  </form>
-                  {/* TABLA DE GET DE SUBENSAMBLES */}
-                  <div className="flex items-center justify-between">
+
+                    {/* Subassemblies for assembly */}
                     <div className="flex mt-5 gap-2">
                       <h1 className="text-1xl text-gray-600">
-                        List of subassemblies of assembly
+                        Subassemblies for assembly
                       </h1>
                       <h1 className="text-1xl font-medium text-gray-400">
                         {selectedItemId.identificationNumber}
                       </h1>
                     </div>
-                    <div className="flex items-center  py-1 mt-5">
-                      <button
-                        onClick={handleRefreshClick}
-                        className="p-2 ml-auto text-white rounded hover:bg-gray-700 transition duration-200"
-          >
-            <FaSync color="gray" size={15} />
-                      </button>
-                    </div>
-                  </div>
-
-                  <table className="min-w-full bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-lg mt-4">
-                  <thead className="border border-gray-700">
-                  <tr>
-                    <th className="text-center py-1 px-1 border-b border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300">
-                      No.
-                    </th>
-                    <th className="py-1 px-2 border-b border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300">
-                      Identification Number
-                    </th>
-                    <th className="py-1 px-2 border-b border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300">
-                      Description
-                    </th>
-                    <th className="py-1 px-2 border-b border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300">
-                      Delivery Date
-                    </th>
-                    <th
-                      className="py-1 px-2 border-b border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-xs font-semibold text-gray-600 dark:text-gray-300"
-                      colSpan={2}
-                    >
-                      Price <span className="text-xs text-gray-500">(MXN)</span>
-                    </th>
-                  </tr>
-                </thead>
-                    <tbody>
-                      {subassemblies.length > 0 ? (
-                        subassemblies.map((item, index) => (
-                          <tr key={index}>
-                            <td className="text-gray-400 font-medium border border-gray-600 text-center p-2">
-                              {index + 1}
-                            </td>
-                            <td className="text-ms text-gray-300 font-medium border border-gray-600 text-center p-2">
-                              {item.identification_number}
-                            </td>
-                            <td className="text-xs text-gray-400 font-medium border border-gray-600 p-2">
-                              {item.description.length > 50
-                                ? item.description.substring(0, 50) + "..."
-                                : item.description}
-                            </td>
-                            <td className="text-ms text-gray-300 font-medium border border-gray-600 text-center p-2">
-                              {item.delivery_date}
-                            </td>
-                            <td className="text-ms text-gray-300 font-medium border border-gray-600 text-center p-2">
-                              {item.price}
-                            </td>
+                    <form onSubmit={handleSubmit} className="mt-5 w-full">
+                      <table className="border border-gray-900 min-w-full bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-lg">
+                        <thead>
+                          <tr>
+                            <th className="text-center py-2 px-2 border-b border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">
+                              No.
+                            </th>
+                            <th className="py-2 px-4 border-b border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">
+                              Identification Number
+                            </th>
+                            <th className="py-2 px-4 border-b border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">
+                              Description <br />
+                              <span className="text-xs text-gray-500">
+                                (Non-mandatory)
+                              </span>
+                            </th>
+                            <th className="py-2 px-4 border-b border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">
+                              Delivery Date
+                            </th>
+                            <th
+                              className="py-2 px-4 border-b border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 text-left text-sm font-semibold text-gray-600 dark:text-gray-300"
+                              colSpan={2}
+                            >
+                              Price{" "}
+                              <span className="text-xs text-gray-500">
+                                (MXN)
+                              </span>
+                            </th>
                           </tr>
-                        ))
-                      ) : (
+                        </thead>
+                        <tbody>
+                          {rows.map((row, index) => (
+                            <tr key={index}>
+                              <td className="text-gray-400 font-medium border border-gray-600 text-center">
+                                {index + 1}
+                              </td>
+                              <td className="text-gray-300 font-medium border border-gray-600">
+                                <input
+                                  type="text"
+                                  name="identification_number"
+                                  value={row.identification_number}
+                                  onChange={(e) => handleRowChange(index, e)}
+                                  className="w-full px-2 py-1 bg-transparent appearance-none border-none focus:outline-none tracking-wide"
+                                  required
+                                />
+                              </td>
+                              <td className="text-gray-300 font-medium border border-gray-600">
+                                <textarea
+                                  name="description"
+                                  value={
+                                    row.description.length > 255
+                                      ? row.description.substring(0, 50) + "..."
+                                      : row.description
+                                  }
+                                  onChange={(e) =>
+                                    handleRowDescriptionChange(index, e)
+                                  }
+                                  maxLength="255"
+                                  className="w-full px-2 py-1 bg-transparent appearance-none border-none focus:outline-none tracking-wide resize-none overflow-hidden"
+                                />
+                                <div className="text-right text-xs text-gray-400">
+                                  {charCount}/255
+                                </div>
+                              </td>
+                              <td className="text-gray-300 font-medium border border-gray-600">
+                                <input
+                                  type="date"
+                                  name="delivery_date"
+                                  value={row.delivery_date}
+                                  onChange={(e) => handleRowChange(index, e)}
+                                  className="w-full px-2 py-1 bg-transparent appearance-none border-none focus:outline-none tracking-wide"
+                                  required
+                                />
+                              </td>
+                              <td className="text-gray-300 font-medium border-l border-b border-t border-gray-600">
+                                <input
+                                  type="number"
+                                  name="price"
+                                  value={row.price}
+                                  onChange={(e) => handleRowChange(index, e)}
+                                  className="w-full px-2 py-1 bg-transparent appearance-none border-none focus:outline-none tracking-wide"
+                                  min="0"
+                                  step="0.01"
+                                  required
+                                />
+                              </td>
+                              <td className="text-gray-200 font-medium border-r border-b border-gray-600">
+                                <button
+                                  type="button"
+                                  onClick={() => removeRow(index)}
+                                  className="ml-2 w-15 p-2 font-medium text-sm hover:bg-red-600 rounded"
+                                >
+                                  <FaTimes />
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                        <tfoot className="border border-gray-600">
                         <tr>
                           <td
-                            colSpan="6"
-                            className="text-center text-gray-500 py-4"
+                            className="text-gray-400 text-right py-1 px-8 border-gray-500 bg-opacity-40 bg-gray-700 text-left font-semibold"
+                            colSpan={4}
                           >
-                            No subassemblies registered.
+                            Total Subassembly Price
+                          </td>
+                          <td
+                            className="pl-2 font-medium border-gray-600"
+                            colSpan={2}
+                          >
+                            ${rows.reduce((sum, row) => sum + parseFloat(row.price || 0), 0).toFixed(2)} MXN
                           </td>
                         </tr>
-                      )}
-                    </tbody>
-                    <tfoot  className="border border-gray-600">
-                  <tr>
-                  <td className="text-gray-400 text-right py-1 px-8  border-gray-500 bg-opacity-40 bg-gray-700 text-left font-semibold" colSpan={4}>
-                    Total Subassembly Price
-                    </td>
-                    <td className="pl-2 font-medium border-gray-600" colSpan={2}>
-                      ${totalPrice.toFixed(2)} MXN
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="text-indigo-400 text-right py-1 px-8 border-b border-red-600 bg-opacity-20 bg-indigo-500 text-left font-semibold" colSpan={4}>
-                      Cost Material Assembly
-                    </td>
-                    <td className="pl-2 text-indigo-400 bg-opacity-20 bg-indigo-500 font-medium border-b border-red-600" colSpan={2}>
-                      ${costMaterial !== null ? costMaterial.toFixed(2) : "Loading..."} MXN
-                    </td>
-                  </tr>
-                  <tr>
-                  <td className="text-gray-400 text-right py-1 px-8  border-gray-500 bg-opacity-40 bg-gray-700 text-left font-semibold" colSpan={4}>
-                  Remaining Cost
-                    </td>
-                    <td className={`pl-2 font-medium border-r border-b border-gray-500 ${remainingCost < 0 ? 'text-orange-500' : ''}`} colSpan={2}>
-                      ${remainingCost !== null ? remainingCost.toFixed(2) : "Loading..."} MXN
-                    </td>
-                  </tr>
-                </tfoot>
-                  </table>
+                        <tr>
+                          <td
+                            className="text-indigo-400 text-right py-1 px-8 border-b border-red-600 bg-opacity-20 bg-indigo-500 text-left font-semibold"
+                            colSpan={4}
+                          >
+                            Remaining Cost of Material Assembly  
+                          </td>
+                          <td
+                            className="pl-2 text-indigo-400 bg-opacity-20 bg-indigo-500 font-medium border-b border-red-600"
+                            colSpan={2}
+                          >
+                            ${selectedItemId && totalSubassemblyPrice !== null
+                              ? (selectedItemId.price - totalSubassemblyPrice).toFixed(2)
+                              : "Loading..."}{" "} MXN
+                          </td>
+                        </tr>
+                        <tr>
+                          <td
+                            className="text-gray-400 text-right py-1 px-8 border-gray-500 bg-opacity-40 bg-gray-700 text-left font-semibold"
+                            colSpan={4}
+                          >
+                            Remaining Cost Approximate 
+                          </td>
+                          <td
+                            className={`pl-2 font-medium border-r border-b border-gray-500 ${
+                              rows.length > 0 &&
+                              (selectedItemId.price - totalSubassemblyPrice) - rows.reduce((sum, row) => sum + parseFloat(row.price || 0), 0) < 0
+                                ? "text-red-500"
+                                : ""
+                            }`}
+                            colSpan={2}
+                          >
+                            $
+                            {rows.length > 0
+                              ? (
+                                  (selectedItemId.price - totalSubassemblyPrice) - rows.reduce((sum, row) => sum + parseFloat(row.price || 0), 0)
+                                ).toFixed(2)
+                              : "Loading..."}{" "}
+                            MXN
+                          </td>
+                        </tr>
+                      </tfoot>
+                      </table>
+                      <div className="flex items-center">
+                        <div className="p-2">
+                          <button
+                            type="button"
+                            onClick={addRow}
+                            className="ml-2 w-15 p-2 font-medium hover:bg-blue-500 text-sm bg-blue-600 rounded"
+                          >
+                            <FaPlus />
+                          </button>
+                        </div>
+                        <div className="flex justify-end gap-4">
+                          <button
+                            type="submit"
+                            className="ml-2 w-15 px-2 py-1 font-medium hover:bg-blue-500 bg-blue-600 rounded"
+                          >
+                            Save
+                          </button>
+                        </div>
+                      </div>
+                    </form>
                   </div>
                 </>
               ) : (
@@ -555,8 +678,8 @@ const MaterialsSubassemblies = ({ id }) => {
                 type="button"
                 onClick={handleContinueClick}
                 className=" px-4 py-2 font-medium hover:bg-blue-600 bg-pageBackground rounded"
-          >
-            Continue
+              >
+                Continue
               </button>
             </div>
           </div>

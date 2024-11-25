@@ -141,6 +141,11 @@ const ProjectDetails = ({ identificationNumber }) => {
     };
   }, []);
 
+  const formatDate = (dateString) => {
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    return new Date(dateString).toLocaleDateString(undefined, options);
+  };
+
   // USE EFFECT TO FETCH DATA
   useEffect(() => {
     const debouncedFetch = debounce(fetchProjectsData, 300);
@@ -233,6 +238,11 @@ const ProjectDetails = ({ identificationNumber }) => {
 
                 if (allSubassemblyItemsCompleted) {
                   subassembly.completed = 1;
+                  subassembly.completed_date = new Date().toISOString();
+                  await axios.patch(`${apiIpAddress}/api/patchSubassembly/${subassembly.id}`, {
+                    completed: 1,
+                    completed_date: subassembly.completed_date,
+                  });
                 }
               })
             );
@@ -251,6 +261,11 @@ const ProjectDetails = ({ identificationNumber }) => {
 
           if (allItemsCompleted && allSubassembliesCompleted) {
             assembly.completed = 1;
+            assembly.completed_date = new Date().toISOString();
+            await axios.patch(`${apiIpAddress}/api/patchAssembly/${assembly.id}`, {
+              completed: 1,
+              completed_date: assembly.completed_date,
+            });
           }
         })
       );
@@ -551,7 +566,7 @@ const ProjectDetails = ({ identificationNumber }) => {
                                 </button>
                                 <button
                                   onClick={() => handleButtonClick(assembly.id)}
-                                  className="w-15 px-4 py-2 font-medium hover:bg-blue-600 text-sm bg-pageBackground rounded"
+                                  className="w-15 px-4 py-2 font-medium hover:bg-blue-600 text-sm bg-pageBackground rounded text-gray-300 hover:text-gray-100"
                                 >
                                   Assembly File
                                 </button>
@@ -605,7 +620,7 @@ const ProjectDetails = ({ identificationNumber }) => {
                                       },
                                       {
                                         label: "Completed Date",
-                                        value: assembly.completed_date,
+                                        value: formatDate(assembly.completed_date),
                                         className:
                                           "bg-blue-900 bg-opacity-50 text-gray-400 italic",
                                       },
@@ -828,7 +843,7 @@ const ProjectDetails = ({ identificationNumber }) => {
                                                         subassembly.id
                                                       )
                                                     }
-                                                    className="rounded text-xs text-gray-600 border border-transparent hover:border-blue-800 font-semibold px-5 py-2 hover:bg-gray-900 hover:text-gary-200 transition duration-300 ease-in-out"
+                                                    className="w-15 px-4 py-2 font-medium hover:bg-blue-500 text-xs bg-pageBackground rounded text-gray-500 hover:text-gray-100"
                                                   >
                                                     Subassembly File
                                                   </button>
@@ -892,14 +907,7 @@ const ProjectDetails = ({ identificationNumber }) => {
                                                           className:
                                                             "bg-blue-900 bg-opacity-50 text-gray-400 italic",
                                                         },
-                                                        {
-                                                          label:
-                                                            "Completed Date",
-                                                          value:
-                                                            subassembly.completed_date,
-                                                          className:
-                                                            "bg-blue-900 bg-opacity-50 text-gray-400 italic",
-                                                        },
+                                                        
                                                       ].map((row, index) => (
                                                         <tr key={index}>
                                                           <td className="border border-blue-500 px-4 py-2">

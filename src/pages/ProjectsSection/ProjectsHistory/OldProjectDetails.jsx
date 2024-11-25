@@ -435,6 +435,26 @@ const OldProjectDetails = ({ identificationNumber }) => {
     setIsEpicorModalOpen(true);
   };
 
+  const [subassemblyDetails, setSubassemblyDetails] = useState({}); // New state for subassembly details
+
+  const handleSubassemblyFile = async (subassemblyId) => {
+    try {
+      const response = await axios.get(`${apiIpAddress}/api/subassembly/${subassemblyId}`);
+      setSubassemblyDetails((prevState) => ({
+        ...prevState,
+        [subassemblyId]: response.data,
+      }));
+    } catch (error) {
+      console.error("Error fetching subassembly details: ", error);
+    }
+    console.log(`Subassembly file for ID: ${subassemblyId}`);
+  };
+
+  const calculateTotalSubassemblyPrice = (subassemblyId) => {
+    const items = subassembliesItemsData[subassemblyId] || [];
+    return items.reduce((total, item) => total + parseFloat(item.price || 0), 0).toFixed(2);
+  };
+
   return (
     <>
       {/* PROJECT DETAILS */}
@@ -528,16 +548,7 @@ const OldProjectDetails = ({ identificationNumber }) => {
                                         label: "Price",
                                         value: `$${assembly.price} USD`,
                                       },
-                                      {
-                                        label: "Delivery Date",
-                                        value: assembly.delivery_date,
-                                      },
                                       
-                                      {
-                                        label: "Completed Date",
-                                        value: assembly.completed_date,
-                                    
-                                      },
                                     ].map((row, index) => (
                                       <tr key={index}>
                                         <td className="border border-blue-500 px-2 py-1">
@@ -632,16 +643,7 @@ const OldProjectDetails = ({ identificationNumber }) => {
                                                   label: "Supplier",
                                                   value: item.supplier,
                                                 },
-                                                {
-                                                  label: "Order Date",
-                                                  value: item.date_order,
-                                            
-                                                },
-                                                {
-                                                  label: "Arrived Date",
-                                                  value: item.arrived_date,
-                                                  
-                                                },
+                                                
                                               ].map((row, index) => (
                                                 <tr key={index}>
                                                   <td className="text-gray-400 font-medium border-r border-b border-gray-700 px-4 py-2">
@@ -697,30 +699,60 @@ const OldProjectDetails = ({ identificationNumber }) => {
                                                     </span>
                                                   </h3>
                                                 </div>
-                                                <button
-                                                  onClick={() =>
-                                                    toggleSubassemblyList(
-                                                      subassembly.id
-                                                    )
-                                                  }
-                                                  className="px-4 py-2 bg-gray-500 text-sm text-gray-300 bg-pageBackground rounded hover:bg-gray-700"
-                                                >
-                                                  <FontAwesomeIcon
-                                                    icon={
-                                                      isSubassemblyOpen[
+                                                <div className="flex items-center space-x-4">
+                                                 
+                                                  <button
+                                                    onClick={() =>
+                                                      toggleSubassemblyList(
                                                         subassembly.id
-                                                      ]
-                                                        ? faChevronUp
-                                                        : faChevronDown
+                                                      )
                                                     }
-                                                  />
-                                                </button>
+                                                    className="px-4 py-2 bg-gray-500 text-sm text-gray-300 bg-pageBackground rounded hover:bg-gray-700"
+                                                  >
+                                                    <FontAwesomeIcon
+                                                      icon={
+                                                        isSubassemblyOpen[
+                                                          subassembly.id
+                                                        ]
+                                                          ? faChevronUp
+                                                          : faChevronDown
+                                                      }
+                                                    />
+                                                  </button>
+                                                  
+                                                </div>
                                               </div>
 
                                               {isSubassemblyOpen[
                                                 subassembly.id
                                               ] && (
                                                 <>
+                                                  {subassemblyDetails[subassembly.id] ? (
+                                                    <div className="pt-2 pb-10 px-2">
+                                                      <table className="w-full mt-4 border-collapse border border-gray-500 text-sm">
+                                                        <tbody>
+                                                          {[
+                                                            { label: "Identification Number", value: subassemblyDetails[subassembly.id].identification_number },
+                                                            { label: "Description", value: subassemblyDetails[subassembly.id].description },
+                                                            { label: "Price", value: `$${subassemblyDetails[subassembly.id].price} USD` },
+                                                            { label: "Total Subassembly Price", value: `$${calculateTotalSubassemblyPrice(subassembly.id)} USD` },
+                                                            // Add more fields as needed
+                                                          ].map((row, index) => (
+                                                            <tr key={index}>
+                                                              <td className="border border-blue-500 px-2 py-1">
+                                                                <strong>{row.label}</strong>
+                                                              </td>
+                                                              <td className={`border border-gray-500 px-2 py-1 ${row.className || ""}`}>
+                                                                {row.value}
+                                                              </td>
+                                                            </tr>
+                                                          ))}
+                                                        </tbody>
+                                                      </table>
+                                                    </div>
+                                                  ) : (
+                                                    <div className="text-gray-500 my-5 text-center">Loading subassembly details...</div>
+                                                  )}
                                                   {Array.isArray(
                                                     subassembliesItemsData[
                                                       subassembly.id

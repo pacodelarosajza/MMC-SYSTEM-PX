@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import AppProjectDetails from "./ProjectDetails";
+import AppProjectCosts from "./CostProject";
 import { FaArrowLeft, FaArrowRight, FaShare, FaTimes } from "react-icons/fa";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSync } from "@fortawesome/free-solid-svg-icons";
@@ -350,6 +351,9 @@ const Projects = ({ setShowChildRoutes }) => {
   };
 
   const truncateDescription = (description, maxLength) => {
+    if (!description) {
+      return "No description available";
+    }
     if (description.length <= maxLength) {
       return description;
     }
@@ -788,7 +792,7 @@ const Projects = ({ setShowChildRoutes }) => {
                             </strong>
                           </div>
                           <div className="text-white text-justify">
-                            {selectedProject.description}
+                            {selectedProject.description || "No description available"}
                           </div>
                         </div>
                       </div>
@@ -818,23 +822,21 @@ const Projects = ({ setShowChildRoutes }) => {
                         options={materialChartOptions}
                       />
                     </div>
-                   
-                    {/* CARD OF COSTS */}
-                    <div className="col-span-12 md:col-span-6 flex">
-                      <div className="p-4 rounded-lg shadow-lg transition duration-300 transform hover:translate-y-1 flex-grow border border-gray-700 hover:bg-gray-800">
-                        <div className="flex items-center mb-2">
-                          <strong className="text-lg font-extrabold text-blue-400 pb-2">
-                            Cost
-                          </strong>
-                        </div>
-                        <div className="text-white text-justify">
-                          <p>Material Cost: ${selectedProject.cost_material} MXN</p>
-                          <p>Labor Cost: ${laborCost} MXN</p>
-                          <p>Total Cost: ${totalCost} MXN</p>
-                          <p>Profit Margin: {profitMargin}%</p>
-                          <p>Selling Price: ${sellingPrice} MXN</p>
-                        </div>
-                      </div>
+        
+                    <button
+                      className="px-4 py-2 mt-10 w-full bg-blue-600 font-bold text-gray-200 rounded hover:bg-blue-500"
+                      onClick={() => {
+                        const costsElement = document.getElementById('costs-section');
+                        if (costsElement) {
+                          costsElement.classList.toggle('hidden');
+                        }
+                      }}
+                    >
+                      Show costs
+                    </button>
+        
+                    <div id="costs-section" className="hidden">
+                      <AppProjectCosts projectId={selectedProject.id} />
                     </div>
 
                     <AppProjectDetails

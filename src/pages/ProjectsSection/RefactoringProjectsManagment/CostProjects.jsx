@@ -23,7 +23,7 @@ const CostProjects = () => {
   // Función para obtener los proyectos
   const fetchProjects = async () => {
     try {
-      const response = await axios.get(`${apiIpAddress}/api/getProjects`);
+      const response = await axios.get(`${apiIpAddress}/api/getProjectsActives`);
       setProjects(response.data);
       response.data.forEach((project) => fetchProjectItems(project.id));
     } catch (error) {
@@ -129,13 +129,13 @@ const CostProjects = () => {
                 {project.identification_number}
               </td>
               <td className="px-4 py-1 border-t border-r border-b border-gray-500">
-                {project.cost_material}
+                $ {project.cost_material} MXN
               </td>
               <td className="px-4 py-1 border-t border-r border-b border-gray-500">
-                {calculateTotalItemCost(project.id)}
+                $ {calculateTotalItemCost(project.id)} MXN
               </td>
               <td className="px-4 py-1 border-t border-b border-gray-500">
-                {project.cost_material - calculateTotalItemCost(project.id)}
+                $ {project.cost_material - calculateTotalItemCost(project.id)} MXN
               </td>
             </tr>
           ))}

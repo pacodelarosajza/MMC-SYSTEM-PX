@@ -260,7 +260,7 @@ const MaterialsAssemblies = ({ id }) => {
                                 }
                                 maxLength="255"
                                 className="w-full px-2 py-1 bg-transparent appearance-none border-none focus:outline-none tracking-wide resize-none overflow-hidden"
-                                required
+                                
                               />
                               <div className="text-right text-xs text-gray-400">
                                 {rowCharCounts[index]}/255
