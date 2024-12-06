@@ -419,7 +419,7 @@ function Create() {
         onClose={() => setIsModalSuccessOpen(false)}
         title="Success"
       >
-        <p>The project has been registered successfully.</p>
+        The project has been registered successfully.
       </Modal>
 
       <Modal
@@ -427,7 +427,7 @@ function Create() {
         onClose={() => setIsModalErrorOpen(false)}
         title="Error"
       >
-        <p>Project registration failed. Please try again.</p>
+        Project registration failed. Please try again.
       </Modal>
 
       <ModalAcept
@@ -436,7 +436,7 @@ function Create() {
         onContinue={confirmCancel}
         title="Cancel Registration"
       >
-        <p>Are you sure you want to cancel the registration?</p>
+        Are you sure you want to cancel the registration?
       </ModalAcept>
     </>
   );

@@ -232,73 +232,71 @@ const MaterialsAssemblies = ({ id }) => {
                     </thead>
                     <tbody>
                       {rows.map((row, index) => (
-                        <>
-                          <tr key={index}>
-                            <td className="text-gray-400 font-medium border border-gray-600 text-center">
-                              {index + 1}
-                            </td>
-                            <td className="text-gray-300 font-medium border border-gray-600">
-                              <input
-                                type="text"
-                                name="identification_number"
-                                value={row.identification_number}
-                                onChange={(e) => handleRowChange(index, e)}
-                                className="w-full px-2 py-1 bg-transparent appearance-none border-none focus:outline-none tracking-wide"
-                                required
-                              />
-                            </td>
-                            <td className="text-gray-300 font-medium border border-gray-600">
-                              <textarea
-                                name="description"
-                                value={
-                                  row.description.length > 255
-                                    ? row.description.substring(0, 50) + "..."
-                                    : row.description
-                                }
-                                onChange={(e) =>
-                                  handleRowDescriptionChange(index, e)
-                                }
-                                maxLength="255"
-                                className="w-full px-2 py-1 bg-transparent appearance-none border-none focus:outline-none tracking-wide resize-none overflow-hidden"
-                                
-                              />
-                              <div className="text-right text-xs text-gray-400">
-                                {rowCharCounts[index]}/255
-                              </div>
-                            </td>
-                            <td className="text-gray-300 font-medium border border-gray-600">
-                              <input
-                                type="date"
-                                name="delivery_date"
-                                value={row.delivery_date}
-                                onChange={(e) => handleRowChange(index, e)}
-                                className="w-full px-2 py-1 bg-transparent appearance-none border-none focus:outline-none tracking-wide"
-                                required
-                              />
-                            </td>
-                            <td className="text-gray-300 font-medium border-l border-b border-t border-gray-600">
-                              <input
-                                type="number"
-                                name="price"
-                                value={row.price}
-                                onChange={(e) => handleRowChange(index, e)}
-                                className="w-full px-2 py-1 bg-transparent appearance-none border-none focus:outline-none tracking-wide"
-                                min="0"
-                                step="0.01"
-                                required
-                              />
-                            </td>
-                            <td className="text-gray-200 font-medium border-r border-b border-gray-600">
-                              <button
-                                type="button"
-                                onClick={() => removeRow(index)}
-                                className="ml-2 w-15 p-2 font-medium text-sm hover:bg-red-600 rounded"
-                                >
-                                <FaTimes />
-                              </button>
-                            </td>
-                          </tr>
-                        </>
+                        <tr key={index}>
+                          <td className="text-gray-400 font-medium border border-gray-600 text-center">
+                            {index + 1}
+                          </td>
+                          <td className="text-gray-300 font-medium border border-gray-600">
+                            <input
+                              type="text"
+                              name="identification_number"
+                              value={row.identification_number}
+                              onChange={(e) => handleRowChange(index, e)}
+                              className="w-full px-2 py-1 bg-transparent appearance-none border-none focus:outline-none tracking-wide"
+                              required
+                            />
+                          </td>
+                          <td className="text-gray-300 font-medium border border-gray-600">
+                            <textarea
+                              name="description"
+                              value={
+                                row.description.length > 255
+                                  ? row.description.substring(0, 50) + "..."
+                                  : row.description
+                              }
+                              onChange={(e) =>
+                                handleRowDescriptionChange(index, e)
+                              }
+                              maxLength="255"
+                              className="w-full px-2 py-1 bg-transparent appearance-none border-none focus:outline-none tracking-wide resize-none overflow-hidden"
+                              
+                            />
+                            <div className="text-right text-xs text-gray-400">
+                              {rowCharCounts[index]}/255
+                            </div>
+                          </td>
+                          <td className="text-gray-300 font-medium border border-gray-600">
+                            <input
+                              type="date"
+                              name="delivery_date"
+                              value={row.delivery_date}
+                              onChange={(e) => handleRowChange(index, e)}
+                              className="w-full px-2 py-1 bg-transparent appearance-none border-none focus:outline-none tracking-wide"
+                              required
+                            />
+                          </td>
+                          <td className="text-gray-300 font-medium border-l border-b border-t border-gray-600">
+                            <input
+                              type="number"
+                              name="price"
+                              value={row.price}
+                              onChange={(e) => handleRowChange(index, e)}
+                              className="w-full px-2 py-1 bg-transparent appearance-none border-none focus:outline-none tracking-wide"
+                              min="0"
+                              step="0.01"
+                              required
+                            />
+                          </td>
+                          <td className="text-gray-200 font-medium border-r border-b border-gray-600">
+                            <button
+                              type="button"
+                              onClick={() => removeRow(index)}
+                              className="ml-2 w-15 p-2 font-medium text-sm hover:bg-red-600 rounded"
+                              >
+                              <FaTimes />
+                            </button>
+                          </td>
+                        </tr>
                       ))}
                     </tbody>
                     <tfoot>
@@ -323,7 +321,7 @@ const MaterialsAssemblies = ({ id }) => {
                         Remaining Cost
                         </td>
                         <td className={`pl-2 font-medium border-r border-b border-gray-500 ${remainingCostStyle}`} colSpan={2}>
-                          $ {remainingCost !== null ? remainingCost.toFixed(2) : "Loading..."}  <span className=" text-gray-500">MXN</span>
+                          $ {remainingCost !== null ? remainingCost.toFixed(2) : "Loading..."} MXN
                         </td>
                       </tr>
                     </tfoot>
@@ -369,7 +367,7 @@ const MaterialsAssemblies = ({ id }) => {
         onContinue={confirmCancel}
         title="Cancel Registration"
       >
-        <p>Are you sure you want to cancel the registration?</p>
+        Are you sure you want to cancel the registration?
       </ModalAcept>
 
       <ModalSuccess
@@ -386,7 +384,7 @@ const MaterialsAssemblies = ({ id }) => {
         onContinue={handleWarningContinue}
         title="Exceeding Project Budget"
       >
-        <p>You are exceeding the budget for this project. Are you sure you want to continue?</p>
+        You are exceeding the budget for this project. Are you sure you want to continue?
       </ModalAcept>
     </>
   );

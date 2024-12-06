@@ -40,22 +40,18 @@ const History = ({ setShowChildRoutes }) => {
     setCurrentPage((prevPage) => Math.max(prevPage - 1, 0));
   };
 
-  // Navigation hadescrindler
+  // Navigation handler
   const handleNavigate = async () => {
     setLoading(true);
     setError(null);
-    console.log("Navigating..."); // Debugging
     try {
       // Simular una operación asíncrona
       await new Promise((resolve) => setTimeout(resolve, 1000));
       setShowChildRoutes(true);
-      console.log("Navigation successful"); // Debugging
     } catch (err) {
       setError("Error al navegar");
-      console.error("Navigation error:", err); // Debugging
     } finally {
       setLoading(false);
-      console.log("Loading state:", loading); // Debugging
     }
   };
 
@@ -142,8 +138,6 @@ const History = ({ setShowChildRoutes }) => {
       );
 
       setSearchResults(filteredProjects);
-
-      console.log("Search results:", filteredProjects);
     } catch (error) {
       console.error("Error fetching search results:", error);
     }
@@ -184,6 +178,10 @@ const History = ({ setShowChildRoutes }) => {
     return completed
       ? "text-green-500 italic font-medium"
       : "text-orange-500 italic font-medium";
+  };
+
+  const handleMoreInfo = (projectId) => {
+    // Removed console.log statement
   };
 
   return (

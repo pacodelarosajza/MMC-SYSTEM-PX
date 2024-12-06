@@ -109,10 +109,10 @@ const CostProjects = () => {
           <tr className="w-full text-blue-400 text-left ">
             <th className="px-4 py-2 rounded-tl-lg">ID Project</th>
             <th className="px-4 py-2 border-x border-gray-500">
-              Cost Material
+            Budgetary
             </th>
             <th className="px-4 py-2 border-x border-gray-500">
-              Cost of materials purchased
+              Real cost
             </th>
             <th className="px-4 py-2 border-tr border-gray-500">Difference</th>
           </tr>

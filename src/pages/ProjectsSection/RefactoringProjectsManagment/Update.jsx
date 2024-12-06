@@ -559,7 +559,7 @@ const Update = ({ id }) => {
         onContinue={handleConfirmSave}
         title="Confirm Save"
       >
-        <p>Are you sure you want to save the changes to this project?</p>
+        Are you sure you want to save the changes to this project?
       </ModalAcept>
 
       <Modal
@@ -567,7 +567,7 @@ const Update = ({ id }) => {
         onClose={() => setIsModalSuccessOpen(false)}
         title="Success"
       >
-        <p>The project has been updated successfully.</p>
+        The project has been updated successfully.
       </Modal>
 
       <Modal
@@ -575,7 +575,7 @@ const Update = ({ id }) => {
         onClose={() => setIsModalUserRemovedOpen(false)}
         title="User Removed"
       >
-        <p>The user has been removed successfully.</p>
+        The user has been removed successfully.
       </Modal>
 
       <Modal
@@ -583,7 +583,7 @@ const Update = ({ id }) => {
         onClose={() => setIsModalUserAddedOpen(false)}
         title="User Added"
       >
-        <p>Reload the section to see the changes.</p>
+        Reload the section to see the changes.
       </Modal>
     </>
   );

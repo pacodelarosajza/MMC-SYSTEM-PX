@@ -104,6 +104,9 @@ const ProjectsManagmentTable = () => {
   const endIndex = (currentPage + 1) * recordsPerPage;
 
   const truncateDescription = (description) => {
+    if (!description) {
+      return "No description available";
+    }
     return description.length > 145 ? description.substring(0, 145) + "  . . ." : description;
   };
 
@@ -206,7 +209,7 @@ const ProjectsManagmentTable = () => {
         onClose={() => setIsModalErrorOpen(false)}
         title="Error"
       >
-        <p>There was an error deleting the project.</p>
+        There was an error deleting the project.
       </Modal>
 
       {/* MODAL SECTION FOR SUCCESSFUL PROJECT DELETION */}
@@ -215,7 +218,7 @@ const ProjectsManagmentTable = () => {
         onClose={() => setIsModalDeleteSuccessOpen(false)}
         title="Project Deletion Successful"
       >
-        <p>The project has been successfully deleted.</p>
+        The project has been successfully deleted.
       </Modal>
 
       {/* MODAL SECTION FOR ACCEPT PROJECT DELETION */}
@@ -225,7 +228,7 @@ const ProjectsManagmentTable = () => {
         onContinue={confirmDeleteProject}
         title="Delete Project"
       >
-        <p>Are you sure you want to delete this project?</p>
+        Are you sure you want to delete this project?
       </ModalAcept>
 
       {/* MODAL SECTION FOR EDITING PROJECTS  */}
@@ -258,7 +261,7 @@ const ProjectsManagmentTable = () => {
           }}
         title="Cancel Editing"
       >
-        <p>Are you sure you want to cancel editing this project?</p>
+        Are you sure you want to cancel editing this project?
       </ModalAcept>
 
       <Modal
@@ -266,7 +269,7 @@ const ProjectsManagmentTable = () => {
         onClose={closeModal}
         title="Cancel Editing Successful"
       >
-        <p>The project editing has been successfully canceled.</p>
+        The project editing has been successfully canceled.
       </Modal>
     </>
   );

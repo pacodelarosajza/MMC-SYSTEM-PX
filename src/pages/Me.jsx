@@ -6,8 +6,6 @@ import {
   FaCalendarAlt,
   FaUserShield,
   FaPowerOff,
-  FaSun,
-  FaMoon,
   FaKey,
 } from "react-icons/fa"; // Actualizamos el icono a FaKey
 import axios from "axios";

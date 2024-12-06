@@ -117,19 +117,21 @@ const MtlTable = ({ id }) => {
               Project. {projectId}
             </h1>
           </div>
-          <tr>
-            <td
-              colSpan="7"
-              className="text-right text-lg text-gray-300 font-medium p-1"
-            >
-              Total UNIT:
-            </td>
-            <td className="text-lg text-gray-300 font-medium text-center p-1">
-              $ {items
-                .reduce((total, item) => total + parseFloat(item.price), 0)
-                .toFixed(2)} MXN
-            </td>
-          </tr>
+          <table className="w-full">
+            <tbody>
+              <tr>
+           l<td
+                  colSpan="7"
+                  className="text-right text-lg text-gray-300 font-medium p-1"
+                >
+                  Total UNIT:
+                  $ {items
+                    .reduce((total, item) => total + parseFloat(item.price), 0)
+                    .toFixed(2)} MXN
+                </td>
+              </tr>
+            </tbody>
+          </table>
           <div className="fixed top-2 right-2 my-4">
             <button
               className=" px-4 py-2 mx-2 font-medium hover:bg-blue-600 bg-pageBackground rounded"

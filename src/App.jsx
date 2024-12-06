@@ -71,8 +71,8 @@ const App = () => {
           <Route path="projects" element={<PrivateRoute><Projects /></PrivateRoute>} />  {/*requiredRole={2}*/}
           <Route path="project-details" element={<PrivateRoute><ProjectDetails /></PrivateRoute>} />
 
-          <Route path="projects-managment" element={<PrivateRoute><ProjectsManagment /></PrivateRoute>} />
-          <Route path="materials-managment" element={<PrivateRoute><MaterialsManagment /></PrivateRoute>} />
+          <Route path="projects-managment" element={<PrivateRoute requiredRole={1}><ProjectsManagment /></PrivateRoute>} />
+          <Route path="materials-managment" element={<PrivateRoute requiredRole={1}><MaterialsManagment /></PrivateRoute>} />
 
           <Route path="forgotpass" element={<PrivateRoute><ForgotPass /></PrivateRoute>} /> {/*??*/}
 

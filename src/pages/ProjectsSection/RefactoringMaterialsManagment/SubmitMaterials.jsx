@@ -176,7 +176,6 @@ const SubmitMaterials = ({ id }) => {
             body: JSON.stringify(postData),
           });
           const responseData = await response.json();
-          console.log("Response data:", responseData);
           if (!response.ok) {
             console.error("Response error:", responseData);
             throw new Error("Failed to post material");
@@ -296,9 +295,7 @@ const SubmitMaterials = ({ id }) => {
                         </>
                       )}
                     </tr>
-                    {/* UPLOAD MATERIALS */}{" "}
-                    {/* SOBRE ESTA PARTE DEBE SER EL POST */}{" "}
-                    {/* PARTE DE SUBIR MATERIALES DE SUBENSAMBLES */}
+                    {/* UPLOAD MATERIALS */}
                     {showMessages[`assembly-${assembly.id}`] &&
                       !subassemblies.filter(
                         (subassembly) => subassembly.assembly_id === assembly.id

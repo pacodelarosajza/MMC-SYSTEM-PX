@@ -324,7 +324,7 @@ const MaterialsSubassemblies = ({ id }) => {
                       className="text-gray-400 text-right py-1 px-8  border-gray-500 bg-opacity-40 bg-gray-700 text-left font-semibold"
                       colSpan={4}
                     >
-                      Remaining Cost
+                      Remaining Cost first
                     </td>
                     <td
                       className={`pl-2 font-medium border-r border-b border-gray-500 ${
@@ -332,11 +332,7 @@ const MaterialsSubassemblies = ({ id }) => {
                       }`}
                       colSpan={2}
                     >
-                      $
-                      {selectedItemId && totalSubassemblyPrice !== null
-                        ? (selectedItemId.price - totalSubassemblyPrice).toFixed(2)
-                        : "Loading..."}{" "}
-                      MXN
+                      ${remainingCost.toFixed(2)} MXN
                     </td>
                   </tr>
                 </tfoot>

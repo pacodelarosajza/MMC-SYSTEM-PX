@@ -148,7 +148,6 @@ const OldProjectDetails = ({ identificationNumber }) => {
       );
       const project = response.data;
       setProject(project);
-      console.log("Project: ", project);
 
       // Fetch admin and operational users
       const [adminProjectResponse, userOperProjectResponse] = await Promise.all(
@@ -252,14 +251,8 @@ const OldProjectDetails = ({ identificationNumber }) => {
       setSubassembliesItemsData(subassembliesItemsData);
 
       // Log data
-      console.log("Admin Projects: ", adminProjectsData);
-      console.log("User Operational Projects: ", userOperProjectsData);
-      console.log("Assemblies: ", assembliesData);
-      console.log("Items: ", itemsData);
-      console.log("Subassemblies: ", subassembliesData);
-      console.log("Subassemblies Items: ", subassembliesItemsData);
     } catch (error) {
-      console.log("Error fetching project: ", error);
+      console.error("Error fetching project: ", error);
     } finally {
       setIsLoading(false);
     }
@@ -317,10 +310,16 @@ const OldProjectDetails = ({ identificationNumber }) => {
   };
   // Toggle list of subassemblies for each assembly
   const toggleSubassemblyList = (subassemblyId) => {
-    setIsSubassemblyOpen((prevState) => ({
-      ...prevState,
-      [subassemblyId]: !prevState[subassemblyId],
-    }));
+    setIsSubassemblyOpen((prevState) => {
+      const isOpen = !prevState[subassemblyId];
+      if (isOpen && !subassemblyDetails[subassemblyId]) {
+        handleSubassemblyFile(subassemblyId);
+      }
+      return {
+        ...prevState,
+        [subassemblyId]: isOpen,
+      };
+    });
   };
   // Handle button click to show item info
   const handleItemButtonClick = (itemId) => {
@@ -436,6 +435,7 @@ const OldProjectDetails = ({ identificationNumber }) => {
   };
 
   const [subassemblyDetails, setSubassemblyDetails] = useState({}); // New state for subassembly details
+  const [subassemblyError, setSubassemblyError] = useState({}); // New state for subassembly errors
 
   const handleSubassemblyFile = async (subassemblyId) => {
     try {
@@ -444,10 +444,17 @@ const OldProjectDetails = ({ identificationNumber }) => {
         ...prevState,
         [subassemblyId]: response.data,
       }));
+      setSubassemblyError((prevState) => ({
+        ...prevState,
+        [subassemblyId]: null,
+      }));
     } catch (error) {
       console.error("Error fetching subassembly details: ", error);
+      setSubassemblyError((prevState) => ({
+        ...prevState,
+        [subassemblyId]: "Error fetching subassembly details",
+      }));
     }
-    console.log(`Subassembly file for ID: ${subassemblyId}`);
   };
 
   const calculateTotalSubassemblyPrice = (subassemblyId) => {
@@ -727,7 +734,9 @@ const OldProjectDetails = ({ identificationNumber }) => {
                                                 subassembly.id
                                               ] && (
                                                 <>
-                                                  {subassemblyDetails[subassembly.id] ? (
+                                                  {subassemblyError[subassembly.id] ? (
+                                                    <div className="text-red-500 my-5 text-center">{subassemblyError[subassembly.id]}</div>
+                                                  ) : subassemblyDetails[subassembly.id] && (
                                                     <div className="pt-2 pb-10 px-2">
                                                       <table className="w-full mt-4 border-collapse border border-gray-500 text-sm">
                                                         <tbody>
@@ -739,7 +748,7 @@ const OldProjectDetails = ({ identificationNumber }) => {
                                                             // Add more fields as needed
                                                           ].map((row, index) => (
                                                             <tr key={index}>
-                                                              <td className="border border-blue-500 px-2 py-1">
+                                                               <td className="border border-blue-500 px-2 py-1">
                                                                 <strong>{row.label}</strong>
                                                               </td>
                                                               <td className={`border border-gray-500 px-2 py-1 ${row.className || ""}`}>
@@ -750,8 +759,6 @@ const OldProjectDetails = ({ identificationNumber }) => {
                                                         </tbody>
                                                       </table>
                                                     </div>
-                                                  ) : (
-                                                    <div className="text-gray-500 my-5 text-center">Loading subassembly details...</div>
                                                   )}
                                                   {Array.isArray(
                                                     subassembliesItemsData[
@@ -944,7 +951,7 @@ const OldProjectDetails = ({ identificationNumber }) => {
         onContinue={modalAction}
         title="Material not received"
       >
-        <p>{modalMessage}</p> {/* Message to show in the modal */}
+        {modalMessage} {/* Message to show in the modal */}
       </ModalAcept>
 
       {/* Received success modal */}
@@ -953,7 +960,7 @@ const OldProjectDetails = ({ identificationNumber }) => {
         onClose={() => setIsModalReceivedSuccess(false)}
         title="Material received"
       >
-        <p>Material has been marked as successfully received.</p>
+        Material has been marked as successfully received.
       </Modal>
 
       {/* Not received success modal */}
@@ -962,7 +969,7 @@ const OldProjectDetails = ({ identificationNumber }) => {
         onClose={() => setIsModalNotReceivedSuccess(false)}
         title="Material not received"
       >
-        <p>Material has been marked as not received.</p>
+        Material has been marked as not received.
       </Modal>
 
       {/* EPICOR format modal */}

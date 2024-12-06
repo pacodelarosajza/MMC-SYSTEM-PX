@@ -14,8 +14,8 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import CopyToClipboard from "react-copy-to-clipboard";
 import Modal from "../../../components/Modal";
-import ModalAcept from "../../../components/ModalAcept";
-import EpicorModal from "../../../components/EpicorModal"; // Import the new EpicorModal component
+import ModalAccept from "../../../components/ModalAcept"; // Corrected import statement
+import EpicorModal from "../../../components/EpicorModal"; // Updated import path
 import { debounce } from "lodash";
 import { FaHourglassHalf } from "react-icons/fa";
 
@@ -165,7 +165,6 @@ const ProjectDetails = ({ identificationNumber }) => {
       );
       const project = response.data;
       setProject(project);
-      console.log("Project: ", project);
 
       // Fetch admin and operational users
       const [adminProjectResponse, userOperProjectResponse] = await Promise.all(
@@ -239,10 +238,18 @@ const ProjectDetails = ({ identificationNumber }) => {
                 if (allSubassemblyItemsCompleted) {
                   subassembly.completed = 1;
                   subassembly.completed_date = new Date().toISOString();
-                  await axios.patch(`${apiIpAddress}/api/patchSubassembly/${subassembly.id}`, {
-                    completed: 1,
-                    completed_date: subassembly.completed_date,
-                  });
+                  try {
+                    await axios.patch(`${apiIpAddress}/api/patchSubassembly/${subassembly.id}`, {
+                      completed: 1,
+                      completed_date: subassembly.completed_date,
+                    });
+                  } catch (error) {
+                    if (error.response && error.response.status === 404) {
+                      console.error(`Subassembly ${subassembly.id} not found.`);
+                    } else {
+                      throw error;
+                    }
+                  }
                 }
               })
             );
@@ -262,10 +269,18 @@ const ProjectDetails = ({ identificationNumber }) => {
           if (allItemsCompleted && allSubassembliesCompleted) {
             assembly.completed = 1;
             assembly.completed_date = new Date().toISOString();
-            await axios.patch(`${apiIpAddress}/api/patchAssembly/${assembly.id}`, {
-              completed: 1,
-              completed_date: assembly.completed_date,
-            });
+            try {
+              await axios.patch(`${apiIpAddress}/api/patchAssembly/${assembly.id}`, {
+                completed: 1,
+                completed_date: assembly.completed_date,
+              });
+            } catch (error) {
+              if (error.response && error.response.status === 404) {
+                console.error(`Assembly ${assembly.id} not found.`);
+              } else {
+                throw error;
+              }
+            }
           }
         })
       );
@@ -362,11 +377,11 @@ const ProjectDetails = ({ identificationNumber }) => {
   const handleCopyAssemblyMaterials = async (assemblyId) => {
     const assemblyItems = itemsData[assemblyId] || [];
     const subassemblyItems = subassembliesData[assemblyId]
-      ? subassembliesData[assembly.id].flatMap(
+      ? subassembliesData[assemblyId].flatMap(
           (subassembly) => subassembliesItemsData[subassembly.id] || []
         )
       : [];
-
+s
     const allItems = [...assemblyItems, ...subassemblyItems];
     const materialsList = await Promise.all(
       allItems.map(async (item) => {
@@ -484,7 +499,7 @@ const ProjectDetails = ({ identificationNumber }) => {
             />
           </div>
         ) : (
-          project && (
+          project && assembliesData[project.id] && (
             <div>
               <div className="pb-20">
                 {/* LIST OF ASSEMBLIES */}
@@ -1162,14 +1177,14 @@ const ProjectDetails = ({ identificationNumber }) => {
 
       {/* MODALS */}
       {/* Generic modal */}
-      <ModalAcept
+      <ModalAccept
         isOpen={isModalOpen}
         onClose={handleCancel}
         onContinue={modalAction}
         title="Material not received"
       >
-        <p>{modalMessage}</p> {/* Message to show in the modal */}
-      </ModalAcept>
+        {modalMessage} {/* Message to show in the modal */}
+      </ModalAccept>
 
       {/* Received success modal */}
       <Modal
@@ -1177,7 +1192,7 @@ const ProjectDetails = ({ identificationNumber }) => {
         onClose={() => setIsModalReceivedSuccess(false)}
         title="Material received"
       >
-        <p>Material has been marked as successfully received.</p>
+        Material has been marked as successfully received.
       </Modal>
 
       {/* Not received success modal */}
@@ -1186,7 +1201,7 @@ const ProjectDetails = ({ identificationNumber }) => {
         onClose={() => setIsModalNotReceivedSuccess(false)}
         title="Material not received"
       >
-        <p>Material has been marked as not received.</p>
+        Material has been marked as not received.
       </Modal>
 
       {/* EPICOR format modal */}

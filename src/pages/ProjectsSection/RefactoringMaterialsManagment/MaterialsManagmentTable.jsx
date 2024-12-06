@@ -55,6 +55,9 @@ const ProjectsManagmentTable = () => {
   const endIndex = (currentPage + 1) * recordsPerPage;
 
   const truncateDescription = (description) => {
+    if (!description) {
+      return "No description available";
+    }
     return description.length > 145
       ? description.substring(0, 145) + "  . . ."
       : description;
@@ -89,7 +92,10 @@ const ProjectsManagmentTable = () => {
               <thead>
                 <tr className="w-full text-indigo-400 text-left ">
                   <th className="px-4 py-2 rounded-tl-lg">Identifier</th>
-                  <th className="px-4 py-2 border-l border-gray-500 rounded-tr-lg" colSpan="2">
+                  <th
+                    className="px-4 py-2 border-l border-gray-500 rounded-tr-lg"
+                    colSpan="2"
+                  >
                     Description
                   </th>
                 </tr>
@@ -110,15 +116,13 @@ const ProjectsManagmentTable = () => {
                       </td>
                       <td className="pr-4 border-t border-b border-gray-500">
                         <div className="flex justify-end items-center">
-                         
-                          <AppAddMaterials id={project.id} /> 
-                            <button
-          className="w-15 px-2 py-1 font-medium hover:bg-indigo-600 text-sm bg-pageBackground rounded"
-            onClick={() => toggleContainer(projectId)}
-                            >
-                              Ctrl Mts
-                            </button>
-                          
+                          <AppAddMaterials id={project.id} />
+                          <button
+                            className="w-15 px-2 py-1 font-medium hover:bg-indigo-600 text-sm bg-pageBackground rounded"
+                            onClick={() => toggleContainer(projectId)}
+                          >
+                            Ctrl Mts
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -151,7 +155,7 @@ const ProjectsManagmentTable = () => {
             </div>
             {showContainer && selectedProjectId && (
               <div className="mt-10">
-                <AppCtrlMaterials id={selectedProjectId}/> 
+                <AppCtrlMaterials id={selectedProjectId} />
               </div>
             )}
           </div>

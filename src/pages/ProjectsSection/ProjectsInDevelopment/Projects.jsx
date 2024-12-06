@@ -191,7 +191,7 @@ const Projects = ({ setShowChildRoutes }) => {
         const response = await axios.get(
           `${apiIpAddress}/api/getItems/project/assembly/${projectId}/${assembly.id}`
         );
-        const items = response.data;
+        const items = Array.isArray(response.data) ? response.data : [];
         const arrivedItems = items.filter((item) => item.in_subassembly === 1);
         const totalItems = items.length;
         const progressPercentage =
@@ -212,12 +212,26 @@ const Projects = ({ setShowChildRoutes }) => {
     }
   };
 
+useEffect(() => {
+  if (selectedProject) {
+    console.log("Selected Project:", selectedProject);
+    console.log("Assemblies:", assemblies[selectedProject.id]);
+    console.log("Material Progresses:", materialProgresses);
+    getAssemblyProgress(selectedProject.id);
+    if (assemblies[selectedProject.id]) {
+      assemblies[selectedProject.id].forEach((assembly) => {
+        getMaterialProgress(selectedProject.id, assembly.id);
+      });
+    }
+  }
+}, [selectedProject, assemblies]);
+
   const getMaterialProgress = async (projectId, assemblyId) => {
     try {
       const response = await axios.get(
         `${apiIpAddress}/api/getItems/project/assembly/${projectId}/${assemblyId}`
       );
-      const items = response.data;
+      const items = Array.isArray(response.data) ? response.data : [];
       const arrivedItems = items.filter((item) => item.in_subassembly === 1);
       const totalItems = items.length;
       const progressPercentage =
@@ -267,11 +281,13 @@ const Projects = ({ setShowChildRoutes }) => {
   };
 
   useEffect(() => {
-    if (selectedProject && assemblies[selectedProject.id]) {
+    if (selectedProject) {
       getAssemblyProgress(selectedProject.id);
-      assemblies[selectedProject.id].forEach((assembly) => {
-        getMaterialProgress(selectedProject.id, assembly.id);
-      });
+      if (assemblies[selectedProject.id]) {
+        assemblies[selectedProject.id].forEach((assembly) => {
+          getMaterialProgress(selectedProject.id, assembly.id);
+        });
+      }
     }
   }, [selectedProject, assemblies]);
 
@@ -321,11 +337,10 @@ const Projects = ({ setShowChildRoutes }) => {
     const project = currentProjects.find((p) => p.id === projectId);
     if (assemblies[projectId] && assemblies[projectId].length > 0) {
       setSelectedProject(project);
-    } else {
-      console.warn(`Project ${projectId} has no assemblies to display.`);
-      setNoAssembliesProjectId(project.identification_number);
-      setIsNoAssembliesModalOpen(true);
-    }
+        } else {
+          setNoAssembliesProjectId(project.identification_number);
+          setIsNoAssembliesModalOpen(true);
+        }
     setLoading(false);
   };
 
@@ -383,7 +398,7 @@ const Projects = ({ setShowChildRoutes }) => {
     ],
   };
 
-  const materialChartData =
+    const materialChartData =
     selectedProject && assemblies[selectedProject.id]
       ? {
           labels: assemblies[selectedProject.id].map(
@@ -400,6 +415,7 @@ const Projects = ({ setShowChildRoutes }) => {
                   const progress = materialProgresses[assembly.id] || 0;
                   if (progress < 25) return "rgba(255, 99, 132, 0.2)"; // red
                   if (progress < 50) return "rgba(54, 162, 235, 0.2)"; // blue
+                  if (progress < 75) return "rgba(255, 206, 86, 0.2)"; // yellow
                   return "rgba(75, 192, 192, 0.2)"; // green
                 }
               ),
@@ -407,13 +423,17 @@ const Projects = ({ setShowChildRoutes }) => {
                 const progress = materialProgresses[assembly.id] || 0;
                 if (progress < 25) return "rgba(255, 99, 132, 1)"; // red
                 if (progress < 50) return "rgba(54, 162, 235, 1)"; // blue
+                if (progress < 75) return "rgba(255, 206, 86, 1)"; // yellow
                 return "rgba(75, 192, 192, 1)"; // green
               }),
               borderWidth: 1,
             },
           ],
         }
-      : {};
+      : {
+          labels: [],
+          datasets: [],
+        };
 
   const chartOptions = {
     responsive: true,
@@ -860,28 +880,28 @@ const Projects = ({ setShowChildRoutes }) => {
         onClose={() => setIsModalReceivedSuccess(false)}
         title="Material received"
       >
-        <p>Material has been marked as successfully received.</p>
+        Material has been marked as successfully received.
       </Modal>
       <Modal
         isOpen={isModalNotReceivedSuccess}
         onClose={() => setIsModalNotReceivedSuccess(false)}
         title="Material not received"
       >
-        <p>Material has been marked as not received.</p>
+        Material has been marked as not received.
       </Modal>
       <Modal
         isOpen={isProjectCompleted}
         onClose={handleModalClose}
         title="Project Completed"
       >
-        <p>Congratulations! You have completed the project.</p>
+        Congratulations! You have completed the project.
       </Modal>
       <Modal
         isOpen={isNoAssembliesModalOpen}
         onClose={() => setIsNoAssembliesModalOpen(false)}
         title="No Assemblies"
       >
-        <p>Project {noAssembliesProjectId} has no assemblies to display.</p>
+        Project {noAssembliesProjectId} has no assemblies to display.
       </Modal>
     </>
   );

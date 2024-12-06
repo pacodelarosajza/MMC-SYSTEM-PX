@@ -79,12 +79,17 @@ const CostProject = ({ projectId }) => {
     return assemblies.reduce((sum, assembly) => sum + parseFloat(assembly.price), 0).toFixed(2);
   };
 
-  const calculateTotalMaterialCost = (assemblyId) => {
-    if (!assemblyMaterials[assemblyId]) return 0;
-    return assemblyMaterials[assemblyId].reduce(
-      (sum, material) => sum + parseFloat(material.price),
-      0
-    ).toFixed(2);
+  const calculateTotalMaterialCost = (assemblyMaterials) => {
+    let totalCost = 0;
+    for (const assemblyId in assemblyMaterials) {
+      if (Array.isArray(assemblyMaterials[assemblyId])) {
+        totalCost += assemblyMaterials[assemblyId].reduce(
+          (sum, material) => sum + material.cost,
+          0
+        );
+      }
+    }
+    return totalCost;
   };
 
   const calculateTotalMaterialsPurchased = () => {
@@ -96,7 +101,7 @@ const CostProject = ({ projectId }) => {
   };
 
   const calculateTotalProjectDifference = () => {
-    return (calculateTotalAssemblyCost() - parseFloat(project.cost_material)).toFixed(2);
+    return (parseFloat(project.cost_material) - calculateTotalAssemblyCost()).toFixed(2);
   };
 
   useEffect(() => {
@@ -133,10 +138,10 @@ const CostProject = ({ projectId }) => {
             <tr className="w-full text-blue-400 text-left ">
               <th className="px-4 py-2 rounded-tl-lg">ID Assemblies</th>
               <th className="px-4 py-2 border-x border-gray-500">
-                Cost Material
+              Budgetary
               </th>
               <th className="px-4 py-2 border-x border-gray-500">
-                Cost of materials purchased
+                Real cost
               </th>
               <th className="px-4 py-2 border-tr border-gray-500">Difference</th>
             </tr>

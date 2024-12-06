@@ -97,7 +97,7 @@ const SearchStock = ({ id }) => {
         let stockResponse;
         if (newStockQuantity === 0) {
           stockResponse = await fetch(
-            `${apiIpAddress}/api/items/${selectedItem.matchedStockItem.id}/stock`,
+            `${apiIpAddress}/api/stock/${selectedItem.matchedStockItem.id}`,
             {
               method: "DELETE",
             }
@@ -173,7 +173,7 @@ const SearchStock = ({ id }) => {
     const fetchItems = async () => {
       try {
         const response = await fetch(
-          `${apiIpAddress}/api/getItems/project/${id}`
+          `${apiIpAddress}/api/getItems/project/inactives/${id}`
         );
         if (!response.ok) {
           throw new Error("Failed to fetch project items");
@@ -356,10 +356,11 @@ const SearchStock = ({ id }) => {
                             <div className="bg-white bg-opacity-10 px-1 flex rounded gap-1">
                               <p className="text-gray-200">QTY:</p>
                               <p className="text-gray-400">
+                                {/* AQUI DEBES RESTAR quantityToTake DESPUES DE HACER EL PATCH*/}
                                 {
                                   item.matchedStockItem.stock_items[0].stock
                                     .stock_quantity
-                                }
+                                } 
                               </p>
                             </div>
                           </div>
