@@ -493,7 +493,7 @@ const Dashboard = ({ onLogout }) => {
                 {projects.map((project) => (
                   <div
                     key={project.project.id} // Usamos project.project.id para acceder al ID real del proyecto
-                    className="relative bg-gray-700 p-3 rounded-lg shadow shadow-shadowBlueColor shadow-xl text-sm cursor-pointer hover:bg-gray-600 transition duration-200"
+                    className="relative bg-gray-700 p-3 rounded-lg shadow shadow-shadowBlueColor shadow-xl text-sm hover:bg-gray-600 transition duration-200"
 
                   >
                     {/*<h2 className="font-bold text-lg">ID: {project.project.id}</h2>*/}

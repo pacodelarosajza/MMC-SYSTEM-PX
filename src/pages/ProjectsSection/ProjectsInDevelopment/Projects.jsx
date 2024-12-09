@@ -7,7 +7,7 @@ import { FaArrowLeft, FaArrowRight, FaShare, FaTimes } from "react-icons/fa";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSync } from "@fortawesome/free-solid-svg-icons";
 import Modal from "../../../components/Modal";
-import { Bar } from "react-chartjs-2";
+import ProjectProgressChart from "./ProjectProgressChart"; // Import the new component
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -17,6 +17,7 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
+import SelectedProjectIdentification from "../../../components/SelectedProjectIdentification";
 
 ChartJS.register(
   CategoryScale,
@@ -36,7 +37,6 @@ const Projects = ({ setShowChildRoutes }) => {
   const [items, setItems] = useState({});
   const [progresses, setProgresses] = useState({});
   const [assemblyProgresses, setAssemblyProgresses] = useState({});
-  const [materialProgresses, setMaterialProgresses] = useState({});
   const [currentPage, setCurrentPage] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
@@ -69,7 +69,7 @@ const Projects = ({ setShowChildRoutes }) => {
   useEffect(() => {
     const interval = setInterval(() => {
       setReload((prev) => !prev);
-    }, 60000); // Check for updates every 60 seconds
+    }, 60000);
 
     return () => clearInterval(interval);
   }, []);
@@ -164,7 +164,6 @@ const Projects = ({ setShowChildRoutes }) => {
         [projectId]: progressPercentage,
       }));
 
-      // Check if project progress is 100%
       if (progressPercentage === 100) {
         await axios.patch(`${apiIpAddress}/api/patchProject/${projectId}`, {
           completed: 1,
@@ -212,82 +211,9 @@ const Projects = ({ setShowChildRoutes }) => {
     }
   };
 
-useEffect(() => {
-  if (selectedProject) {
-    console.log("Selected Project:", selectedProject);
-    console.log("Assemblies:", assemblies[selectedProject.id]);
-    console.log("Material Progresses:", materialProgresses);
-    getAssemblyProgress(selectedProject.id);
-    if (assemblies[selectedProject.id]) {
-      assemblies[selectedProject.id].forEach((assembly) => {
-        getMaterialProgress(selectedProject.id, assembly.id);
-      });
-    }
-  }
-}, [selectedProject, assemblies]);
-
-  const getMaterialProgress = async (projectId, assemblyId) => {
-    try {
-      const response = await axios.get(
-        `${apiIpAddress}/api/getItems/project/assembly/${projectId}/${assemblyId}`
-      );
-      const items = Array.isArray(response.data) ? response.data : [];
-      const arrivedItems = items.filter((item) => item.in_subassembly === 1);
-      const totalItems = items.length;
-      const progressPercentage =
-        totalItems === 0 ? 0 : (arrivedItems.length / totalItems) * 100;
-
-      setMaterialProgresses((prevProgresses) => ({
-        ...prevProgresses,
-        [assemblyId]: progressPercentage,
-      }));
-
-      // Check if all materials are received
-      if (progressPercentage === 100) {
-        const allAssembliesCompleted = Object.values({
-          ...materialProgresses,
-          [assemblyId]: progressPercentage,
-        }).every((progress) => progress === 100);
-
-        if (allAssembliesCompleted) {
-          const allProjectsCompleted = Object.values(assemblyProgresses).every(
-            (assemblyProgress) =>
-              Object.values(assemblyProgress).every(
-                (progress) => progress === 100
-              )
-          );
-
-          if (allProjectsCompleted) {
-            const overallProjectProgress = progresses[projectId] || 0;
-            if (overallProjectProgress === 100) {
-              setIsProjectCompleted(true);
-              await axios.patch(
-                `${apiIpAddress}/api/patchProject/${projectId}`,
-                {
-                  completed: 1,
-                }
-              );
-              window.location.reload();
-            }
-          }
-        }
-      }
-    } catch (error) {
-      console.error(
-        `Error fetching material progress for assembly ${assemblyId}:`,
-        error
-      );
-    }
-  };
-
   useEffect(() => {
     if (selectedProject) {
       getAssemblyProgress(selectedProject.id);
-      if (assemblies[selectedProject.id]) {
-        assemblies[selectedProject.id].forEach((assembly) => {
-          getMaterialProgress(selectedProject.id, assembly.id);
-        });
-      }
     }
   }, [selectedProject, assemblies]);
 
@@ -337,10 +263,10 @@ useEffect(() => {
     const project = currentProjects.find((p) => p.id === projectId);
     if (assemblies[projectId] && assemblies[projectId].length > 0) {
       setSelectedProject(project);
-        } else {
-          setNoAssembliesProjectId(project.identification_number);
-          setIsNoAssembliesModalOpen(true);
-        }
+    } else {
+      setNoAssembliesProjectId(project.identification_number);
+      setIsNoAssembliesModalOpen(true);
+    }
     setLoading(false);
   };
 
@@ -375,107 +301,10 @@ useEffect(() => {
     return description.substring(0, maxLength) + "...";
   };
 
-  const chartData = {
-    labels: activeProjects.map((project) => project.identification_number),
-    datasets: [
-      {
-        label: "Progress (%)",
-        data: activeProjects.map((project) => progresses[project.id] || 0),
-        backgroundColor: activeProjects.map((project) => {
-          const progress = progresses[project.id] || 0;
-          if (progress < 25) return "rgba(255, 99, 132, 0.2)"; // red
-          if (progress < 50) return "rgba(54, 162, 235, 0.2)"; // blue
-          return "rgba(75, 192, 192, 0.2)"; // green
-        }),
-        borderColor: activeProjects.map((project) => {
-          const progress = progresses[project.id] || 0;
-          if (progress < 25) return "rgba(255, 99, 132, 1)"; // red
-          if (progress < 50) return "rgba(54, 162, 235, 1)"; // blue
-          return "rgba(75, 192, 192, 1)"; // green
-        }),
-        borderWidth: 1,
-      },
-    ],
-  };
-
-    const materialChartData =
-    selectedProject && assemblies[selectedProject.id]
-      ? {
-          labels: assemblies[selectedProject.id].map(
-            (assembly) => assembly.identification_number
-          ),
-          datasets: [
-            {
-              label: `Material Progress in Project ${selectedProject.identification_number}`,
-              data: assemblies[selectedProject.id].map(
-                (assembly) => materialProgresses[assembly.id] || 0
-              ),
-              backgroundColor: assemblies[selectedProject.id].map(
-                (assembly) => {
-                  const progress = materialProgresses[assembly.id] || 0;
-                  if (progress < 25) return "rgba(255, 99, 132, 0.2)"; // red
-                  if (progress < 50) return "rgba(54, 162, 235, 0.2)"; // blue
-                  if (progress < 75) return "rgba(255, 206, 86, 0.2)"; // yellow
-                  return "rgba(75, 192, 192, 0.2)"; // green
-                }
-              ),
-              borderColor: assemblies[selectedProject.id].map((assembly) => {
-                const progress = materialProgresses[assembly.id] || 0;
-                if (progress < 25) return "rgba(255, 99, 132, 1)"; // red
-                if (progress < 50) return "rgba(54, 162, 235, 1)"; // blue
-                if (progress < 75) return "rgba(255, 206, 86, 1)"; // yellow
-                return "rgba(75, 192, 192, 1)"; // green
-              }),
-              borderWidth: 1,
-            },
-          ],
-        }
-      : {
-          labels: [],
-          datasets: [],
-        };
-
-  const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        display: false, // Hide the legend
-      },
-      title: {
-        display: true,
-        text: "Project Progress",
-      },
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-        max: 100,
-      },
-    },
-  };
-
-  const materialChartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        display: false, // Hide the legend
-      },
-      title: {
-        display: true,
-        text: "Material Progress",
-        font: {
-          size: 24, // Adjust size as needed
-        },
-      },
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-        max: 100,
-      },
-    },
+  const getProgressColor = (progress) => {
+    if (progress < 25) return "rgba(255, 99, 132, 0.6)";
+    if (progress < 50) return "rgba(54, 162, 235, 0.6)";
+    return "rgba(75, 192, 192, 0.6)";
   };
 
   const handleReloadData = () => {
@@ -502,378 +331,365 @@ useEffect(() => {
   return (
     <>
       <div className="mx-5 min-h-screen">
-        <>
-          <div className="flex justify-between items-center pt-4 pb-4 mb-5">
-            <div className="flex justify-center items-center">
-              <h1 className="text-3xl font-extrabold text-gray-500">
-                Projects Under Development
-              </h1>
-              <button
-                onClick={handleReloadData}
-                className="p-2 my-4 mx-4 text-white rounded hover:bg-gray-800 transition duration-200"
-                title="Refresh data"
-              >
-                <FontAwesomeIcon icon={faSync} color="gray" size="lg" />
-              </button>
-            </div>
-            <div className="flex items-center">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onBlur={handleContentBlur}
-                placeholder="project id. 000351 ..."
-                className="w-80 p-2 rounded-l focus:bg-gray-700 hover:bg-gray-700 text-sm text-gray-200 bg-gray-800 border border-blue-500 focus:outline-none focus:border-blue-400"
-              />
-              <button
-                onClick={handleButtonClickBySearch}
-                className="px-4 py-2 ml-1 bg-blue-600 border border-blue-600 text-sm rounded-r hover:bg-blue-500 font-medium"
-              >
-                <strong>Search</strong>
-              </button>
-            </div>
+        <div className="flex justify-between items-center pt-4 pb-4 mb-5">
+          <div className="flex justify-center items-center">
+            <h1 className="text-3xl font-extrabold text-gray-500">
+              Projects Under Development
+            </h1>
+            <button
+              onClick={handleReloadData}
+              className="p-2 my-4 mx-4 text-white rounded hover:bg-gray-800 transition duration-200"
+              title="Refresh data"
+            >
+              <FontAwesomeIcon icon={faSync} color="gray" size="lg" />
+            </button>
           </div>
-          <div className="text-gray-500">
-            {isFocusedContent ? (
+          <div className="flex items-center">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onBlur={handleContentBlur}
+              placeholder="project id. 000351 ..."
+              className="w-80 p-2 rounded-l focus:bg-gray-700 hover:bg-gray-700 text-sm text-gray-200 bg-gray-800 border border-blue-500 focus:outline-none focus:border-blue-400"
+            />
+            <button
+              onClick={handleButtonClickBySearch}
+              className="px-4 py-2 ml-1 bg-blue-600 border border-blue-600 text-sm rounded-r hover:bg-blue-500 font-medium"
+            >
+              <strong>Search</strong>
+            </button>
+          </div>
+        </div>
+        <div className="text-gray-500">
+          {isFocusedContent ? (
+            <table
+              className="text-sm table-auto w-full text-lightWhiteLetter"
+              id="projects-actions"
+            >
+              <thead>
+                <tr className="w-full text-indigo-400 text-left ">
+                  <th className="px-4 py-2 rounded-tl-lg">Identifier</th>
+                  <th className="px-4 py-2 border-l border-gray-600 rounded-tr-lg">
+                    Description
+                  </th>
+                  <th className="px-4 py-2 border-l border-gray-600 rounded-tr-lg">
+                    status
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="shadow-lg">
+                {Array.isArray(searchResults) && searchResults.length > 0 ? (
+                  searchResults.map((project) => (
+                    <tr
+                      key={project.id}
+                      className="cursor-pointer hover:bg-pageSideMenuTextHover transition duration-200"
+                      onClick={() => handleSelectProject(project.id)}
+                    >
+                      <td className="px-4 py-2 font-medium border-t border-r border-b border-gray-600">
+                        {project.identification_number}
+                      </td>
+                      <td className="px-4 py-2 border border-gray-600">
+                        {truncateDescription(project.description, 80)}
+                      </td>
+                      <td className="border-t border-l border-b text-gray-400 border-gray-600 px-4 py-2 italic">
+                        {project.completed ? (
+                          <div className="flex items-center space-between">
+                            <div className="text-gray-400 italic">
+                              <span className="text-green-500 italic">
+                                Completed.
+                              </span>
+                              <br />
+                              If you want to share this project, click the
+                              button below.
+                            </div>
+                            <div className="px-5">
+                              <button
+                                id="old-project-botton"
+                                className="px-4 py-2 text-sm text-gray-300 bg-gray-800 rounded hover:bg-gray-500 hover:text-gray-800"
+                                onClick={() => handleShareProject(project.id)}
+                                disabled={loading}
+                              >
+                                <FaShare />
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <span className="text-yellow-500 italic">
+                            In Progress
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan="3"
+                      className="px-4 py-2 border border-gray-600 text-center"
+                    >
+                      No projects found
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          ) : (
+            <div>
+              <ProjectProgressChart activeProjects={activeProjects} progresses={progresses} />
               <table
-                className="text-sm table-auto w-full text-lightWhiteLetter"
+                className="my-20 text-sm table-auto w-full text-lightWhiteLetter"
                 id="projects-actions"
               >
                 <thead>
                   <tr className="w-full text-indigo-400 text-left ">
                     <th className="px-4 py-2 rounded-tl-lg">Identifier</th>
                     <th className="px-4 py-2 border-l border-gray-600 rounded-tr-lg">
-                      Description
+                      Responsible
                     </th>
                     <th className="px-4 py-2 border-l border-gray-600 rounded-tr-lg">
-                      status
+                      Delivery Date
+                    </th>
+                    <th className="px-4 py-2 border-l border-gray-600 rounded-tr-lg">
+                      Progress
                     </th>
                   </tr>
                 </thead>
-
                 <tbody className="shadow-lg">
-                  {/* TABLA DE PROYECTOS */}
-                  {Array.isArray(searchResults) && searchResults.length > 0 ? (
-                    searchResults.map((project) => (
-                      <tr
-                        key={project.id}
-                        className="cursor-pointer hover:bg-pageSideMenuTextHover transition duration-200"
-                        onClick={() => handleSelectProject(project.id)}
-                      >
-                        <td className="px-4 py-2 font-medium border-t border-r border-b border-gray-600">
-                          {project.identification_number}
-                        </td>
-                        <td className="px-4 py-2 border border-gray-600">
-                          {truncateDescription(project.description, 80)}
-                        </td>
-                        <td className="border-t border-l border-b text-gray-400 border-gray-600 px-4 py-2 italic">
-                          {project.completed ? (
-                            <div className="flex items-center space-between">
-                              <div className="text-gray-400 italic">
-                                <span className="text-green-500 italic">
-                                  Completed.
-                                </span>
-                                <br />
-                                If you want to share this project, click the
-                                button below.
-                              </div>
-                              <div className="px-5">
-                                <button
-                                  id="old-project-botton"
-                                  className="px-4 py-2 text-sm text-gray-300 bg-gray-800 rounded hover:bg-gray-500 hover:text-gray-800"
-                                  onClick={() => handleShareProject(project.id)}
-                                  disabled={loading}
-                                >
-                                  <FaShare />
-                                </button>
-                              </div>
-                            </div>
-                          ) : (
-                            <span className="text-yellow-500 italic">
-                              In Progress
-                            </span>
-                          )}
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td
-                        colSpan="3"
-                        className="px-4 py-2 border border-gray-600 text-center"
-                      >
-                        No projects found
+                  {currentProjects.map((project) => (
+                    <tr
+                      key={project.id}
+                      className="cursor-pointer hover:bg-pageSideMenuTextHover transition duration-200"
+                      onClick={() => handleSelectProject(project.id)}
+                      disabled={loading}
+                    >
+                      <td className="px-4 font-medium py-2 border-t border-r border-b border-gray-600">
+                        {project.identification_number}
+                      </td>
+                      <td className="px-4 py-2 border border-gray-600">
+                        {getProjectManager(project.id).map(
+                          (userNumber, index) => (
+                            <div key={index}>{userNumber}</div>
+                          )
+                        )}
+                      </td>
+                      <td className="px-4 py-2 border border-gray-600">
+                        {project.delivery_date}
+                      </td>
+                      <td className="px-4 py-2 border-t border-l border-b border-gray-600">
+                        <div
+                          className={`font-bold ${
+                            (progresses[project.id] || 0) < 25
+                              ? "text-red-500"
+                              : (progresses[project.id] || 0) < 50
+                              ? "text-orange-500"
+                              : (progresses[project.id] || 0) < 75
+                              ? "text-yellow-500"
+                              : "text-green-500"
+                          }`}
+                        >
+                          {Math.round(progresses[project.id] || 0)}%
+                        </div>
                       </td>
                     </tr>
-                  )}
+                  ))}
                 </tbody>
               </table>
-            ) : (
-              <div>
-                <div className="" style={{ height: "200px" }}>
-                  {" "}
-                  {/* Adjusted height */}
-                  <Bar data={chartData} options={chartOptions} />
-                </div>
-                <table
-                  className="my-5 text-sm table-auto w-full text-lightWhiteLetter"
-                  id="projects-actions"
-                >
-                  <thead>
-                    <tr className="w-full text-indigo-400 text-left ">
-                      <th className="px-4 py-2 rounded-tl-lg">Identifier</th>
-                      <th className="px-4 py-2 border-l border-gray-600 rounded-tr-lg">
-                        Responsible
-                      </th>
-                      <th className="px-4 py-2 border-l border-gray-600 rounded-tr-lg">
-                        Delivery Date
-                      </th>
-                      <th className="px-4 py-2 border-l border-gray-600 rounded-tr-lg">
-                        Progress
-                      </th>
-                    </tr>
-                  </thead>
-
-                  <tbody className="shadow-lg">
-                    {currentProjects.map((project) => (
-                      <tr
-                        key={project.id}
-                        className="cursor-pointer hover:bg-pageSideMenuTextHover transition duration-200"
-                        onClick={() => handleSelectProject(project.id)}
-                        disabled={loading}
+              <div className="flex justify-between items-center mt-4">
+                {currentPage > 0 && (
+                  <button
+                    className="px-4 py-2 bg-gray-500 text-sm text-gray-300 bg-pageBackground rounded hover:bg-gray-700"
+                    onClick={handlePreviousPage}
+                  >
+                    <FaArrowLeft />
+                  </button>
+                )}
+                <span className="text-sm text-gray-300">
+                  Page {currentPage + 1} of{" "}
+                  {Math.ceil(activeProjects.length / recordsPerPage)}
+                </span>
+                {endIndex < activeProjects.length && (
+                  <button
+                    className="px-4 py-2 bg-gray-500 text-sm text-gray-300 bg-pageBackground rounded hover:bg-gray-700"
+                    onClick={handleNextPage}
+                    disabled={endIndex >= activeProjects.length}
+                  >
+                    <FaArrowRight />
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+        <div className="col-span-12 pt-5">
+          <div className="card" id="pj-info-projects">
+            <div className="text-sm text-white text-lightWhiteLetter">
+              {selectedProject ? (
+                <div key={selectedProject.id}>
+                  <div className="flex justify-end mt-4">
+                    <button
+                      onClick={handleDeselectProject}
+                      title="Close details"
+                      className="m-2 w-15 p-2 font-medium text-sm hover:bg-red-500 bg-red-600 rounded"
+                    >
+                      <FaTimes />
+                    </button>
+                  </div>
+                  <div className="flex justify-center items-center">
+                    <div className="relative w-64 h-64 transform scale-150">
+                      <svg
+                        className="absolute w-full h-full"
+                        viewBox="0 0 36 36"
                       >
-                        <td className="px-4 font-medium py-2 border-t border-r border-b border-gray-600">
-                          {project.identification_number}
-                        </td>
-                        <td className="px-4 py-2 border border-gray-600">
-                          {getProjectManager(project.id).map(
-                            (userNumber, index) => (
-                              <div key={index}>{userNumber}</div>
-                            )
-                          )}
-                        </td>
-                        <td className="px-4 py-2 border border-gray-600">
-                          {project.delivery_date}
-                        </td>
-                        <td className="px-4 py-2 border-t border-l border-b border-gray-600">
+                        <path
+                          className="text-gray-600"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth=".5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeDasharray="50, 100"
+                          d="M2 18 C 9 5, 27 5, 34 18"
+                        />
+                      </svg>
+                      <svg
+                        className="absolute w-full h-full"
+                        viewBox="0 0 36 36"
+                      >
+                        <path
+                          fill="none"
+                          stroke={
+                            (progresses[selectedProject.id] || 0) < 25
+                              ? "red"
+                              : (progresses[selectedProject.id] || 0) < 50
+                              ? "orange"
+                              : (progresses[selectedProject.id] || 0) < 75
+                              ? "yellow"
+                              : "green"
+                          }
+                          strokeWidth=".5"
+                          strokeDasharray={`${
+                            (progresses[selectedProject.id] || 0) * 0.5
+                          }, 50`}
+                          d="M2 18 C 9 5, 27 5, 34 18"
+                        />
+                      </svg>
+                      <div className="absolute inset-0 flex flex-col items-center justify-center font-bold">
+                        <div className="text-4xl">
                           <div
-                            className={`font-bold ${
-                              (progresses[project.id] || 0) < 25
+                            className={`text-4xl ${
+                              (progresses[selectedProject.id] || 0) < 25
                                 ? "text-red-500"
-                                : (progresses[project.id] || 0) < 50
+                                : (progresses[selectedProject.id] || 0) < 50
                                 ? "text-orange-500"
-                                : (progresses[project.id] || 0) < 75
+                                : (progresses[selectedProject.id] || 0) < 75
                                 ? "text-yellow-500"
                                 : "text-green-500"
                             }`}
                           >
-                            {Math.round(progresses[project.id] || 0)}%
+                            {Math.round(progresses[selectedProject.id] || 0)}%
                           </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                <div className="flex justify-between items-center mt-4">
-                  {currentPage > 0 && (
-                    <button
-                      className="px-4 py-2 bg-gray-500 text-sm text-gray-300 bg-pageBackground rounded hover:bg-gray-700"
-                      onClick={handlePreviousPage}
-                    >
-                      <FaArrowLeft />
-                    </button>
-                  )}
-                  <span className="text-sm text-gray-300">
-                    Page {currentPage + 1} of{" "}
-                    {Math.ceil(activeProjects.length / recordsPerPage)}
-                  </span>
-                  {endIndex < activeProjects.length && (
-                    <button
-                      className="px-4 py-2 bg-gray-500 text-sm text-gray-300 bg-pageBackground rounded hover:bg-gray-700"
-                      onClick={handleNextPage}
-                      disabled={endIndex >= activeProjects.length}
-                    >
-                      <FaArrowRight />
-                    </button>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-          <div className="col-span-12 pt-5">
-            <div className="card" id="pj-info-projects">
-              <div className="text-sm text-white text-lightWhiteLetter">
-                {selectedProject ? (
-                  <div key={selectedProject.id}>
-                    <div className="flex justify-end mt-4">
-                      <button
-                        onClick={handleDeselectProject}
-                        title="Close details"
-                        className="m-2 w-15 p-2 font-medium text-sm hover:bg-red-500 bg-red-600 rounded"
-                      >
-                        <FaTimes />
-                      </button>
-                    </div>
-                    <div className="flex justify-center items-center">
-                      <div className="relative w-64 h-64 transform scale-150">
-                        <svg
-                          className="absolute w-full h-full"
-                          viewBox="0 0 36 36"
-                        >
-                          <path
-                            className="text-gray-600"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth=".5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeDasharray="50, 100"
-                            d="M2 18 C 9 5, 27 5, 34 18"
-                          />
-                        </svg>
-                        <svg
-                          className="absolute w-full h-full"
-                          viewBox="0 0 36 36"
-                        >
-                          <path
-                            fill="none"
-                            stroke={
-                              (progresses[selectedProject.id] || 0) < 25
-                                ? "red"
-                                : (progresses[selectedProject.id] || 0) < 50
-                                ? "orange"
-                                : (progresses[selectedProject.id] || 0) < 75
-                                ? "yellow"
-                                : "green"
-                            }
-                            strokeWidth=".5"
-                            strokeDasharray={`${
-                              (progresses[selectedProject.id] || 0) * 0.5
-                            }, 50`}
-                            d="M2 18 C 9 5, 27 5, 34 18"
-                          />
-                        </svg>
-                        <div className="absolute inset-0 flex flex-col items-center justify-center font-bold">
-                          <div className="text-4xl">
-                            <div
-                              className={`text-4xl ${
-                                (progresses[selectedProject.id] || 0) < 25
-                                  ? "text-red-500"
-                                  : (progresses[selectedProject.id] || 0) < 50
-                                  ? "text-orange-500"
-                                  : (progresses[selectedProject.id] || 0) < 75
-                                  ? "text-yellow-500"
-                                  : "text-green-500"
-                              }`}
-                            >
-                              {Math.round(progresses[selectedProject.id] || 0)}%
-                            </div>
-                          </div>
-                          <div className="mt-2 text-xs text-gray-400 font-medium">
-                            IDENTIFICATION NUMBER
-                          </div>
-                          <h2 className="font-bold text-gray-300 text-base">
-                            {selectedProject.identification_number}
-                          </h2>
-                          <div className="col-span-12 md:col-span-6 flex justify-center">
-                            <div className="text-xs text-center text-gray-500">
-                              <hr className="my-2 border-b border-gray-500 shadow-md opacity-50" />
-                              Delivery Date.
-                              <strong>{selectedProject.delivery_date}</strong>
-                            </div>
+                        </div>
+                        <div className="mt-2 text-xs text-gray-400 font-medium">
+                          IDENTIFICATION NUMBER
+                        </div>
+                        <h2 className="font-bold text-gray-300 text-base">
+                          {selectedProject.identification_number}
+                        </h2>
+                        <div className="col-span-12 md:col-span-6 flex justify-center">
+                          <div className="text-xs text-center text-gray-500">
+                            <hr className="my-2 border-b border-gray-500 shadow-md opacity-50" />
+                            Delivery Date.
+                            <strong>{selectedProject.delivery_date}</strong>
                           </div>
                         </div>
                       </div>
                     </div>
-                    <div className="px-10 flex justify-center grid grid-cols-12 gap-4">
-                      <div className="col-span-12 md:col-span-3 flex">
-                        <div className="p-4 rounded-lg shadow-lg transition duration-300 transform hover:translate-y-1 flex-grow border border-gray-700 hover:bg-gray-800">
-                          <div className="flex items-center mb-2">
-                            <strong className="text-lg font-extrabold text-blue-400 pb-2">
-                              Responsible
-                            </strong>
-                          </div>
-                          <ul className="text-white">
-                            {getProjectManager(selectedProject.id).map(
-                              (userNumber, index) => (
-                                <li key={index}>
-                                  {index + 1}. {userNumber}
-                                </li>
-                              )
-                            )}
-                          </ul>
+                  </div>
+                  <div className="px-10 flex justify-center grid grid-cols-12 gap-4">
+                    <div className="col-span-12 md:col-span-3 flex">
+                      <div className="p-4 rounded-lg shadow-lg transition duration-300 transform hover:translate-y-1 flex-grow border border-gray-700 hover:bg-gray-800">
+                        <div className="flex items-center mb-2">
+                          <strong className="text-lg font-extrabold text-blue-400 pb-2">
+                            Responsible
+                          </strong>
                         </div>
+                        <ul className="text-white">
+                          {getProjectManager(selectedProject.id).map(
+                            (userNumber, index) => (
+                              <li key={index}>
+                                {index + 1}. {userNumber}
+                              </li>
+                            )
+                          )}
+                        </ul>
                       </div>
-                      <div className="col-span-12 md:col-span-6 flex">
-                        <div className="p-4 rounded-lg shadow-lg transition duration-300 transform hover:translate-y-1 flex-grow border border-gray-700 hover:bg-gray-800">
-                          <div className="flex items-center mb-2">
-                            <strong className="text-lg font-extrabold text-blue-400 pb-2">
-                              Description
-                            </strong>
-                          </div>
-                          <div className="text-white text-justify">
-                            {selectedProject.description || "No description available"}
-                          </div>
+                    </div>
+                    <div className="col-span-12 md:col-span-6 flex">
+                      <div className="p-4 rounded-lg shadow-lg transition duration-300 transform hover:translate-y-1 flex-grow border border-gray-700 hover:bg-gray-800">
+                        <div className="flex items-center mb-2">
+                          <strong className="text-lg font-extrabold text-blue-400 pb-2">
+                            Description
+                          </strong>
                         </div>
-                      </div>
-                      <div className="col-span-12 md:col-span-3 flex">
-                        <div className="p-4 rounded-lg shadow-lg transition duration-300 transform hover:translate-y-1 flex-grow border border-gray-700 hover:bg-gray-800">
-                          <div className="flex items-center mb-2">
-                            <strong className="text-lg font-extrabold text-blue-400 pb-2">
-                              Operational users
-                            </strong>
-                          </div>
-                          <ul className="text-white">
-                            {getUserOperational(selectedProject.id).map(
-                              (userNumber, index) => (
-                                <li key={index}>
-                                  {index + 1}. {userNumber}
-                                </li>
-                              )
-                            )}
-                          </ul>
+                        <div className="text-white text-justify">
+                          {selectedProject.description || "No description available"}
                         </div>
                       </div>
                     </div>
-
-                    <div className="my-5" style={{ height: "300px" }}>
-                      <Bar
-                        data={materialChartData}
-                        options={materialChartOptions}
-                      />
+                    <div className="col-span-12 md:col-span-3 flex">
+                      <div className="p-4 rounded-lg shadow-lg transition duration-300 transform hover:translate-y-1 flex-grow border border-gray-700 hover:bg-gray-800">
+                        <div className="flex items-center mb-2">
+                          <strong className="text-lg font-extrabold text-blue-400 pb-2">
+                            Operational users
+                          </strong>
+                        </div>
+                        <ul className="text-white">
+                          {getUserOperational(selectedProject.id).map(
+                            (userNumber, index) => (
+                              <li key={index}>
+                                {index + 1}. {userNumber}
+                              </li>
+                            )
+                          )}
+                        </ul>
+                      </div>
                     </div>
-        
-                    <button
-                      className="px-4 py-2 mt-10 w-full bg-blue-600 font-bold text-gray-200 rounded hover:bg-blue-500"
-                      onClick={() => {
-                        const costsElement = document.getElementById('costs-section');
-                        if (costsElement) {
-                          costsElement.classList.toggle('hidden');
-                        }
-                      }}
-                    >
-                      Show costs
-                    </button>
-        
-                    <div id="costs-section" className="hidden">
-                      <AppProjectCosts projectId={selectedProject.id} />
-                    </div>
-
-                    <AppProjectDetails
-                      identificationNumber={
-                        selectedProject.identification_number
+                    
+                  </div>
+                  
+                  <button
+                    className="px-4 py-2 mt-10 w-full bg-blue-600 font-bold text-gray-200 rounded hover:bg-blue-500"
+                    onClick={() => {
+                      const costsElement = document.getElementById('costs-section');
+                      if (costsElement) {
+                        costsElement.classList.toggle('hidden');
                       }
-                    />
+                    }}
+                  >
+                    Show costs
+                  </button>
+      
+                  <div id="costs-section" className="hidden">
+                    <AppProjectCosts projectId={selectedProject.id} />
                   </div>
-                ) : (
-                  <div className="mx-3 my-10 flex items-center text-gray-500">
-                    <span>Click on a project to see more details ...</span>
-                  </div>
-                )}
-              </div>
+                  <SelectedProjectIdentification id={selectedProject.id} onReload={handleReloadData} />
+
+
+                  <AppProjectDetails
+                    identificationNumber={
+                      selectedProject.identification_number
+                    }
+                  />
+                </div>
+              ) : (
+                <div className="mx-3 my-10 flex items-center text-gray-500">
+                  <span>Click on a project to see more details ...</span>
+                </div>
+              )}
             </div>
           </div>
-        </>
+        </div>
       </div>
       <Modal
         isOpen={isModalReceivedSuccess}
