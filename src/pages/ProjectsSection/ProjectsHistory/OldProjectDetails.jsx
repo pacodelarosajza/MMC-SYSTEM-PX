@@ -553,7 +553,7 @@ const OldProjectDetails = ({ identificationNumber }) => {
                                       },
                                       {
                                         label: "Price",
-                                        value: `$${assembly.price} USD`,
+                                        value: `$${assembly.price} MXN`,
                                       },
                                       
                                     ].map((row, index) => (

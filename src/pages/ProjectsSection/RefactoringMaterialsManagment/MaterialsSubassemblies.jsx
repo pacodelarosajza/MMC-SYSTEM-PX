@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { FaSync, FaPlus, FaTimes } from "react-icons/fa";
 import SubmitMaterials from "./SubmitMaterials"; // Import the new component
 import ModalSuccess from "../../../components/ModalSuccess"; // Import ModalSuccess
+import ModalAcept from "../../../components/ModalAcept"; // Import ModalAcept
 
 const MaterialsSubassemblies = ({ id }) => {
   const [data, setData] = useState([]);
@@ -24,6 +25,8 @@ const MaterialsSubassemblies = ({ id }) => {
   const [totalPrice, setTotalPrice] = useState(0); // New state
   const [remainingCost, setRemainingCost] = useState(0); // New state
   const [totalSubassemblyPrice, setTotalSubassemblyPrice] = useState(0); // New state
+  const [isWarningModalOpen, setIsWarningModalOpen] = useState(false); // New state
+  const [proceedWithNegativeCost, setProceedWithNegativeCost] = useState(false); // New state
   const apiIpAddress = import.meta.env.VITE_API_IP_ADDRESS;
 
   useEffect(() => {
@@ -88,8 +91,9 @@ const MaterialsSubassemblies = ({ id }) => {
     }
   }, [selectedItemId, apiIpAddress]);
 
-  const handleAddClick = (itemId, identificationNumber) => {
-    setSelectedItemId({ id: itemId, identificationNumber });
+  const handleAddClick = (itemId, identificationNumber, price) => {
+    setSelectedItemId({ id: itemId, identificationNumber, price });
+    console.log("Selected Item ID:", { id: itemId, identificationNumber, price }); // Add price to console log
     setSubassemblies([]); // Reset subassemblies when a new item is selected
   };
 
@@ -127,6 +131,10 @@ const MaterialsSubassemblies = ({ id }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (remainingCost < 0 && !proceedWithNegativeCost) {
+      setIsWarningModalOpen(true);
+      return;
+    }
     try {
       for (const row of rows) {
         const postData = {
@@ -153,6 +161,12 @@ const MaterialsSubassemblies = ({ id }) => {
     } catch (error) {
       console.error(error);
     }
+  };
+
+  const handleWarningContinue = () => {
+    setProceedWithNegativeCost(true);
+    setIsWarningModalOpen(false);
+    handleSubmit(new Event('submit'));
   };
 
   const handleRefreshClick = () => {
@@ -264,7 +278,7 @@ const MaterialsSubassemblies = ({ id }) => {
                       <td className="text-xs text-gray-400 font-medium border border-gray-600 p-2">
                         {item.description.length > 50
                           ? item.description.substring(0, 50) + "..."
-                          : item.description}
+                          : item.description || "No description available"}
                       </td>
                       <td className="text-ms text-gray-300 font-medium border border-gray-600 text-center p-2">
                         {item.delivery_date}
@@ -276,7 +290,7 @@ const MaterialsSubassemblies = ({ id }) => {
                         <button
                           type="button"
                           onClick={() =>
-                            handleAddClick(item.id, item.identification_number)
+                            handleAddClick(item.id, item.identification_number, item.price) // Pass price to handleAddClick
                           }
                           className="w-15 px-2 py-1 font-medium hover:bg-blue-600 text-xs bg-gray-800 rounded"
                         >
@@ -350,7 +364,7 @@ const MaterialsSubassemblies = ({ id }) => {
                           List of subassemblies of assembly
                         </h1>
                         <h1 className="text-1xl font-medium text-gray-400">
-                          {selectedItemId.identificationNumber}
+                          {selectedItemId.identificationNumber} 
                         </h1>
                       </div>
                       <div className="flex items-center  py-1 mt-5">
@@ -400,7 +414,7 @@ const MaterialsSubassemblies = ({ id }) => {
                               <td className="text-xs text-gray-400 font-medium border border-gray-600 p-2">
                                 {item.description.length > 50
                                   ? item.description.substring(0, 50) + "..."
-                                  : item.description}
+                                  : item.description || "No description available"}
                               </td>
                               <td className="text-ms text-gray-300 font-medium border border-gray-600 text-center p-2">
                                 {item.delivery_date}
@@ -681,13 +695,6 @@ const MaterialsSubassemblies = ({ id }) => {
           </div>
         </div>
       )}
-      {projectDetails && (
-        <div className="project-details">
-          <h2>Project Details</h2>
-          <p>{projectDetails.name}</p>
-          <p>{projectDetails.description}</p>
-        </div>
-      )}
       <ModalSuccess
         isOpen={isModalSuccessOpen}
         onClose={handleModalSuccessClose}
@@ -695,6 +702,14 @@ const MaterialsSubassemblies = ({ id }) => {
       >
         <p className="text-5xl text-green-500">✔</p>
       </ModalSuccess>
+      <ModalAcept
+        isOpen={isWarningModalOpen}
+        onClose={() => setIsWarningModalOpen(false)}
+        onContinue={handleWarningContinue}
+        title="Exceeding Assembly Budget"
+      >
+        You are exceeding the budget for this assembly. Are you sure you want to continue?
+      </ModalAcept>
     </>
   );
 };

@@ -5,7 +5,7 @@ import 'chart.js/auto';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSync } from "@fortawesome/free-solid-svg-icons";
 
-const SelectedProjectIdentification = ({ id, onReload }) => {
+const AssemlyProgressChart = ({ id, onReload }) => {
   const [assemblies, setAssemblies] = useState([]);
   const [materials, setMaterials] = useState({});
   const [materialCounts, setMaterialCounts] = useState({});
@@ -46,6 +46,30 @@ const SelectedProjectIdentification = ({ id, onReload }) => {
     });
   }, [assemblies, apiIpAddress, materials]);
 
+  const reloadChartData = async () => {
+    try {
+      const response = await axios.get(`${apiIpAddress}/api/assembly/project/${id}`);
+      setAssemblies(response.data);
+      const materialPromises = response.data.map(assembly => axios.get(`${apiIpAddress}/api/getItems/assembly/${assembly.id}`));
+      const materialsResponses = await Promise.all(materialPromises);
+      const newMaterials = {};
+      const newMaterialCounts = {};
+      materialsResponses.forEach((response, index) => {
+        const materials = response.data;
+        const totalMaterials = materials.length;
+        const inSubassemblyCount = materials.filter(material => material.in_subassembly === 1).length;
+        const completionPercentage = totalMaterials > 0 ? (inSubassemblyCount / totalMaterials) * 100 : 0;
+        const assemblyId = response.data[0]?.assembly_id || response.data[index]?.assembly_id;
+        newMaterials[assemblyId] = materials;
+        newMaterialCounts[assemblyId] = { total: totalMaterials, inSubassembly: inSubassemblyCount, completionPercentage };
+      });
+      setMaterials(newMaterials);
+      setMaterialCounts(newMaterialCounts);
+    } catch (error) {
+      console.error("Error reloading chart data:", error);
+    }
+  };
+
   const sortedAssemblies = [...assemblies].sort((a, b) => {
     const aCompletion = materialCounts[a.id] ? materialCounts[a.id].completionPercentage : 0;
     const bCompletion = materialCounts[b.id] ? materialCounts[b.id].completionPercentage : 0;
@@ -65,7 +89,7 @@ const SelectedProjectIdentification = ({ id, onReload }) => {
           <div className="flex justify-between items-center">
             <h3 className="text-lg font-bold text-gray-300">Progress of materials</h3>
             <button
-              onClick={onReload}
+              onClick={reloadChartData}
               className="p-2 text-white rounded hover:bg-gray-800 transition duration-200"
               title="Refresh data"
             >
@@ -75,7 +99,7 @@ const SelectedProjectIdentification = ({ id, onReload }) => {
           <div style={{ height: '350px', width: '100%' }}>
             <Bar
               data={{
-                labels: sortedAssemblies.map(assembly => assembly.id),
+                labels: sortedAssemblies.map(assembly => assembly.identification_number),
                 datasets: [{
                   label: 'Completion Percentage',
                   data: sortedAssemblies.map(assembly => materialCounts[assembly.id] ? materialCounts[assembly.id].completionPercentage : 0),
@@ -117,4 +141,4 @@ const SelectedProjectIdentification = ({ id, onReload }) => {
   );
 };
 
-export default SelectedProjectIdentification;
+export default AssemlyProgressChart;

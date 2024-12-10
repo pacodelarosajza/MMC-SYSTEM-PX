@@ -17,7 +17,7 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
-import SelectedProjectIdentification from "../../../components/SelectedProjectIdentification";
+import SelectedProjectIdentification from "./AssemlyProgressChart";
 
 ChartJS.register(
   CategoryScale,
@@ -309,6 +309,8 @@ const Projects = ({ setShowChildRoutes }) => {
 
   const handleReloadData = () => {
     setReload((prev) => !prev);
+    getProjectProgress(selectedProject.id);
+    getAssemblyProgress(selectedProject.id);
   };
 
   const handleDeselectProject = () => {
@@ -436,7 +438,9 @@ const Projects = ({ setShowChildRoutes }) => {
             </table>
           ) : (
             <div>
-              <ProjectProgressChart activeProjects={activeProjects} progresses={progresses} />
+              <div className="my-10">
+                <ProjectProgressChart activeProjects={activeProjects} progresses={progresses} />
+              </div>
               <table
                 className="my-20 text-sm table-auto w-full text-lightWhiteLetter"
                 id="projects-actions"

@@ -381,23 +381,27 @@ const ProjectDetails = ({ identificationNumber }) => {
           (subassembly) => subassembliesItemsData[subassembly.id] || []
         )
       : [];
-s
-    const allItems = [...assemblyItems, ...subassemblyItems];
-    const materialsList = await Promise.all(
-      allItems.map(async (item) => {
-        let subassemblyIdPart = "";
-        if (item.subassembly_id > 0) {
-          const subassemblyResponse = await axios.get(
-            `${apiIpAddress}/api/subassembly/${item.subassembly_id}`
-          );
-          const subassembly = subassemblyResponse.data;
-          subassemblyIdPart = `Subassembly ID: ${subassembly.identification_number}\n`;
-        }
-        return `${subassemblyIdPart}\nMat. ${item.number_material}\n${item.name}\n${item.description}\nQty: ${item.subassembly_assignment_quantity}\nSuppl: ${item.supplier}\n${item.price} ${item.currency}`;
-      })
-    );
 
-    setTextToCopy(materialsList.join("\n"));
+    const allItems = [...assemblyItems, ...subassemblyItems];
+    if (allItems.length === 0) {
+      setTextToCopy("No materials to copy.");
+    } else {
+      const materialsList = await Promise.all(
+        allItems.map(async (item) => {
+          let subassemblyIdPart = "";
+          if (item.subassembly_id > 0) {
+            const subassemblyResponse = await axios.get(
+              `${apiIpAddress}/api/subassembly/${item.subassembly_id}`
+            );
+            const subassembly = subassemblyResponse.data;
+            subassemblyIdPart = `Subassembly ID: ${subassembly.identification_number}\n`;
+          }
+          return `${subassemblyIdPart}\nMat. ${item.number_material}\n${item.name}\n${item.description}\nQty: ${item.subassembly_assignment_quantity}\nSuppl: ${item.supplier}\n${item.price} ${item.currency}`;
+        })
+      );
+      setTextToCopy(materialsList.join("\n"));
+    }
+
     setCopyStatus((prevState) => ({ ...prevState, [assemblyId]: true }));
     setTimeout(() => {
       setCopyStatus((prevState) => ({ ...prevState, [assemblyId]: false }));
@@ -615,11 +619,11 @@ s
                                       },
                                       {
                                         label: "Description",
-                                        value: assembly.description,
+                                        value: assembly.description || "No description available",
                                       },
                                       {
                                         label: "Price",
-                                        value: `$${assembly.price} USD`,
+                                        value: `$${assembly.price} MXN`,
                                       },
                                       {
                                         label: "Delivery Date",
@@ -735,7 +739,7 @@ s
                                                 },
                                                 {
                                                   label: "Description",
-                                                  value: item.description,
+                                                  value: item.description || "No description available",
                                                 },
                                                 {
                                                   label: "Quantity required",
@@ -901,11 +905,11 @@ s
                                                         {
                                                           label: "Description",
                                                           value:
-                                                            subassembly.description,
+                                                            subassembly.description || "No description available",
                                                         },
                                                         {
                                                           label: "Price",
-                                                          value: `$${subassembly.price} USD`,
+                                                          value: `$${subassembly.price} MXN`,
                                                         },
                                                         {
                                                           label:
@@ -1051,7 +1055,7 @@ s
                                                                       label:
                                                                         "Description",
                                                                       value:
-                                                                        subassemblyItem.description,
+                                                                        subassemblyItem.description || "No description available",
                                                                     },
                                                                     {
                                                                       label:

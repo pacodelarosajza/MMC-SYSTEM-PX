@@ -120,7 +120,7 @@ const MtlTable = ({ id }) => {
           <table className="w-full">
             <tbody>
               <tr>
-           l<td
+           <td
                   colSpan="7"
                   className="text-right text-lg text-gray-300 font-medium p-1"
                 >
