@@ -1,22 +1,27 @@
-# React + Vite
-# CMS - Credits management system
+# MMC - Materials Monitoring and Control System
 
-## Descripción del repositorio
+## Repository Description
 
-Este repositorio contiene el frontend del Sistema de Monitorización y Control de Materiales (MMC). La aplicación está construida con React y utiliza Vite como herramienta de construcción. Sirve como la interfaz de usuario para interactuar con el sistema, permitiendo a los usuarios gestionar y monitorear materiales y proyectos a través de una experiencia intuitiva y eficiente.
+This repository contains the frontend of the Materials Monitoring and Control System (MMC). The application is built with React and uses Vite as the build tool. It serves as the user interface to interact with the system, allowing users to manage and monitor materials and projects through an intuitive and efficient experience.
 
-## Descripción del proyecto 
+## Project Description
 
-El Sistema de Monitorización y Control de Materiales (MMC) es un proyecto que consta de dos componentes principales: una API con nombre de repositorio "api-monitoring-control-mts", que maneja las operaciones CRUD (Crear, Leer, Actualizar, Eliminar) para materiales y proyectos, y esta aplicación frontend que permite la interacción visual con el sistema. Juntos, estos dos repositorios forman una aplicación completa para la gestión de recursos y seguimiento de proyectos, con una interfaz que facilita el uso del sistema para los usuarios finales.
+The Materials Monitoring and Control System (MMC) is a broader project composed of this frontend application and another component, called "api-monitoring-control-mts", which handles CRUD (Create, Read, Update, Delete) operations for materials and projects. Together, these two repositories form a complete application for resource management and project tracking, providing an easy-to-use interface and a robust backend infrastructure.
 
-Repository link: ["api-monitoring-control-mts"](https://github.com/GlzLXochitl/api-monitoring-control-mts.git) 
+Repository link: ["api-monitoring-control-mts"](https://github.com/GlzLXochitl/api-monitoring-control-mts.git)
 
 ## Dependencies
 
-The project uses the following dependencies:
+The project uses the following main dependencies:
 
-- `react`: Library for building user interfaces.
-- `react-dom`: Package for working with the DOM in React.
+- `react`: Main library for building the user interface.
+- `react-router-dom`: For navigation and routing in the application.
+- `axios`: For making HTTP requests.
+- `chart.js`: For data visualization through charts.
+- `socket.io-client`: For real-time communication.
+- `tailwindcss`: For design and styling.
+- `@fortawesome/react-fontawesome`: For icons.
+- `vite`: For fast development and bundling.
 
 ## Installation
 
@@ -29,20 +34,22 @@ Follow these steps to set up and run the project in your local environment:
    cd MMC-SYSTEM-PX
    ```
 
-2. Installs the project dependencies:
+2. Install the project dependencies:
 
    ```sh
    npm install
    ```
 
-3. Create a `.env` file in the root directory of the project and add the following environment variables:
+3. Set up environment variables:
 
-   ```sh
-   REACT_APP_API_IP_ADDRESS=http://localhost:3001
+   - Create a `.env` file in the root directory of the project.
+   - Add the `VITE_API_IP_ADDRESS` variable to the `.env` file with the IP address of the API server.
+
+   ```env
+   VITE_API_IP_ADDRESS=your_api_server_ip_address
    ```
 
-   Replace the value of `REACT_APP_API_IP_ADDRESS` with the URL of the API server. This is the URL where the API server is running.
-
+   - Also, ensure that the backend is configured to recognize the frontend by setting the `CLIENT_IP_ADDRESS` environment variable in the backend's configuration.
 
 4. Start the server in development mode:
 
@@ -50,10 +57,8 @@ Follow these steps to set up and run the project in your local environment:
    npm run dev
    ```
 
-   This will start the server using `nodemon`, which will automatically restart the application when changes to the files are detected.
+   This will start the server using `nodemon`, which will automatically restart the application when file changes are detected.
 
-## Use
+## Usage
 
-Once the server is up and running, you can access the application at `http://localhost:5173` (or whatever port you have configured).
-
-//react-monitoring-control-mts
+Once the server is running, you can access the application at `http://localhost:5173` (or any port you have configured).

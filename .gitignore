@@ -1,5 +1,8 @@
 # Ignorar la carpeta de dependencias
 node_modules/
 
+.env
+
 # Ignorar los archivos de lock
 package-lock.json
+
